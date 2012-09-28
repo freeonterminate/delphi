@@ -14,6 +14,8 @@ uses
 function TryStrToDateTimeEx(
   const iStr: String;
   out oDateTime: TDateTime): Boolean;
+label
+  Last;
 const
   DateSeps: array [0.. 1] of Char = ('/', '-');
   TimeSeps: array [0.. 1] of Char = (':', '.');
@@ -31,9 +33,11 @@ begin
 
       Result := TryStrToDateTime(iStr, oDateTime, FS);
       if (Result) then
-        Break;
+        goto Last;
     end;
   end;
+
+Last:
 end;
 
 end.
