@@ -209,6 +209,7 @@ var
   Ch2: String;
   tmpCh: Char;
   InComment, InString, InSharpString, InNumber: Boolean;
+  PrevIsOther: Boolean;
   i: Integer;
   Comment: TComment;
   ExecComment: TComment;
@@ -256,6 +257,12 @@ var
     Dest := Dest + Word + iTag;
   end;
 
+  procedure Flush;
+  begin
+    Dest := Dest + Word;
+    Word := '';
+  end;
+
   function CheckTag(const iEndTag: String; var ioFlag: Boolean): Boolean;
   begin
     Result := False;
@@ -266,14 +273,29 @@ var
       AddTag(Word);
       AddTag(iEndTag);
       Word := Ch;
+      Ch := #0;
 
       Result := True;
     end;
   end;
 
   function CheckNumber: Boolean;
+  var
+    Doted: Boolean;
   begin
-    Result := CheckTag(FNumberTag.EndTag, InNumber);
+    Result := False;
+
+    if (InNumber) then begin
+      Doted := (Word[Word.Length] = '.');
+
+      if (Doted) then
+        Word := Copy(Word, 1, Word.Length - 1);
+
+      Result := CheckTag(FNumberTag.EndTag, InNumber);
+
+      if (Doted) then
+        Word := '.' + Word;
+    end;
   end;
 
   function CheckSharpString: Boolean;
@@ -320,11 +342,9 @@ begin
         InString := False;
         InSharpString := False;
         InNumber := False;
+        PrevIsOther := False;
         Word := '';
         Ch2 := '  ';
-
-        if (InComment) and (ExecComment.Ende = '\n') then
-          EndComment;
 
         for i := 1 to Length(Source) do begin
           Ch := Source[i];
@@ -366,6 +386,7 @@ begin
 
             case Ch of
               '''': begin
+                PrevIsOther := False;
                 CheckNumber;
                 CheckSharpString;
 
@@ -374,6 +395,11 @@ begin
               end;
 
               '$', '0'.. '9': begin
+                if (PrevIsOther) then
+                  Flush;
+
+                PrevIsOther := False;
+
                 if (Word = '') then begin
                   if (InNumber) then begin
                     if (Ch = '$') then
@@ -389,6 +415,8 @@ begin
               end;
 
               'A'.. 'Z', 'a'.. 'z': begin
+                PrevIsOther := False;
+
                 if
                   (InNumber) and
                   (Word[1] = '$') and
@@ -404,6 +432,8 @@ begin
               end;
 
               '#': begin
+                PrevIsOther := False;
+
                 CheckNumber;
 
                 InSharpString := True;
@@ -414,6 +444,8 @@ begin
                 if (Ch = '.') and (InNumber) then
                   Addef
                 else begin
+                  PrevIsOther := True;
+
                   if (CheckNumber) or (CheckSharpString) then
                     Word := '';
 
@@ -435,6 +467,12 @@ begin
           AddTag('<br />');
           AddEndTag(FStringTag.EndTag);
         end;
+
+        CheckNumber;
+        CheckSharpString;
+
+        if (InComment) and (ExecComment.Ende = '\n') then
+          EndComment;
 
         if (CheckReserveds) then
           Dest := Dest + sLineBreak
