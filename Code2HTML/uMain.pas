@@ -272,7 +272,11 @@ var
 
       AddTag(Word);
       AddTag(iEndTag);
-      Word := Ch;
+
+      Word := '';
+      Addef;
+      Flush;
+
       Ch := #0;
 
       Result := True;
@@ -389,6 +393,7 @@ begin
                 PrevIsOther := False;
                 CheckNumber;
                 CheckSharpString;
+                Flush;
 
                 InString := True;
                 AddStartTag(FStringTag.StartTag);
