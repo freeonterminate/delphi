@@ -2,9 +2,10 @@ program Code2HTML;
 
 uses
   Vcl.Forms,
-  uMain in 'uMain.pas' {Form1},
+  uMain in 'uMain.pas' {frmMain},
   Vcl.Themes,
-  Vcl.Styles;
+  Vcl.Styles,
+  uAddWord in 'uAddWord.pas' {frmExtra};
 
 {$R *.res}
 
@@ -12,6 +13,6 @@ begin
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
   TStyleManager.TrySetStyle('Auric');
-  Application.CreateForm(TForm1, Form1);
+  Application.CreateForm(TfrmMain, frmMain);
   Application.Run;
 end.

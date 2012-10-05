@@ -4,7 +4,8 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Classes,
-  Vcl.Forms, Vcl.StdCtrls, Vcl.ExtCtrls, Generics.Collections, Vcl.Controls;
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
+  Generics.Collections;
 
 type
   TComment = record
@@ -23,26 +24,32 @@ type
     function ToString: String;
   end;
 
-  TForm1 = class(TForm)
+  TfrmMain = class(TForm)
     memoSource: TMemo;
     lblSource: TLabel;
     memoDest: TMemo;
     lblDest: TLabel;
-    bvSep2: TBevel;
     btnGo: TButton;
     btnEnd: TButton;
     btnCopy: TButton;
     Bevel1: TBevel;
     btnClear: TButton;
+    btnAdd: TButton;
+    Bevel2: TBevel;
+    btnOpenIni: TButton;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure btnGoClick(Sender: TObject);
     procedure btnEndClick(Sender: TObject);
     procedure btnCopyClick(Sender: TObject);
     procedure btnClearClick(Sender: TObject);
+    procedure btnAddClick(Sender: TObject);
+    procedure btnOpenIniClick(Sender: TObject);
   private
     FReserveds: TStringList;
     FCommands: TStringList;
+    FExtras: TStringList;
+    FTempExtras: TStringList;
     FCommentChars: TStringList;
     FComments: TList<TComment>;
     FStartTag: TTag;
@@ -51,16 +58,17 @@ type
     FCommentTag: TTag;
     FReservedTag: TTag;
     FCommandTag: TTag;
+    FExtraTag: TTag;
   public
   end;
 
 var
-  Form1: TForm1;
+  frmMain: TfrmMain;
 
 implementation
 
 uses
-  IniFiles, Clipbrd, uNotifier;
+  System.IniFiles, Vcl.Clipbrd, System.UITypes, uAddWord, uNotifier;
 
 {$R *.dfm}
 
@@ -186,22 +194,27 @@ end;
 
 {TForm1}
 
-procedure TForm1.btnClearClick(Sender: TObject);
+procedure TfrmMain.btnAddClick(Sender: TObject);
+begin
+  ShowAddWords(FTempExtras);
+end;
+
+procedure TfrmMain.btnClearClick(Sender: TObject);
 begin
   memoSource.Lines.Clear;
 end;
 
-procedure TForm1.btnCopyClick(Sender: TObject);
+procedure TfrmMain.btnCopyClick(Sender: TObject);
 begin
   Clipboard.AsText := memoDest.Lines.Text;
 end;
 
-procedure TForm1.btnEndClick(Sender: TObject);
+procedure TfrmMain.btnEndClick(Sender: TObject);
 begin
   Close;
 end;
 
-procedure TForm1.btnGoClick(Sender: TObject);
+procedure TfrmMain.btnGoClick(Sender: TObject);
 var
   Source, Dest: String;
   Word: String;
@@ -240,9 +253,9 @@ var
     Ch := #0;
   end;
 
-  procedure AddTag(const iTag: String);
+  procedure AddRaw(const iSrc: String);
   begin
-    Dest := Dest + iTag;
+    Dest := Dest + iSrc;
   end;
 
   procedure AddStartTag(const iTag: String);
@@ -270,8 +283,8 @@ var
     if (ioFlag) then begin
       ioFlag := False;
 
-      AddTag(Word);
-      AddTag(iEndTag);
+      AddRaw(Word);
+      AddRaw(iEndTag);
 
       Word := '';
       Addef;
@@ -307,21 +320,28 @@ var
     Result := CheckTag(FStringTag.EndTag, InSharpString);
   end;
 
-  function CheckRerserved(const iList: TStringList; const iTag: TTag): Boolean;
+  function CheckReserved(const iList: TStringList; const iTag: TTag): Boolean;
   begin
     Result := (iList.IndexOf(Word) > -1);
 
     if (Result) then begin
-      AddTag(iTag.Tagged(Word));
+      AddRaw(iTag.Tagged(Word));
       Word := Ch;
     end
   end;
 
   function CheckReserveds: Boolean;
   begin
-    Result := CheckRerserved(FReserveds, FReservedTag);
+    Result := CheckReserved(FTempExtras, FExtraTag);
+
     if (not Result) then
-      Result := CheckRerserved(FCommands, FCommandTag);
+      Result := CheckReserved(FExtras, FExtraTag);
+
+    if (not Result) then
+      Result := CheckReserved(FReserveds, FReservedTag);
+
+    if (not Result) then
+      Result := CheckReserved(FCommands, FCommandTag);
   end;
 
   procedure EndComment;
@@ -333,7 +353,7 @@ var
   end;
 
 begin
-  ShowNotify('Please Wait', 'Translating...', Self);
+  ShowNotify('Please Wait', 'Decorating...', Self);
   try
     InComment := False;
 
@@ -373,7 +393,7 @@ begin
                 InComment := True;
                 ExecComment := Comment;
 
-                AddTag(FCommentTag.StartTag);
+                AddRaw(FCommentTag.StartTag);
                 Break;
               end;
 
@@ -412,7 +432,7 @@ begin
                   end
                   else begin
                     InNumber := True;
-                    AddTag(FNumberTag.StartTag);
+                    AddRaw(FNumberTag.StartTag);
                   end;
                 end;
 
@@ -460,7 +480,7 @@ begin
                     Addef;
 
                   if (FCommentChars.IndexOf(tmpCh) < 0) then begin
-                    AddTag(Word);
+                    AddRaw(Word);
                     Word := '';
                   end;
                 end;
@@ -469,7 +489,7 @@ begin
         end;
 
         if (InString) then begin
-          AddTag('<br />');
+          AddRaw('<br />');
           AddEndTag(FStringTag.EndTag);
         end;
 
@@ -494,7 +514,15 @@ begin
   end;
 end;
 
-procedure TForm1.FormCreate(Sender: TObject);
+procedure TfrmMain.btnOpenIniClick(Sender: TObject);
+var
+  Str: AnsiString;
+begin
+  Str := AnsiString('notepad ' + ChangeFileExt(Application.ExeName, '.ini'));
+  WinExec(PAnsiChar(Str), SW_SHOW);
+end;
+
+procedure TfrmMain.FormCreate(Sender: TObject);
 var
   SL: TStringList;
   Str: String;
@@ -514,28 +542,50 @@ var
 begin
   FReserveds := TStringList.Create;
   FCommands := TStringList.Create;
+  FExtras := TStringList.Create;
+  FTempExtras := TStringList.Create;
   FCommentChars := TStringList.Create;
   FComments := TList<TComment>.Create;
 
   FileName := ChangeFileExt(Application.ExeName, '.ini');
-  if (not FileExists(FileName)) then
+  if (not FileExists(FileName)) then begin
+    MessageDlg(
+      'ini file が見つかりません！' + sLineBreak +
+      'アプリケーションと同じフォルダに ini file を置いてください',
+      mtWarning,
+      [mbOk],
+      0);
+
     Exit;
+  end;
 
   with TIniFile.Create(FileName) do
     try
       // Tags
       FStartTag :=
         TTag.Create(ReadString('Tag', 'start', 'pre'));
+
       FNumberTag :=
-        TTag.Create(ReadString('Tag', 'number', 'div color=#00ff00'));
+        TTag.Create(ReadString(
+          'Tag', 'number', 'span style="color: #00ff00;"'));
+
       FStringTag :=
-        TTag.Create(ReadString('Tag', 'string', 'div color=#ffff00'));
+        TTag.Create(ReadString(
+          'Tag', 'string', 'span style="color: #ffff00;"'));
+
       FCommentTag :=
-        TTag.Create(ReadString('Tag', 'comment', 'div color=#008080'));
+        TTag.Create(ReadString(
+          'Tag', 'comment', 'span style="color: #008080;"'));
+
       FReservedTag :=
         TTag.Create(ReadString('Tag', 'reserved', 'b'));
+
       FCommandTag :=
         TTag.Create(ReadString('Tag', 'command', 'b'));
+
+      FExtraTag :=
+        TTag.Create(ReadString(
+          'Tag', 'extra', 'span style="font-weight: bold; color: #ff9900;"'));
     finally
       Free;
     end;
@@ -549,6 +599,9 @@ begin
 
     // Command Word
     ReadSectionLines(FileName, 'CommandWord', FCommands);
+
+    // Extra Word
+    ReadSectionLines(FileName, 'ExtraWord', FExtras);
 
     // Comments
     Comments := TStringList.Create;
@@ -577,10 +630,12 @@ begin
   end;
 end;
 
-procedure TForm1.FormDestroy(Sender: TObject);
+procedure TfrmMain.FormDestroy(Sender: TObject);
 begin
   FReserveds.Free;
   FCommands.Free;
+  FExtras.Free;
+  FTempExtras.Free;
   FCommentChars.Free;
   FComments.Free;
 end;
