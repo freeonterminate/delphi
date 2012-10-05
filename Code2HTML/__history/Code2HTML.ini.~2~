@@ -6,10 +6,11 @@ comment=span style="color: #008080;"
 reserved=b
 command=b
 extra=span style="font-weight: bold; color: #ff9900;"
-lineno=span style="color: #999999; background: #202020; padding: 0px 4px 0px 4px;";
+lineno=span style="color: #ffffff; background: #202040; padding: 0px 4px 0px 4px;";
 oddline=div style="background: #000000; width: 100%; display: inline-block; _display: inline;"
 evenline=div style="background: #101010; width: 100%; display: inline-block; _display: inline;"
 
+[Re
 [ReservedWord]
 and
 array
