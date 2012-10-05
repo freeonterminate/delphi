@@ -31,7 +31,7 @@ object frmExtra: TfrmExtra
     Width = 100
     Height = 25
     Anchors = [akLeft, akBottom]
-    Caption = #36861#21152'(&A)'
+    Caption = #36861#21152'(&A)...'
     TabOrder = 1
     OnClick = btnAddNameClick
   end
@@ -41,7 +41,7 @@ object frmExtra: TfrmExtra
     Width = 100
     Height = 25
     Anchors = [akLeft, akBottom]
-    Caption = #21066#38500'(&D)'
+    Caption = #21066#38500'(&D)...'
     TabOrder = 2
     OnClick = btnClearItemClick
   end

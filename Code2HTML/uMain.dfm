@@ -5,6 +5,8 @@ object frmMain: TfrmMain
   ClientHeight = 730
   ClientWidth = 603
   Color = clBtnFace
+  Constraints.MinHeight = 600
+  Constraints.MinWidth = 580
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
@@ -22,9 +24,9 @@ object frmMain: TfrmMain
   object lblSource: TLabel
     Left = 8
     Top = 8
-    Width = 42
+    Width = 315
     Height = 13
-    Caption = 'Code (&S)'
+    Caption = 'Code (&S)   '#12477#12540#12473#12467#12540#12489#12434#8595#12371#12371#12395#12506#12540#12473#12488#12375#12390#12289#22793#25563#12508#12479#12531#12434#25276#12375#12414#12377
     FocusControl = memoSource
   end
   object lblDest: TLabel
@@ -54,7 +56,7 @@ object frmMain: TfrmMain
   object memoSource: TMemo
     Left = 8
     Top = 27
-    Width = 587
+    Width = 590
     Height = 246
     Anchors = [akLeft, akTop, akRight]
     Font.Charset = DEFAULT_CHARSET
@@ -69,7 +71,7 @@ object frmMain: TfrmMain
   object memoDest: TMemo
     Left = 8
     Top = 345
-    Width = 587
+    Width = 590
     Height = 301
     Anchors = [akLeft, akTop, akRight, akBottom]
     Font.Charset = DEFAULT_CHARSET
@@ -80,23 +82,21 @@ object frmMain: TfrmMain
     ParentFont = False
     ReadOnly = True
     ScrollBars = ssBoth
-    TabOrder = 2
-    ExplicitHeight = 338
+    TabOrder = 3
   end
   object btnGo: TButton
-    Left = 435
-    Top = 652
+    Left = 438
+    Top = 279
     Width = 160
     Height = 25
-    Anchors = [akRight, akBottom]
+    Anchors = [akTop, akRight]
     Caption = #22793#25563'(&G)'
     Default = True
-    TabOrder = 5
+    TabOrder = 2
     OnClick = btnGoClick
-    ExplicitTop = 689
   end
   object btnEnd: TButton
-    Left = 435
+    Left = 438
     Top = 697
     Width = 160
     Height = 25
@@ -105,45 +105,42 @@ object frmMain: TfrmMain
     Caption = #32066#20102'(&X)'
     TabOrder = 7
     OnClick = btnEndClick
-    ExplicitTop = 734
   end
   object btnCopy: TButton
-    Left = 184
-    Top = 652
+    Left = 438
+    Top = 656
     Width = 160
     Height = 25
-    Anchors = [akLeft, akBottom]
+    Anchors = [akRight, akBottom]
     Caption = #12467#12500#12540'(&C)'
     TabOrder = 4
     OnClick = btnCopyClick
-    ExplicitTop = 689
   end
   object btnClear: TButton
-    Left = 435
+    Left = 8
     Top = 279
     Width = 160
     Height = 25
-    Anchors = [akTop, akRight]
     Caption = #12463#12522#12450'(&D)'
     TabOrder = 1
     OnClick = btnClearClick
   end
   object btnAdd: TButton
     Left = 8
-    Top = 652
-    Width = 160
-    Height = 25
-    Anchors = [akLeft, akBottom]
-    Caption = #24375#35519#35486#12398#36861#21152'(&A)'
-    TabOrder = 3
-    OnClick = btnAddClick
-  end
-  object btnOpenIni: TButton
-    Left = 8
     Top = 697
     Width = 160
     Height = 25
-    Anchors = [akRight, akBottom]
+    Anchors = [akLeft, akBottom]
+    Caption = #19968#26178#24375#35519#35486#12398#36861#21152'(&A)...'
+    TabOrder = 5
+    OnClick = btnAddClick
+  end
+  object btnOpenIni: TButton
+    Left = 174
+    Top = 697
+    Width = 160
+    Height = 25
+    Anchors = [akLeft, akBottom]
     Caption = 'IniFile '#12434#32232#38598#12377#12427'(&E)'
     TabOrder = 6
     OnClick = btnOpenIniClick
