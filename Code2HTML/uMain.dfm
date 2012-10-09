@@ -145,4 +145,14 @@ object frmMain: TfrmMain
     TabOrder = 6
     OnClick = btnOpenIniClick
   end
+  object chbxLineNo: TCheckBox
+    Left = 314
+    Top = 283
+    Width = 121
+    Height = 17
+    Caption = #34892#30058#21495#12434#20184#12369#12427'(&L)'
+    Checked = True
+    State = cbChecked
+    TabOrder = 8
+  end
 end

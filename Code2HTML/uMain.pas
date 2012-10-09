@@ -37,6 +37,7 @@ type
     btnAdd: TButton;
     Bevel2: TBevel;
     btnOpenIni: TButton;
+    chbxLineNo: TCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure btnGoClick(Sender: TObject);
@@ -59,6 +60,9 @@ type
     FReservedTag: TTag;
     FCommandTag: TTag;
     FExtraTag: TTag;
+    FLineNoTag: TTag;
+    FOddTag: TTag;
+    FEvenTag: TTag;
   public
   end;
 
@@ -223,9 +227,14 @@ var
   tmpCh: Char;
   InComment, InString, InSharpString, InNumber: Boolean;
   PrevIsOther: Boolean;
-  i: Integer;
+  i, j: Integer;
   Comment: TComment;
   ExecComment: TComment;
+  LineWidth: Integer;
+  Index: Integer;
+  LineNoNeeded: Boolean;
+  LineTag: TTag;
+  Space: String;
 
   procedure Addef;
   var
@@ -360,9 +369,47 @@ begin
     with memoDest.Lines do begin
       Clear;
 
+      i := memoSource.Lines.Count;
+      j := 1;
+      LineWidth := 0;
+      while (j < i) do begin
+        Inc(LineWidth);
+        j := j * 10;
+      end;
+
+      if (LineWidth = 0) then
+        LineWidth := 1;
+
+      LineNoNeeded := chbxLineNo.Checked;
+
       Dest := FStartTag.StartTag + sLineBreak;
 
+      Index := 1;
+      LineTag := FOddTag;
+
+      if (LineNoNeeded) then
+        Space := '&nbsp'
+      else
+        Space := '';
+
       for Source in memoSource.Lines do begin
+        // 行番号
+        if (LineNoNeeded) then
+          Dest :=
+            Dest +
+            FLineNoTag.Tagged(IntToStr(Index).PadLeft(LineWidth, '0'));
+
+        // 色替え
+        if (Odd(Index)) then
+          LineTag := FOddTag
+        else
+          LineTag := FEvenTag;
+
+        Dest := Dest + LineTag.StartTag + Space ;
+
+        Inc(Index);
+
+        // 初期化
         InString := False;
         InSharpString := False;
         InNumber := False;
@@ -370,6 +417,7 @@ begin
         Word := '';
         Ch2 := '  ';
 
+        // パース
         for i := 1 to Length(Source) do begin
           Ch := Source[i];
           Ch2 := Copy(Ch2 + Ch, 2, 2);
@@ -499,10 +547,10 @@ begin
         if (InComment) and (ExecComment.Ende = '\n') then
           EndComment;
 
-        if (CheckReserveds) then
-          Dest := Dest + sLineBreak
-        else
-          Dest := Dest + Word + sLineBreak;
+        if (not CheckReserveds) then
+          Dest := Dest + Word;
+
+        Dest := Dest + LineTag.EndTag + sLineBreak;
       end;
 
       Dest := Dest + FStartTag.EndTag;
@@ -563,7 +611,17 @@ begin
     try
       // Tags
       FStartTag :=
-        TTag.Create(ReadString('Tag', 'start', 'pre'));
+        TTag.Create(
+          ReadString(
+            'Tag',
+            'start',
+            'pre style="' +
+            'font-family: monospace; ' +
+            'background: #000000; ' +
+            'border: 1px solid gray; ' +
+            'padding: 5px 10px 5px 10px; ' +
+            'color: #ffffff;' +
+            '"'));
 
       FNumberTag :=
         TTag.Create(ReadString(
@@ -586,6 +644,24 @@ begin
       FExtraTag :=
         TTag.Create(ReadString(
           'Tag', 'extra', 'span style="font-weight: bold; color: #ff9900;"'));
+
+      FLineNoTag :=
+        TTag.Create(ReadString(
+          'Tag',
+          'lineno',
+          'span style="' +
+          'color: #999999; ' +
+          'background: #202040; ' +
+          'padding: 0px 4px 0px 4px;' +
+          '"'));
+
+      FOddTag :=
+        TTag.Create(ReadString(
+          'Tag', 'oddline', 'span style="background: #000000;"'));
+
+      FEvenTag :=
+        TTag.Create(ReadString(
+          'Tag', 'evenline', 'span style="background: #202020;"'));
     finally
       Free;
     end;
