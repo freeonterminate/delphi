@@ -222,6 +222,7 @@ procedure TfrmMain.btnGoClick(Sender: TObject);
 var
   Source, Dest: String;
   Word: String;
+  OldCh: Char;
   Ch: Char;
   Ch2: String;
   tmpCh: Char;
@@ -234,6 +235,7 @@ var
   Index: Integer;
   LineNoNeeded: Boolean;
   LineTag: TTag;
+  LineNo: String;
   Space: String;
 
   procedure Addef;
@@ -392,20 +394,20 @@ begin
       else
         Space := '';
 
-      for Source in memoSource.Lines do begin
-        // çsî‘çÜ
-        if (LineNoNeeded) then
-          Dest :=
-            Dest +
-            FLineNoTag.Tagged(IntToStr(Index).PadLeft(LineWidth, '0'));
+      LineNo := '';
 
+      for Source in memoSource.Lines do begin
         // êFë÷Ç¶
         if (Odd(Index)) then
           LineTag := FOddTag
         else
           LineTag := FEvenTag;
 
-        Dest := Dest + LineTag.StartTag + Space ;
+        // çsî‘çÜ
+        if (LineNoNeeded) then
+          LineNo := FLineNoTag.Tagged(IntToStr(Index).PadLeft(LineWidth, '0'));
+
+        Dest := Dest + LineTag.StartTag + LineNo + Space ;
 
         Inc(Index);
 
@@ -421,6 +423,7 @@ begin
         for i := 1 to Length(Source) do begin
           Ch := Source[i];
           Ch2 := Copy(Ch2 + Ch, 2, 2);
+          OldCh := Copy(Ch2, 1, 1)[1];
 
           if (InString) then begin
             case Ch of
@@ -514,8 +517,14 @@ begin
               end;
 
               else begin
-                if (Ch = '.') and (InNumber) then
-                  Addef
+                if (Ch = '.') and (InNumber) then begin
+                  if (not CharInSet(OldCh, ['0'.. '9'])) then begin
+                    CheckNumber;
+                    Flush;
+                  end
+                  else
+                    Addef;
+                end
                 else begin
                   PrevIsOther := True;
 
