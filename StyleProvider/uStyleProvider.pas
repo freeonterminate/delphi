@@ -3,7 +3,7 @@ unit uStyleProvider;
 interface
 
 uses
-  System.Classes, System.Generics.Collections;
+  System.Classes, System.Generics.Collections, System.Generics.Defaults;
 
 type
   TStyleProvider = class(TObject)
@@ -34,8 +34,13 @@ type
         property Current: String read GetCurrent;
       end;
 
+      TStyleSorter = class(TInterfacedObject, IComparer<TStyleData>)
+        function Compare(const Left, Right: TStyleData): Integer;
+      end;
+
     var
       FStyles: TList<TStyleData>;
+      FStyleSorter: TStyleSorter;
       function GetCount: Integer;
       function GetStyles(const iIndex: Integer): String;
       function GetStyleData(
@@ -44,6 +49,9 @@ type
   public
     constructor Create(const iStyleDirectory: String); overload;
     constructor Create(const iStyleDirectories: array of String); overload;
+    destructor Destroy; override;
+    procedure LoadStyle(const iStyleDirectory: String); overload;
+    procedure LoadStyle(const iStyleDirectories: array of String); overload;
     function Apply(const iIndex: Integer): Boolean;
     function ApplyByName(const iName: String): Boolean;
     function Exists(const iName: String): Boolean;
@@ -66,8 +74,7 @@ begin
   FName := iName;
   FPath := iPath;
   FProvider := iProvider;
-
-  FRegistered := False;
+  FRegistered := (FPath = '');
 end;
 
 function TStyleProvider.TStyleData.Apply: Boolean;
@@ -115,6 +122,14 @@ begin
   FIndex := -1;
 end;
 
+{ TStyleProvider.TStyleSorter }
+
+function TStyleProvider.TStyleSorter.Compare(
+  const Left, Right: TStyleData): Integer;
+begin
+  Result := CompareStr(Left.FName, Right.FName);
+end;
+
 { TStyleProvider }
 
 function TStyleProvider.Apply(const iIndex: Integer): Boolean;
@@ -146,29 +161,21 @@ begin
 end;
 
 constructor TStyleProvider.Create(const iStyleDirectories: array of String);
-var
-  Dir: String;
-  Files: TStringDynArray;
-  Path: String;
-  StyleInfo: TStyleInfo;
 begin
   inherited Create;
 
   FStyles := TList<TStyleData>.Create;
+  FStyleSorter := TStyleSorter.Create;
 
-  for Dir in iStyleDirectories do begin
-    if (not DirectoryExists(Dir)) then
-      Continue;
+  LoadStyle(iStyleDirectories);
+end;
 
-    Files := TDirectory.GetFiles(Dir);
+destructor TStyleProvider.Destroy;
+begin
+  FStyles.Free;
+  FStyleSorter.Free;
 
-    for Path in Files do
-      if
-        (FileExists(Path)) and
-        (TStyleManager.IsValidStyle(Path, StyleInfo))
-      then
-        FStyles.Add(TStyleData.Create(StyleInfo.Name, Path, Self));
-  end;
+  inherited;
 end;
 
 function TStyleProvider.Exists(const iName: String): Boolean;
@@ -212,6 +219,46 @@ begin
     Result := StyleData.FName
   else
     Result := '';
+end;
+
+procedure TStyleProvider.LoadStyle(const iStyleDirectory: String);
+begin
+  LoadStyle([iStyleDirectory]);
+end;
+
+procedure TStyleProvider.LoadStyle(const iStyleDirectories: array of String);
+var
+  Dir: String;
+  Files: TStringDynArray;
+  Path: String;
+  StyleInfo: TStyleInfo;
+  StyleName: String;
+begin
+  FStyles.Clear;
+
+  // Exe にインクルード済みスタイル
+  for StyleName in TStyleManager.StyleNames do
+    FStyles.Add(TStyleData.Create(StyleName, '', Self));
+
+  // ディレクトリにあるスタイル
+  for Dir in iStyleDirectories do begin
+    if (not DirectoryExists(Dir)) then
+      Continue;
+
+    Files := TDirectory.GetFiles(Dir);
+
+    for Path in Files do
+      if
+        (FileExists(Path)) and
+        (TStyleManager.IsValidStyle(Path, StyleInfo))
+      then begin
+        if (not Exists(StyleInfo.Name)) then
+          FStyles.Add(TStyleData.Create(StyleInfo.Name, Path, Self));
+      end;
+  end;
+
+  // Sort
+  FStyles.Sort(FStyleSorter);
 end;
 
 end.
