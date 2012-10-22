@@ -46,12 +46,13 @@ type
       function GetStyleData(
         const iIndex: Integer;
         out oStyleData: TStyleData): Boolean;
+  protected
+    procedure LoadStyle(const iStyleDirectory: String); overload;
+    procedure LoadStyle(const iStyleDirectories: array of String); overload;
   public
     constructor Create(const iStyleDirectory: String); overload;
     constructor Create(const iStyleDirectories: array of String); overload;
     destructor Destroy; override;
-    procedure LoadStyle(const iStyleDirectory: String); overload;
-    procedure LoadStyle(const iStyleDirectories: array of String); overload;
     function Apply(const iIndex: Integer): Boolean;
     function ApplyByName(const iName: String): Boolean;
     function Exists(const iName: String): Boolean;
