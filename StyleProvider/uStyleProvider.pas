@@ -40,7 +40,6 @@ type
 
     var
       FStyles: TList<TStyleData>;
-      FStyleSorter: TStyleSorter;
       function GetCount: Integer;
       function GetStyles(const iIndex: Integer): String;
       function GetStyleData(
@@ -166,7 +165,6 @@ begin
   inherited Create;
 
   FStyles := TList<TStyleData>.Create;
-  FStyleSorter := TStyleSorter.Create;
 
   LoadStyle(iStyleDirectories);
 end;
@@ -174,7 +172,6 @@ end;
 destructor TStyleProvider.Destroy;
 begin
   FStyles.Free;
-  FStyleSorter.Free;
 
   inherited;
 end;
@@ -234,6 +231,7 @@ var
   Path: String;
   StyleInfo: TStyleInfo;
   StyleName: String;
+  StyleSorter: TStyleSorter;
 begin
   FStyles.Clear;
 
@@ -259,7 +257,12 @@ begin
   end;
 
   // Sort
-  FStyles.Sort(FStyleSorter);
+  StyleSorter := TStyleSorter.Create;
+  try
+    FStyles.Sort(StyleSorter);
+  finally
+    StyleSorter.Free;
+  end;
 end;
 
 end.
