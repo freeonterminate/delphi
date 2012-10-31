@@ -91,10 +91,39 @@ begin
     := OnGetStream;
 end;
 
+procedure TForm1.OnGetStream(
+  Sender: TFileContentsStreamOnDemandClipboardFormat;
+  Index: integer;
+  out AStream: IStream);
+var
+  Data: TVirtualFileStreamDataFormat;
+begin
+  // ここは非同期で別スレッドから呼ばれるので、
+  // ここでファイルのダウンロードなどをし、ファイルを一旦生成する
+  // 生成した一時ファイルは TDropEmptySource.OnAfterDrop イベントなどの
+  // タイミングで適宜削除する
+
+  // 追加しておいたファイルを取り出す
+  Data := TVirtualFileStreamDataFormat(DataFormatAdapter1.DataFormat);
+
+  // 追加してある何番目のファイルかが Index に入っている
+  if (Index < Data.FileNames.Count) then
+    AStream :=
+      // TStreamAdapter を使うと IStream の実装が得られる
+      TStreamAdapter.Create(
+        TFileStream.Create(
+          Data.FileNames[Index],
+          fmOpenRead or fmShareDenyNone),
+        soOwned
+      );
+end;
+
 procedure TForm1.DropExecute;
 var
   Data: TVirtualFileStreamDataFormat;
 begin
+  // OnMouseMove から呼ばれる（煩雑になるため機能を分けた）
+
   // TVirtualFileStreamDataFormat.FileNames にコピーするファイル名を追加する
   Data := TVirtualFileStreamDataFormat(DataFormatAdapter1.DataFormat);
   Data.FileNames.Clear;
@@ -104,26 +133,6 @@ begin
 
   if (Data.FileNames.Count > 0) then
     DropEmptySource1.Execute(True); // True を渡すと非同期で実行する
-end;
-
-procedure TForm1.OnGetStream(
-  Sender: TFileContentsStreamOnDemandClipboardFormat;
-  Index: integer;
-  out AStream: IStream);
-var
-  Data: TVirtualFileStreamDataFormat;
-begin
-  // TVirtualFileStreamDataFormat.FileNames にコピーするファイル名を追加する
-  Data := TVirtualFileStreamDataFormat(DataFormatAdapter1.DataFormat);
-
-  if (Index < Data.FileNames.Count) then
-    AStream :=
-      TStreamAdapter.Create( // TStreamAdapter を使うと IStream の実装が得られる
-        TFileStream.Create(
-          Data.FileNames[Index],
-          fmOpenRead or fmShareDenyNone),
-        soOwned
-      );
 end;
 
 end.
