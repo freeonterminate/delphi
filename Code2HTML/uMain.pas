@@ -559,6 +559,9 @@ begin
         if (not CheckReserveds) then
           Dest := Dest + Word;
 
+        if (Source = '') then
+          Dest := Dest + '&nbsp;';
+
         Dest := Dest + LineTag.EndTag + sLineBreak;
       end;
 
