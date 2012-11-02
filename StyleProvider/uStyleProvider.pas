@@ -9,7 +9,7 @@ type
   TStyleProvider = class(TObject)
   strict private
     type
-      TStyleData = record
+      TStyleData = class
       private
         FName: String;
         FPath: String;
@@ -71,6 +71,8 @@ constructor TStyleProvider.TStyleData.Create(
   const iName, iPath: String;
   const iProvider: TStyleProvider);
 begin
+  inherited Create;
+
   FName := iName;
   FPath := iPath;
   FProvider := iProvider;
@@ -170,7 +172,12 @@ begin
 end;
 
 destructor TStyleProvider.Destroy;
+var
+  i: Integer;
 begin
+  for i := 0 to FStyles.Count - 1 do
+    FStyles[i].Free;
+
   FStyles.Free;
 
   inherited;
