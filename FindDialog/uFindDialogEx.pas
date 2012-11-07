@@ -36,7 +36,7 @@ uses
 
 procedure Register;
 begin
-  RegisterComponents('XEST', [TFindDialogEx]);
+  RegisterComponents('Dialogs', [TFindDialogEx]);
 end;
 
 { TFindDialogEx }
