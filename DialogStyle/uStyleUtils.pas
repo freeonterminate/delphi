@@ -7,7 +7,7 @@ procedure ClearStyles(const iObj: TObject);
 implementation
 
 uses
-  System.Rtti, System.TypInfo, Vcl.Controls, uDebug;
+  System.Rtti, System.TypInfo, Vcl.Controls;
 
 procedure ClearStylesSub(const iControl: TControl);
 var
