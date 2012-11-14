@@ -32,11 +32,36 @@ procedure Register;
 implementation
 
 uses
-  System.Rtti, Vcl.Graphics;
+  Vcl.Graphics;
+
+type
+  TCommonDialogHelper = class helper for TCommonDialog
+  public
+    procedure ReleaseRedirector;
+  end;
+
+  TFindDialogHelper = class helper for TFindDialog
+  public
+    procedure ReleaseHandle;
+  end;
 
 procedure Register;
 begin
   RegisterComponents('Dialogs', [TFindDialogEx]);
+end;
+
+{ TCommonDialogHelper }
+
+procedure TCommonDialogHelper.ReleaseRedirector;
+begin
+  Self.FRedirector.Free;
+end;
+
+{ TFindDialogHelper }
+
+procedure TFindDialogHelper.ReleaseHandle;
+begin
+  Self.FFindHandle := 0;
 end;
 
 { TFindDialogEx }
@@ -118,6 +143,21 @@ begin
 function TFindDialogEx.Execute(ParentWnd: HWND): Boolean;
 var
   TId: DWORD;
+begin
+  // 無効なウィンドウハンドルでは 0 が返る
+  TId := GetWindowThreadProcessId(Handle);
+  if (TId = 0) then begin
+    ReleaseHandle;
+    ReleaseRedirector;
+  end;
+
+  Result := inherited;
+end;
+
+{ // RTTI を使ったバージョン
+function TFindDialogEx.Execute(ParentWnd: HWND): Boolean;
+var
+  TId: DWORD;
   Context: TRttiContext;
   Field: TRttiField;
   Obj: TObject;
@@ -147,6 +187,7 @@ begin
 
   Result := inherited;
 end;
+}
 
 procedure TFindDialogEx.ListupControl(
   const iControl: TControl;
