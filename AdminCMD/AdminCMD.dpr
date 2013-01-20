@@ -1,5 +1,6 @@
 program AdminCMD;
 
+// ©•ª‚ğ•\¦‚µ‚½‚­‚È‚¢‚Ì‚Åw’è‚µ‚È‚¢
 //{$APPTYPE CONSOLE}
 
 uses
@@ -12,6 +13,7 @@ var
 begin
   Result := False;
 
+  // runas ‚ÍAVista ˆÈ~‚Ì‚İ“®ì‚·‚é
   if (CheckWin32Version(6)) then begin
     ZeroMemory(@SEI, SizeOf(SEI));
 
