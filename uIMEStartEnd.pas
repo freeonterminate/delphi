@@ -2,8 +2,12 @@ unit uIMEStartEnd;
 
 interface
 
+uses
+  Winapi.Windows;
+
 type
-  TIMEStartEndNotifyEvent = procedure(const iStart: Boolean) of object;
+  TIMEStartEndNotifyEvent =
+    procedure(const iWnd: HWND; const iStart: Boolean) of object;
 
 procedure AddIMEEventListener(const iEvent: TIMEStartEndNotifyEvent);
 procedure RemoveIMEEventListener(const iEvent: TIMEStartEndNotifyEvent);
@@ -11,7 +15,7 @@ procedure RemoveIMEEventListener(const iEvent: TIMEStartEndNotifyEvent);
 implementation
 
 uses
-  Winapi.Windows, Winapi.Messages, Vcl.Controls, System.Generics.Collections;
+  Winapi.Messages, Vcl.Controls, System.Generics.Collections;
 
 var
   GHookHandle: HHOOK;    // Keyboard Hook のハンドル
@@ -29,12 +33,12 @@ begin
     GHandlers.Remove(iEvent);
 end;
 
-procedure CallEventHandlers(const iStart: Boolean);
+procedure CallEventHandlers(const iWnd: HWND; const iStart: Boolean);
 var
   Handler: TIMEStartEndNotifyEvent;
 begin
   for Handler in GHandlers do
-    Handler(iStart);
+    Handler(iWnd, iStart);
 end;
 
 function CallWndProc(
@@ -49,12 +53,12 @@ begin
 
   with PCWPStruct(iLParam)^ do begin
     case message of
-      WM_IME_COMPOSITION: begin
-        CallEventHandlers(True);
+      WM_IME_STARTCOMPOSITION: begin
+        CallEventHandlers(hwnd, True);
       end;
 
       WM_IME_ENDCOMPOSITION: begin
-        CallEventHandlers(False);
+        CallEventHandlers(hwnd, False);
       end;
     end;
   end;
