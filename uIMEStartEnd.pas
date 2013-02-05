@@ -18,7 +18,7 @@ uses
   Winapi.Messages, Vcl.Controls, System.Generics.Collections;
 
 var
-  GHookHandle: HHOOK;    // Keyboard Hook のハンドル
+  GHookHandle: HHOOK;
   GHandlers: TList<TIMEStartEndNotifyEvent>;
 
 procedure AddIMEEventListener(const iEvent: TIMEStartEndNotifyEvent);
