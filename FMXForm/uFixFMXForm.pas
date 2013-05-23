@@ -23,7 +23,6 @@ type
   end;
 
 var
-  GAppWnd: HWND;
   GOldWndProc: TDictionary<HWND, TFormStruct>;
 
 function WndProc(
@@ -59,45 +58,57 @@ begin
   end;
 end;
 
+procedure HookWndProc(const iWnd: HWND; const iForm: TCommonCustomForm);
+var
+  FormStruct: TFormStruct;
+  Proc: TFnWndProc;
+begin
+  Proc := Pointer(GetWindowLong(iWnd, GWL_WNDPROC));
+
+  if (SetWindowLong(iWnd, GWL_WNDPROC, Integer(@WndProc)) <> 0) then begin
+    FormStruct.Proc := Proc;
+    FormStruct.Form := iForm;
+
+    GOldWndProc.Add(iWnd, FormStruct);
+  end;
+end;
+
 procedure FixApplication(const iWnd: HWND);
 var
-  Proc: TFnWndProc;
-  FormStruct: TFormStruct;
+  Wnd: HWND;
 begin
-  GAppWnd := GetWindow(iWnd, GW_OWNER);
-  Proc := Pointer(GetWindowLong(GAppWnd, GWL_WNDPROC));
+  Wnd := GetWindow(iWnd, GW_OWNER);
+  HookWndProc(Wnd, nil);
 
-  if (SetWindowLong(GAppWnd, GWL_WNDPROC, Integer(@WndProc)) <> 0) then begin
-    FormStruct.Proc := Proc;
-    FormStruct.Form := nil;
-
-    GOldWndProc.Add(GAppWnd, FormStruct);
-  end;
+  ShowWindow(Wnd, SW_HIDE);
 end;
 
 procedure FixForm(const iForm: TCommonCustomForm);
 var
   Wnd: HWND;
-  Proc: TFnWndProc;
-  FormStruct: TFormStruct;
 begin
   Wnd := WindowHandleToPlatform(iForm.Handle).Wnd;
-  Proc := Pointer(GetWindowLong(Wnd, GWL_WNDPROC));
 
   if (GOldWndProc = nil) then begin
     GOldWndProc := TDictionary<HWND, TFormStruct>.Create;
-
     FixApplication(Wnd);
   end;
 
-  if (SetWindowLong(Wnd, GWL_WNDPROC, Integer(@WndProc)) <> 0) then begin
-    FormStruct.Proc := Proc;
-    FormStruct.Form := iForm;
+  HookWndProc(Wnd, iForm);
 
-    //SetParent(Wnd, GAppWnd);
+  SetWindowLong(
+    Wnd,
+    GWL_EXSTYLE,
+    GetWindowLong(Wnd, GWL_EXSTYLE) or WS_EX_APPWINDOW);
+end;
 
-    GOldWndProc.Add(Wnd, FormStruct);
-  end;
+initialization
+begin
+end;
+
+finalization
+begin
+  GOldWndProc.Free;
 end;
 
 end.
