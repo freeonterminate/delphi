@@ -26,6 +26,7 @@ interface
 
 implementation
 
+{$IFDEF MSWINDOWS}
 uses
   System.SysUtils,
   Winapi.Messages, Winapi.Windows;
@@ -53,12 +54,16 @@ begin
         with PCREATESTRUCT(lParam)^ do begin
           if (GAppWnd = 0) and (StrComp(lpszClass, 'TFMAppClass') = 0) then
             GAppWnd := hwnd
-          else
+          else begin
+            if (GAppWnd <> 0) and (IsWindowVisible(GAppWnd)) then
+              ShowWindow(GAppWnd, SW_HIDE);
+
             if (GetWindow(hwnd, GW_OWNER) = GAppWnd) then
               SetWindowLong(
                 hwnd,
                 GWL_EXSTYLE,
                 GetWindowLong(hwnd, GWL_EXSTYLE) or WS_EX_APPWINDOW);
+          end;
         end;
       end;
 
@@ -90,5 +95,6 @@ finalization
 begin
   UnhookWIndowsHookEx(GHookHandle);
 end;
+{$ENDIF}
 
 end.
