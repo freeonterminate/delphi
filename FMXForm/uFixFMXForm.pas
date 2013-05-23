@@ -1,56 +1,79 @@
+(*
+ * FIX for FireMonkey-Form Minimize & WM_SYSCOMMAND-SC_CLOSE
+ *                                  Version 1.0 / 2013-05-24
+ * programed by HOSOKAWA Jun     (freeonterminate@gmail.com)
+ *
+ * [USAGE]
+ *
+ * uses
+ *   uFixFMXForm; // Declare only once in Unit or Project.dpr
+ *
+ * [EXAMPLE]
+ *
+ * uses
+ *   uFixFMXForm;
+ *
+ * procedure TForm1.Button1Click(Sender: TObject);
+ * begin
+ *   // doing
+ * end;
+ *
+ *)
+
 unit uFixFMXForm;
 
 interface
-
-uses
-  FMX.Forms;
-
-procedure FixForm(const iForm: TCommonCustomForm);
 
 implementation
 
 uses
   System.SysUtils,
-  Generics.Collections,
-  FMX.Platform.Win,
-  Winapi.Messages,
-  Winapi.Windows;
-
-type
-  TFormStruct = record
-    Proc: TFnWndProc;
-    Form: TCommonCustomForm;
-  end;
+  uUtils,
+  Winapi.Messages, Winapi.Windows;
 
 var
-  GOldWndProc: TDictionary<HWND, TFormStruct>;
+  GHookHandle: HHOOK;
+  GAppWnd: HWND = 0;
 
-function WndProc(
-  hwnd: HWND;
-  uMsg: UINT;
-  wParam: WPARAM;
-  lParam: LPARAM): LRESULT; stdcall;
+function CallWndProc(
+  iNCode: Integer;
+  iWParam: WPARAM;
+  iLParam: LPARAM): LRESULT; stdcall;
 var
-  FormStruct: TFormStruct;
+  ActiveThreadID: DWORD;
+  TargetID: DWORD;
 begin
-  if
-    (GOldWndProc = nil) or
-    (not GOldWndProc.TryGetValue(hwnd, FormStruct)) or
-    (FormStruct.Proc = nil)
-  then
-    Exit(0);
+  Result := CallNextHookEx(GHookHandle, iNCode, iWParam, iLParam);
 
-  Result := CallWindowProc(FormStruct.Proc, hwnd, uMsg, wParam, lParam);
+  if (iNCode < 0) then
+    Exit;
 
-  case uMsg of
-    WM_SYSCOMMAND: begin
-      case wParam of
-        SC_CLOSE: begin
-          if (wParam = SC_CLOSE) then begin
-            if (FormStruct.Form = nil) then
-              Application.Terminate
-            else
-              FormStruct.Form.Close;
+  with PCWPStruct(iLParam)^ do begin
+    case message of
+      WM_CREATE: begin
+        with PCREATESTRUCT(lParam)^ do begin
+          if (GAppWnd = 0) and (StrComp(lpszClass, 'TFMAppClass') = 0) then
+            GAppWnd := hwnd
+          else
+            if (GetWindow(hwnd, GW_OWNER) = GAppWnd) then
+              SetWindowLong(
+                hwnd,
+                GWL_EXSTYLE,
+                GetWindowLong(hwnd, GWL_EXSTYLE) or WS_EX_APPWINDOW);
+        end;
+      end;
+
+      WM_SHOWWINDOW: begin
+        if (GetWindow(hwnd, GW_OWNER) = GAppWnd) then begin
+          ActiveThreadID := GetWindowThreadProcessId(GetForegroundWindow, nil);
+          TargetID := GetWindowThreadProcessId(hwnd, nil);
+
+          AttachThreadInput(TargetID, ActiveThreadID, True);
+          try
+            SetForegroundWindow(hwnd);
+            SetActiveWindow(hwnd);
+          finally
+            AttachThreadInput(TargetID, ActiveThreadID, False);
           end;
         end;
       end;
@@ -58,57 +81,15 @@ begin
   end;
 end;
 
-procedure HookWndProc(const iWnd: HWND; const iForm: TCommonCustomForm);
-var
-  FormStruct: TFormStruct;
-  Proc: TFnWndProc;
-begin
-  Proc := Pointer(GetWindowLong(iWnd, GWL_WNDPROC));
-
-  if (SetWindowLong(iWnd, GWL_WNDPROC, Integer(@WndProc)) <> 0) then begin
-    FormStruct.Proc := Proc;
-    FormStruct.Form := iForm;
-
-    GOldWndProc.Add(iWnd, FormStruct);
-  end;
-end;
-
-procedure FixApplication(const iWnd: HWND);
-var
-  Wnd: HWND;
-begin
-  Wnd := GetWindow(iWnd, GW_OWNER);
-  HookWndProc(Wnd, nil);
-
-  ShowWindow(Wnd, SW_HIDE);
-end;
-
-procedure FixForm(const iForm: TCommonCustomForm);
-var
-  Wnd: HWND;
-begin
-  Wnd := WindowHandleToPlatform(iForm.Handle).Wnd;
-
-  if (GOldWndProc = nil) then begin
-    GOldWndProc := TDictionary<HWND, TFormStruct>.Create;
-    FixApplication(Wnd);
-  end;
-
-  HookWndProc(Wnd, iForm);
-
-  SetWindowLong(
-    Wnd,
-    GWL_EXSTYLE,
-    GetWindowLong(Wnd, GWL_EXSTYLE) or WS_EX_APPWINDOW);
-end;
-
 initialization
 begin
+  GHookHandle :=
+    SetWindowsHookEx(WH_CALLWNDPROC, CallWndProc, 0, GetCurrentThreadID);
 end;
 
 finalization
 begin
-  GOldWndProc.Free;
+  UnhookWIndowsHookEx(GHookHandle);
 end;
 
 end.
