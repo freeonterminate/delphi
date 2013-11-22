@@ -58,10 +58,6 @@ begin
   end;
 end;
 
-type
-  TDummyTabControl = class(TTabControl);
-  TDummyTabItem = class(TTabItem);
-
 procedure TTabControlHelper.CloseButtonClick(Sender: TObject);
 var
   TabItem: TTabItem;
