@@ -4,7 +4,7 @@ object TStyleContainer
     DesignVisible = False
     Height = 20.000000000000000000
     Position.X = 502.000000000000000000
-    Position.Y = 404.000000000000000000
+    Position.Y = 407.000000000000000000
     Width = 100.000000000000000000
     object TRectangle
       Align = alContents
@@ -31,19 +31,6 @@ object TStyleContainer
         PropertyName = 'Fill.Color'
         StartValue = xFF545556
         StopValue = xFF252525
-        Trigger = 'IsSelected=true'
-        TriggerInverse = 'IsSelected=false'
-      end
-      object TRectAnimation
-        Duration = 0.000009999999747379
-        PropertyName = 'Margins'
-        StartValue.Left = 2.000000000000000000
-        StartValue.Top = 2.000000000000000000
-        StartValue.Right = -2.000000000000000000
-        StartValue.Bottom = -1.000000000000000000
-        StopValue.Left = 2.000000000000000000
-        StopValue.Right = -2.000000000000000000
-        StopValue.Bottom = -1.000000000000000000
         Trigger = 'IsSelected=true'
         TriggerInverse = 'IsSelected=false'
       end
@@ -116,6 +103,19 @@ object TStyleContainer
         StartValue = xFF606060
         StopValue = xFF303030
         Trigger = 'IsSelected=false'
+      end
+      object TRectAnimation
+        Duration = 0.000009999999747379
+        PropertyName = 'Margins'
+        StartValue.Left = 2.000000000000000000
+        StartValue.Top = 2.000000000000000000
+        StartValue.Right = -2.000000000000000000
+        StartValue.Bottom = -1.000000000000000000
+        StopValue.Left = 2.000000000000000000
+        StopValue.Right = -2.000000000000000000
+        StopValue.Bottom = -1.000000000000000000
+        Trigger = 'IsSelected=true'
+        TriggerInverse = 'IsSelected=false'
       end
       object TRectAnimation
         Duration = 0.000009999999747379

@@ -12,15 +12,14 @@ uses
 type
   [ComponentPlatformsAttribute(pidWin32 or pidWin64 or pidOSX32)]
   TTabItemWithClose = class(TTabItem)
-  public const
-    STYLE_CLOSE_BUTTON_NAME = 'closebutton';
+  private const
+    STYLE_COLOR_BUTTON = 'closebutton';
+    STYLE_TEXT = 'text';
+    STYLE_TABITEM = 'tabitemstyle';
   private var
     FCloseBtn: TCustomButton;
     FTabControl2: TTabControl;
-    function GetText: string;
   protected
-    procedure SetText(const Value: String); override;
-    function GetDefaultStyleLookupName: string; override;
     procedure ChangeParent; override;
     procedure ApplyStyle; override;
     procedure FreeStyle; override;
@@ -31,26 +30,106 @@ type
       var ioLastValue: Single): boolean; override;
   public
     property TabControl: TTabControl read FTabControl2;
-  published
-    property Text: String read GetText write SetText;
   end;
 
 implementation
 
 uses
   System.Rtti
-  , FMX.Types;
+  , FMX.Types
+  , FMX.Ani
+  , FMX.Objects
+  ;
 
 { TTabItemWithClose }
 
 procedure TTabItemWithClose.ApplyStyle;
 var
   CloseBtn: TFmxObject;
+
+  procedure AssignColors;
+  var
+    Src, Dest: TFmxObject;
+    i, j: Integer;
+    SrcChild, DestChild: TFmxObject;
+    TabItem: TTabItem;
+  begin
+    TabItem := TTabItem.Create(nil);
+    try
+      TabItem.Visible := False;
+      TabItem.Parent := Parent;
+      TabItem.StyleLookup := STYLE_TABITEM;
+      TabItem.ApplyStyleLookup;
+
+      Src := TabItem.FindStyleResource(STYLE_TEXT);
+      Dest := FindStyleResource(STYLE_TEXT);
+
+      if (Src is TText) and (Dest is TText) then begin
+        TText(Dest).Color := TText(Src).Color;
+
+        Src := TText(Src).Parent;
+        Dest := TText(Dest).Parent;
+        if (Dest <> nil) then
+          Dest := Dest.Parent;
+
+        if (Src is TRectangle) and (Dest is TRectangle) then begin
+          TRectangle(Dest).Corners := TRectangle(Src).Corners;
+          TRectangle(Dest).CornerType := TRectangle(Src).CornerType;
+          TRectangle(Dest).Sides := TRectangle(Src).Sides;
+          TRectangle(Dest).Fill.Assign(TRectangle(Src).Fill);
+          TRectangle(Dest).Stroke.Assign(TRectangle(Src).Stroke);
+          TRectangle(Dest).XRadius := TRectangle(Src).XRadius;
+          TRectangle(Dest).YRadius := TRectangle(Src).YRadius;
+
+          j := -1;
+          for i := 0 to TRectangle(Dest).Children.Count - 1 do
+            if (TRectangle(Dest).Children[i] is TColorAnimation) then begin
+              j := i;
+              Break;
+            end;
+
+          if (j > -1) then
+            for i := 0 to TRectangle(Src).Children.Count - 1 do begin
+              SrcChild := TRectangle(Src).Children[i];
+              DestChild := nil;
+
+              if (SrcChild is TColorAnimation) then begin
+                while (j < TRectangle(Dest).ChildrenCount) do begin
+                  DestChild := TRectangle(Dest).Children[j];
+                  Inc(j);
+
+                  if (DestChild is TColorAnimation) then
+                    Break;
+                end;
+
+                if (DestChild is TColorAnimation) then begin
+                  TColorAnimation(DestChild).StartValue :=
+                    TColorAnimation(SrcChild).StartValue;
+
+                  TColorAnimation(DestChild).StopValue :=
+                    TColorAnimation(SrcChild).StopValue;
+                end;
+              end;
+            end;
+          end;
+      end;
+    finally
+      TabItem.DisposeOf;
+    end;
+
+    if (FTabControl2 <> nil) then begin
+      FTabControl2.TabIndex := -1;
+      FTabControl2.TabIndex := 0;
+    end;
+  end;
+
 begin
   inherited;
 
-  CloseBtn := FindStyleResource(STYLE_CLOSE_BUTTON_NAME);
+  CloseBtn := FindStyleResource(STYLE_COLOR_BUTTON);
   if (CloseBtn <> nil) and (CloseBtn is TCustomButton) then begin
+    AssignColors;
+
     FCloseBtn := TCustomButton(CloseBtn);
     FCloseBtn.OnClick := DoCloseBtnClick;
   end;
@@ -124,25 +203,6 @@ procedure TTabItemWithClose.FreeStyle;
 begin
   inherited;
   FCloseBtn := nil;
-end;
-
-function TTabItemWithClose.GetDefaultStyleLookupName: string;
-begin
-  Result := inherited GetDefaultStyleLookupName;
-  //if (FindStyleResource(Result) = nil) then
-    //Result := 'TabItemStyle';
-end;
-
-function TTabItemWithClose.GetText: String;
-begin
-  Result := inherited Text;
-  if (Result = '') then
-    Result := ' ';
-end;
-
-procedure TTabItemWithClose.SetText(const Value: String);
-begin
-  inherited SetText(Value);
 end;
 
 initialization

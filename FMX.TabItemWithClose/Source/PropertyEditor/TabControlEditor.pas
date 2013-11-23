@@ -102,8 +102,8 @@ begin
   Item := GetCurrentTabItem;
 
   if (Item <> nil) then begin
+    lstItems.Items.Delete(Item.Index);
     Item.Release;
-    lstItems.Items.Delete(Index);
   end;
 end;
 
