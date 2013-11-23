@@ -22,16 +22,16 @@
 
 ##使用方法
 
-1.
-  FMX.TabItemWithClosePackage.dproj を開き、コンポーネントをインストールします。
-  これによって、TabControl を右クリックしたときに開くコンテキストメニューの最上部に「Show TabItem Editor」という項目が追加されます。
+1.  
+FMX.TabItemWithClosePackage.dproj を開き、コンポーネントをインストールします。  
+これによって、TabControl を右クリックしたときに開くコンテキストメニューの最上部に「Show TabItem Editor」という項目が追加されます。  
 
-2.
-  StyleBook のスタイル編集画面を開き「追加」ボタンをクリックして下さい（StyleBook が無ければ配置してください）。
-  ダイアログから同梱の Style\TabItemWithCloseStyle.style を選択します。
-  最後に「適用して閉じる」ボタンをクリックして、スタイルの編集を終了します。
+2.  
+StyleBook のスタイル編集画面を開き「追加」ボタンをクリックして下さい（StyleBook が無ければ配置してください）。  
+ダイアログから同梱の Style\TabItemWithCloseStyle.style を選択します。  
+最後に「適用して閉じる」ボタンをクリックして、スタイルの編集を終了します。  
 
-3.
-  Show TabItem Editor をクリックするとプロパティエディタが立ち上がります。
-  DropDown から TTabItem を選ぶと普通のタブが、TTabItemWithClose を選ぶとボタン付きのタブが生成されます。
+3.  
+Show TabItem Editor をクリックするとプロパティエディタが立ち上がります。  
+DropDown から TTabItem を選ぶと普通のタブが、TTabItemWithClose を選ぶとボタン付きのタブが生成されます。  
 
