@@ -1,0 +1,133 @@
+object TStyleContainer
+  object TLayout
+    StyleName = 'tabitemwithclosestyle'
+    DesignVisible = False
+    Height = 20.000000000000000000
+    Position.X = 502.000000000000000000
+    Position.Y = 404.000000000000000000
+    Width = 100.000000000000000000
+    object TRectangle
+      Align = alContents
+      Corners = [crTopLeft, crTopRight]
+      Fill.Color = xFF252525
+      Locked = True
+      Height = 20.000000000000000000
+      HitTest = False
+      Sides = [sdTop, sdLeft, sdRight]
+      Stroke.Color = xFF858585
+      XRadius = 3.000000000000000000
+      YRadius = 3.000000000000000000
+      Width = 100.000000000000000000
+      object TColorAnimation
+        Duration = 0.000099999997473788
+        PropertyName = 'Fill.Color'
+        StartValue = xFF545556
+        StopValue = xFF018AD4
+        Trigger = 'IsMouseOver=true;IsSelected=false'
+        TriggerInverse = 'IsMouseOver=false;IsSelected=false'
+      end
+      object TColorAnimation
+        Duration = 0.000000999999997475
+        PropertyName = 'Fill.Color'
+        StartValue = xFF545556
+        StopValue = xFF252525
+        Trigger = 'IsSelected=true'
+        TriggerInverse = 'IsSelected=false'
+      end
+      object TRectAnimation
+        Duration = 0.000009999999747379
+        PropertyName = 'Margins'
+        StartValue.Left = 2.000000000000000000
+        StartValue.Top = 2.000000000000000000
+        StartValue.Right = -2.000000000000000000
+        StartValue.Bottom = -1.000000000000000000
+        StopValue.Left = 2.000000000000000000
+        StopValue.Right = -2.000000000000000000
+        StopValue.Bottom = -1.000000000000000000
+        Trigger = 'IsSelected=true'
+        TriggerInverse = 'IsSelected=false'
+      end
+      object TSpeedButton
+        StyleName = 'closebutton'
+        Align = alFitRight
+        Height = 10.000000000000000000
+        Margins.Left = 5.000000000000000000
+        Margins.Top = 5.000000000000000000
+        Margins.Right = 4.000000000000000000
+        Margins.Bottom = 5.000000000000000000
+        Position.X = 85.834716796875000000
+        Position.Y = 5.000000000000000000
+        StyleLookup = 'ClearingEdit1clearbutton1'
+        Width = 10.165283203125000000
+        object TPath
+          Align = alFit
+          Data.Path = {
+            10000000000000000000A0C00000704101000000000070410000A0C001000000
+            000048420000F041010000000000AA420000A0C0010000000000D24200007041
+            0100000000008C4200004842010000000000D2420000B442010000000000AA42
+            0000DC42020000003BDF34429E6F8C4202000000FE547D427FAAB04202000000
+            000048420000964201000000000070410000DC42010000000000A0C00000B442
+            010000000000F04100005C42010000000000A0C0000070410300000000000000
+            00000000}
+          Fill.Color = claWhite
+          Locked = True
+          Height = 2.000000000000000000
+          HitTest = False
+          Margins.Left = 4.000000000000000000
+          Margins.Top = 4.000000000000000000
+          Margins.Right = 4.000000000000000000
+          Margins.Bottom = 4.000000000000000000
+          Stroke.Kind = bkNone
+          Width = 1.999999046325684000
+        end
+      end
+      object TLayout
+        StyleName = 'Layout1'
+        Align = alClient
+        Height = 20.000000000000000000
+        Padding.Right = 30.000000000000000000
+        Width = 80.834716796875000000
+        object TText
+          StyleName = 'text'
+          Align = alContents
+          Color = claWhite
+          Locked = True
+          Height = 15.000000000000000000
+          HitTest = False
+          Margins.Left = 8.000000000000000000
+          Margins.Top = 3.000000000000000000
+          Margins.Right = 8.000000000000000000
+          Margins.Bottom = 2.000000000000000000
+          Text = 'item'
+          Width = 64.834716796875000000
+          WordWrap = False
+        end
+      end
+      object TColorAnimation
+        Duration = 0.000000999999997475
+        PropertyName = 'Fill.Color'
+        StartValue = xFF303030
+        StopValue = xFF606060
+        Trigger = 'IsSelected=true'
+      end
+      object TColorAnimation
+        Duration = 0.000009999999747379
+        PropertyName = 'Fill.Color'
+        StartValue = xFF606060
+        StopValue = xFF303030
+        Trigger = 'IsSelected=false'
+      end
+      object TRectAnimation
+        Duration = 0.000009999999747379
+        Inverse = True
+        PropertyName = 'Margins'
+        StartValue.Left = 2.000000000000000000
+        StartValue.Top = 2.000000000000000000
+        StartValue.Right = -2.000000000000000000
+        StopValue.Left = 2.000000000000000000
+        StopValue.Right = -2.000000000000000000
+        Trigger = 'IsSelected=false'
+      end
+    end
+  end
+end
