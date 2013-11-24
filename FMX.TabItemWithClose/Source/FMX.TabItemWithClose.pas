@@ -12,6 +12,8 @@ uses
 type
   [ComponentPlatformsAttribute(pidWin32 or pidWin64 or pidOSX32)]
   TTabItemWithClose = class(TTabItem)
+  public type
+    TCloseEvent = procedure (Sender: TObject; var ioDoClose: Boolean) of object;
   private const
     STYLE_COLOR_BUTTON = 'closebutton';
     STYLE_TEXT = 'text';
@@ -19,6 +21,7 @@ type
   private var
     FCloseBtn: TCustomButton;
     FTabControl2: TTabControl;
+    FOnClose: TCloseEvent;
   protected
     procedure ChangeParent; override;
     procedure ApplyStyle; override;
@@ -29,7 +32,10 @@ type
       iNewValue: single;
       var ioLastValue: Single): boolean; override;
   public
+    class function Make(const iParent: TTabControl): TTabItemWithClose;
     property TabControl: TTabControl read FTabControl2;
+  published
+    property OnClose: TCloseEvent read FOnClose write FOnClose;
   end;
 
 implementation
@@ -164,7 +170,16 @@ var
   TC: TTabControl;
   i: Integer;
   ActiveTab: TTabItem;
+  DoClose: Boolean;
 begin
+  if (Assigned(FOnClose)) then begin
+    DoClose := True;
+    FOnClose(Self, DoClose);
+
+    if (not DoClose) then
+      Exit;
+  end;
+
   ActiveTab := nil;
   TC := FTabControl2;
 
@@ -203,6 +218,15 @@ procedure TTabItemWithClose.FreeStyle;
 begin
   inherited;
   FCloseBtn := nil;
+end;
+
+class function TTabItemWithClose.Make(
+  const iParent: TTabControl): TTabItemWithClose;
+begin
+  Result := TTabItemWithClose.Create(iParent.Root.GetObject);
+  Result.Parent := iParent;
+  if (Result.Text = '') then
+    Result.Text := ' ';
 end;
 
 initialization
