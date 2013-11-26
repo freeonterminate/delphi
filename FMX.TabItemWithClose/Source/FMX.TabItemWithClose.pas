@@ -189,9 +189,8 @@ begin
   i := Index;
 
   Parent := nil;
-  Release;
 
-  if (ActiveTab  = Self) then begin
+  if (ActiveTab = Self) then begin
     if (i < TC.TabCount) then begin
       TC.TabIndex := -1;
       TC.TabIndex := i;
@@ -203,6 +202,8 @@ begin
         TC.TabIndex := i;
     end;
   end;
+
+  Release;
 end;
 
 function TTabItemWithClose.DoSetWidth(var ioValue: Single; iNewValue: single;
