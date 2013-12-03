@@ -5,7 +5,7 @@ interface
 uses
   System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants, 
   FMX.Types, FMX.Graphics, FMX.Controls, FMX.Forms, FMX.Dialogs, FMX.StdCtrls,
-  FMX.ListBox, FMX.Layouts, FMX.TabControl;
+  FMX.ListBox, FMX.Layouts, FMX.TabControl, DesignEditors;
 
 type
   TfrmTabControlPropEditor = class(TForm)
@@ -24,6 +24,7 @@ type
     TTabItemClass = class of TTabItem;
   private var
     FTabControl: TTabControl;
+    FEditor: TComponentEditor;
   private
     function GetCurrentTabItem: TTabItem;
     procedure ChangeIndex(const iDelta: Integer);
@@ -31,10 +32,8 @@ type
     function ShowModal(const iTabControl: TTabControl): TModalResult; overload;
     class procedure RegisterTabItemClasses(
       const iClasses: array of TTabItemClass);
+    property Editor: TComponentEditor read FEditor write FEditor;
   end;
-
-var
-  frmTabControlPropEditor: TfrmTabControlPropEditor;
 
 implementation
 
@@ -59,8 +58,8 @@ var
   Index: Integer;
   ItemClass: TTabItemClass;
   Item: TTabItem;
-  NameIndex: Integer;
-  Prefix: String;
+  //NameIndex: Integer;
+  //Prefix: String;
 begin
   Index := cmbbxItemClasses.ItemIndex;
   if
@@ -74,23 +73,8 @@ begin
   Item := ItemClass.Create(FTabControl.Root.GetObject);
   Item.Parent := FTabControl;
 
-  if (String.IsNullOrEmpty(Item.Name)) then begin
-    Prefix := ItemClass.ClassName;
-    if (Prefix.StartsWith('T')) then
-      Prefix := Prefix.Remove(0, 1);
-
-    NameIndex := 1;
-    while (True) do begin
-      try
-        Item.Name := Prefix + NameIndex.ToString;
-      except
-        Inc(NameIndex);
-        Continue;
-      end;
-
-      Break;
-    end;
-  end;
+  if (String.IsNullOrEmpty(Item.Name)) and (FEditor <> nil) then
+    Item.Name := FEditor.Designer.UniqueName(ItemClass.ClassName);
 
   lstItems.Items.AddObject(Item.Name, Item);
 end;

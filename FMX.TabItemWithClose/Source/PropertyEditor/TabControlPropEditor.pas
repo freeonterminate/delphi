@@ -40,6 +40,7 @@ var
 begin
   Editor := TfrmTabControlPropEditor.Create(nil);
   try
+    Editor.Editor := Self;
     Editor.ShowModal(Component as TTabControl);
   finally
     Editor.Release;
