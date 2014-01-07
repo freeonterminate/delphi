@@ -11,6 +11,7 @@ FMX.FormHelper を uses してください。
 TForm.OnCreate などでヘルパーメソッドを呼んでください。
 
 ■例
+
     uses
       FMX.FormHelper;
     
