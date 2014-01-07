@@ -10,13 +10,12 @@ FMX.FormHelper を uses してください。
 2.  
 TForm.OnCreate などでヘルパーメソッドを呼んでください。
 
-例
-
-```Unit1.pas
-procedure TForm1.FormCreate(Sender: TObject);
-begin
-  DisableAltEnter;
-  SetMinSize(300, 200);
-end;
-```
-
+■例
+    uses
+      FMX.FormHelper;
+    
+    procedure TForm1.FormCreate(Sender: TObject);
+    begin
+      DisableAltEnter;
+      SetMinSize(300, 200);
+    end;
