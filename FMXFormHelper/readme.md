@@ -1,16 +1,16 @@
-#FMX.FormHelper ƒwƒ‹ƒp[ƒNƒ‰ƒX
+#FMX.FormHelper ãƒ˜ãƒ«ãƒ‘ãƒ¼ã‚¯ãƒ©ã‚¹
 
-FireMonkey ‚Ì TForm ‚ÉuAlt + Enter ‚Ì–³Œø‰»vuÅ¬‰»ƒTƒCƒY‚ÌÝ’èv‹@”\‚ð’Ç‰Á‚·‚éƒwƒ‹ƒp[ƒNƒ‰ƒX‚Å‚·B
+FireMonkey ã® TForm ã«ã€ŒAlt + Enter ã®ç„¡åŠ¹åŒ–ã€ã€Œæœ€å°åŒ–ã‚µã‚¤ã‚ºã®è¨­å®šã€æ©Ÿèƒ½ã‚’è¿½åŠ ã™ã‚‹ãƒ˜ãƒ«ãƒ‘ãƒ¼ã‚¯ãƒ©ã‚¹ã§ã™ã€‚
 
-##Žg—p•û–@
+##ä½¿ç”¨æ–¹æ³•
 
 1.  
-FMX.FormHelper ‚ð uses ‚µ‚Ä‚­‚¾‚³‚¢B
+FMX.FormHelper ã‚’ uses ã—ã¦ãã ã•ã„ã€‚
 
 2.  
-TForm.OnCreate ‚È‚Ç‚Åƒwƒ‹ƒp[ƒƒ\ƒbƒh‚ðŒÄ‚ñ‚Å‚­‚¾‚³‚¢B
+TForm.OnCreate ãªã©ã§ãƒ˜ãƒ«ãƒ‘ãƒ¼ãƒ¡ã‚½ãƒƒãƒ‰ã‚’å‘¼ã‚“ã§ãã ã•ã„ã€‚
 
-¡—á
+â– ä¾‹
 
     uses
       FMX.FormHelper;
@@ -20,3 +20,10 @@ TForm.OnCreate ‚È‚Ç‚Åƒwƒ‹ƒp[ƒƒ\ƒbƒh‚ðŒÄ‚ñ‚Å‚­‚¾‚³‚¢B
       DisableAltEnter;
       SetMinSize(300, 200);
     end;
+
+##å‚è€ƒ
+Alt+Enter å•é¡Œã‚’ä¿®æ­£ã™ã‚‹ã‚³ãƒ¼ãƒ‰ã¯â†“ã“ã¡ã‚‰ã®ã‚³ãƒ¼ãƒ‰ã‚’ä½¿ã‚ã›ã¦ã„ãŸã ãã¾ã—ãŸã€‚
+
+> å…¨åŠ›ã‚ã¯ãƒ¼ 
+> â– [Delphi][FireMonkey]Alt+Enterã«ã‚ˆã‚‹ãƒ•ãƒ«ã‚¹ã‚¯ãƒªãƒ¼ãƒ³åŒ–ã‚’ç„¡åŠ¹ã«ã™ã‚‹ã€‚ 
+> http://d.hatena.ne.jp/tales/20130221/1361380072
