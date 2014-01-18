@@ -1,100 +1,108 @@
-#����CROSS
+#言語CROSS
 
-���̃t�@�C���Q�́ACROSS 2014 �ŊJ�Â��ꂽ�u����CROSS�v�̂���� Delphi �ɂ������@�ł��B
+このファイル群は、CROSS 2014 で開催された「言語CROSS」のお題と Delphi における解法です。
+実行ファイルは github 上に置けないので、別途 [Skydrive](https://skydrive.live.com/redir?resid=F63E36483C16B294%21441) からダウンロードできます。
 
-##����
+##お題
 
-����͈ȉ��̒ʂ�ł��B
+###Clojure - @esehara さんからの出題
+####ルール
+	プレイヤーは二人。片方はコンピューター。 
+	手は「グー、チョキ、パー」。あとは一般的なじゃんけんの規則にのっとります 
+	少なくとも、プレイヤーかコンピューターが勝ったかを判定できること 
+	入力・出力は自由。ゲーム用の関数が定義されて、対話コンソールから入力できれば十分とします 
+####目的
+	じゃんけんのルールをどう実装するかは、各種の言語で差が出ることを期待 
+	(関数型、オブジェクト型の違い) 
+	余力でリッチなGUIを実装してくれる人がいる 
+	ライブラリ自慢 
+####実行ファイル
+	[janken.exe](https://skydrive.live.com/redir?resid=F63E36483C16B294%21440)
 
-###Clojure - @esehara ���񂩂�̏o��
-####���[��
-	�v���C���[�͓�l�B�Е��̓R���s���[�^�[�B 
-	��́u�O�[�A�`���L�A�p�[�v�B���Ƃ͈�ʓI�Ȃ���񂯂�̋K���ɂ̂��Ƃ�܂� 
-	���Ȃ��Ƃ��A�v���C���[���R���s���[�^�[�����������𔻒�ł��邱�� 
-	���́E�o�͎͂��R�B�Q�[���p�̊֐�����`����āA�Θb�R���\�[��������͂ł���Ώ\���Ƃ��܂� 
-####�ړI
-	����񂯂�̃��[�����ǂ��������邩�́A�e��̌���ō����o�邱�Ƃ����� 
-	(�֐��^�A�I�u�W�F�N�g�^�̈Ⴂ) 
-	�]�͂Ń��b�`��GUI���������Ă����l������ 
-	���C�u�������� 
-
-
-###F# - @igeta ���񂩂�̏o��
-####���[��
-	�Ƃ���J���[���̒����������A�ȉ��Ɏ���������isource�j�ŗ^������B
-
-	1;�p���p���`�L��;����;500;0;
-	2;���[�X�J�c;����;300;0;�Ȃ�,��Ń^�}�S
-	3;�C�̍K;�����;300;1;
-	4;�₳��;��ؗ�;400;0;��Ń^�}�S
-	5;�t�B�b�V���t���C;�����;400;1;
-	6;���[�X�J�c;����;500;3;
-	7;�g�}�g�A�X�p��;��ؗ�;300;0;
-	8;���[�X�J�c;����;500;1;�`�[�Y,��Ń^�}�S
-	9;�g�}�g�A�X�p��;��ؗ�;300;2;
-	10;�p���p���`�L��;����;300;0;
-	11;�₳��;��ؗ�;300;-1;
-	12;�t�B�b�V���t���C;�����;200;0;�`�[�Y
-
-	�e�s��1�̒�����\���Ă���B�����f�[�^�́A���ɁA���� ID�iOrderId�j�A���j���[�iCurryMenu�j�A
-	���ށiCategory�j�A���C�X�̗ʁiRiceWeight�j�A�h���iHotFlavor�j�A�g�b�s���O�iToppings�j��6���ڂ�
-	�܂݁A���ꂼ��̍��ڂ̓Z�~�R�����ŋ�؂��Ă���B�܂��A�u�g�b�s���O�v�ɂ��Ă͕����w�肪
-	�ł��邽�߁A�J���}��؂�̃��X�g�ƂȂ��Ă���B
-
-	�����ŁA�܂��́A���̒������𕶎���isource�j�������Ɏ��A�����f�[�^��v�f�Ɏ����X�g�i�C��
-	�̃R���N�V�����^�j��Ԃ�l�Ƃ���AgetOrderHistory �֐����`������ŁA�ȉ��̊e�₢�ɓ�����B
-
-	Q1. �u�h���v��2�ȏ�̒����𒊏o���A���́u���� ID�v�����ׂĎ擾����B
-	Q2. �u���ށv���ƂɁu���C�X�̗ʁv�̕��ς��擾����B�Ȃ��A���ϒl���傫�����ɕ��ׂ邱�ƁB
-	Q3. �u���j���[�v�����[�X�J�c�̒����ɂ��āA�e�u�g�b�s���O�v�̏o���񐔂��J�E���g����B
-####�ړI
-	�������񏈗��{���X�g�����̔�r
+###Delphi - @pik の出題
+####ルール
+	3D GUI の作成とします。
+	ボタンを押すと Hello, 3D World ! と表示されるようにしてください（編集可能であると、なお良い）。
+	ただし、文字列は 3D オブジェクトとしてパースがかかっているなど、3D であることが判るようにしてください。
+####目的
+	このお題は、GUI を迅速に作成できる RAD としての Delphi の特色を示した物です。
+####実行ファイル
+	[3DGUI.exe](https://skydrive.live.com/redir?resid=F63E36483C16B294%21438)
 
 
-###Delphi - @pik �̏o��
-####���[��
-	3D GUI �̍쐬�Ƃ��܂��B
-	�{�^���������� Hello, 3D World ! �ƕ\�������悤�ɂ��Ă��������i�ҏW�\�ł���ƁA�Ȃ��ǂ��j�B
-	�������A������� 3D �I�u�W�F�N�g�Ƃ��ăp�[�X���������Ă���ȂǁA3D �ł��邱�Ƃ�����悤�ɂ��Ă��������B
-####�ړI
-	���̂���́AGUI ��v���ɍ쐬�ł��� RAD �Ƃ��Ă� Delphi �̓��F�����������ł��B
+###F# - @igeta さんからの出題
+####ルール
+	とあるカレー屋の注文履歴が、以下に示す文字列（source）で与えられる。
+
+	1;パリパリチキン;肉類;500;0;
+	2;ロースカツ;肉類;300;0;なす,ゆでタマゴ
+	3;海の幸;魚介類;300;1;
+	4;やさい;野菜類;400;0;ゆでタマゴ
+	5;フィッシュフライ;魚介類;400;1;
+	6;ロースカツ;肉類;500;3;
+	7;トマトアスパラ;野菜類;300;0;
+	8;ロースカツ;肉類;500;1;チーズ,ゆでタマゴ
+	9;トマトアスパラ;野菜類;300;2;
+	10;パリパリチキン;肉類;300;0;
+	11;やさい;野菜類;300;-1;
+	12;フィッシュフライ;魚介類;200;0;チーズ
+
+	各行は1つの注文を表している。注文データは、順に、注文 ID（OrderId）、メニュー（CurryMenu）、
+	分類（Category）、ライスの量（RiceWeight）、辛さ（HotFlavor）、トッピング（Toppings）の6項目を
+	含み、それぞれの項目はセミコロンで区切られている。また、「トッピング」については複数指定が
+	できるため、カンマ区切りのリストとなっている。
+
+	ここで、まずは、この注文履歴文字列（source）を引数に取り、注文データを要素に持つリスト（任意
+	のコレクション型）を返り値とする、getOrderHistory 関数を定義した上で、以下の各問いに答えよ。
+
+	Q1. 「辛さ」が2以上の注文を抽出し、その「注文 ID」をすべて取得せよ。
+	Q2. 「分類」ごとに「ライスの量」の平均を取得せよ。なお、平均値が大きい順に並べること。
+	Q3. 「メニュー」がロースカツの注文について、各「トッピング」の出現回数をカウントせよ。
+####目的
+	た文字列処理＋リスト処理の比較
+####実行ファイル
+	[CurryOrder.exe](https://skydrive.live.com/redir?resid=F63E36483C16B294%21439)
 
 
-###Haskell - @its_out_of_tune ���񂩂�̏o��
-####���[��
-	�����̃p�[�X�A�v�Z��������������
 
-	���͗�F1 + 2
-	�o�́F3
-	���͗�F(1*2)+(3*4)
-	�o�́F14
+###Haskell - @its_out_of_tune さんからの出題
+####ルール
+	数式のパース、計算処理を実装する
 
-	�ȉ��̂悤�ɊԈ�������͂��s��ꂽ�ꍇ���A�P�Ȃ�G���[�Ƃ����A�Ȃ�炩�̌`�ō\���Ɏӂ肪���鎖�����[�U�[�ɓ`����悤�ɂ��ĉ������B
+	入力例：1 + 2
+	出力：3
+	入力例：(1*2)+(3*4)
+	出力：14
 
-	���͗�F(1*2+(3*4)
-	�o�͗�F�������s���ł�
+	以下のように間違った入力が行われた場合も、単なるエラーとせず、なんらかの形で構文に謝りがある事をユーザーに伝えるようにして下さい。
 
-	eval�̂悤�ȋ@�\��A��L�̂悤�ȋ@�\�����������C�u���������̂܂܎g�����͋֎~�Ƃ��܂��B
-####�ړI
-	������̃p�[�X�����̔�r
+	入力例：(1*2+(3*4)
+	出力例：数式が不正です
+
+	evalのような機能や、上記のような機能を持ったライブラリをそのまま使う事は禁止とします。
+####目的
+	文字列のパース処理の比較
+####実行ファイル
+	[Calc.exe](https://skydrive.live.com/redir?resid=F63E36483C16B294%21437)
 
 
-###Smalltalk - @umejava ���񂩂�̏o��
-####���[��
-	�u���ݎ��s���̃v���O�����̑S�I�u�W�F�N�g�𓾂�ɂ�?�v
+###Smalltalk - @umejava さんからの出題
+####ルール
+	「現在実行中のプログラムの全オブジェクトを得るには?」
 
-	���Ȃ݂�Smalltalk�ł̉���
+	ちなみにSmalltalkでの解は
 
 	Object allSubInstances 
 
-	�ł��BallSubInstances �͓�����allSubInstancesDo:���g���ďW�v���Ă��܂����A����allSubInstancesDo:���ċA�ō���Ă��ĂȂ��Ȃ������܂��B
+	です。allSubInstances は内部でallSubInstancesDo:を使って集計していますが、そのallSubInstancesDo:も再帰で作られていてなかなか趣があります。
 
 	TBehavior>>allSubInstancesDo: aBlock 
 		self allInstancesDo: aBlock.
 		self allSubclassesDo: [:sub | sub allInstancesDo: aBlock]
 
-	�u���N���X�̂��ׂẴC���X�^���X��m��v�u���N���X�̂��ׂẴT�u�N���X��m��v�Ȃǂ��C�y�ɂł���Ƃ������Ƃ����킩�肢��������Ǝv���܂��B
+	「自クラスのすべてのインスタンスを知る」「自クラスのすべてのサブクラスを知る」などが気軽にできるということがおわかりいただけると思います。
 
-####�ړI
-	�����݂ł��邱�Ƃ̈�̓������o��
-
+####目的
+	環境込みであることの一つの特徴が出る
+####実行ファイル
+	[ObjectCounter.exe](https://skydrive.live.com/redir?resid=F63E36483C16B294%21441)
