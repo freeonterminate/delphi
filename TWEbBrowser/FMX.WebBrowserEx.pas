@@ -19,17 +19,24 @@ type
     )
   ]
   TWebBrowserEx = class(TWebBrowser)
+  private
+    procedure ParentResize(Sender: TObject);
   protected
     procedure SetParent(const Value: TFmxObject); override;
   public
     constructor Create(Owner: TComponent); override;
     destructor Destroy; override;
+    procedure CheckBounds;
+    [Weak] function GetWeb: ICustomBrowser;
+    procedure CallJS(const iFunction: String; const iParams: array of String);
+    function GetTagValue(const iTagName, iValueName: String): String;
   end;
 
 implementation
 
 uses
   System.Rtti
+  , FMX.Controls
   {$IFDEF MSWINDOWS}
     , FMX.WebBrowser.Win
   {$ENDIF}
@@ -39,6 +46,41 @@ uses
   ;
 
 { TWebBrowserEx }
+
+procedure TWebBrowserEx.CallJS(
+  const iFunction: String;
+  const iParams: array of String);
+begin
+  {$IFDEF MSWINDOWS}
+    FMX.WebBrowser.Win.CallJS(Self, iFunction, iParams);
+  {$ENDIF}
+  {$IFDEF MACOS}
+    FMX.WebBrowser.Mac.CallJS(Self, iFunction, iParams);
+    CheckBounds;
+  {$ENDIF}
+end;
+
+function TWebBrowserEx.GetTagValue(const iTagName, iValueName: String): String;
+begin
+  {$IFDEF MSWINDOWS}
+    Result := FMX.WebBrowser.Win.GetTagValue(Self, iTagName, iValueName);
+  {$ENDIF}
+  {$IFDEF MACOS}
+    Result := FMX.WebBrowser.Mac.GetTagValue(Self, iTagName, iValueName);
+    CheckBounds;
+  {$ENDIF}
+end;
+
+procedure TWebBrowserEx.CheckBounds;
+var
+  [Weak] Web: ICustomBrowser;
+begin
+  Web := GetWeb;
+
+  if (Web <> nil) then
+    Web.UpdateContentFromControl;
+end;
+
 constructor TWebBrowserEx.Create(Owner: TComponent);
 begin
   inherited;
@@ -47,6 +89,18 @@ begin
 end;
 
 destructor TWebBrowserEx.Destroy;
+var
+  [Weak] Web: ICustomBrowser;
+begin
+  Web := GetWeb;
+
+  inherited;
+
+  if (Web <> nil)  then
+    Web.Hide;
+end;
+
+[Weak] function TWebBrowserEx.GetWeb: ICustomBrowser;
 var
   Context: TRttiContext;
   RttiType: TRttiType;
@@ -61,21 +115,35 @@ begin
     Context.Free;
   end;
 
-  inherited;
+  Result := Web;
+end;
 
-  if (Web <> nil)  then
-    Web.Hide;
+procedure TWebBrowserEx.ParentResize(Sender: TObject);
+begin
+  CheckBounds;
 end;
 
 procedure TWebBrowserEx.SetParent(const Value: TFmxObject);
+var
+  [Weak] Web: ICustomBrowser;
 begin
+  if (Parent <> nil) and (Parent is TControl) then
+    TControl(Parent).OnResize := nil;
+
   inherited;
 
-  if (Parent <> nil) then
+  if (Parent <> nil) then begin
+    if (Parent is TControl) then
+      TControl(Parent).OnResize := ParentResize;
+
+    Web := GetWeb;
+    Web.SetWebBrowserControl(Self);
+
     Show;
+  end;
 end;
 
 initialization
-  RegisterFmxClasses([TWebBrowserEx]);
+  RegisterFmxClasses([TWebBrowser]);
 
 end.

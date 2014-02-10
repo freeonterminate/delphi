@@ -2,18 +2,30 @@ unit FMX.WebBrowser.Win;
 
 interface
 
+uses
+  FMX.WebBrowserEx;
+
 procedure RegisterWebBrowserService;
 procedure UnRegisterWebBrowserService;
+
+procedure CallJS(
+  const iWebBrowser: TWebBrowserEx;
+  const iFunction: String;
+  const iParams: array of String);
+
+function GetTagValue(
+  const iWebBrowser: TWebBrowserEx;
+  const iTagName, iValueName: String): String;
 
 implementation
 
 uses
-  System.Classes, System.SysUtils, System.Types, System.Math
+  System.Classes, System.SysUtils, System.Types, System.Math, System.DateUtils
   , System.Generics.Collections
   , Winapi.Windows
   , FMX.Types, FMX.WebBrowser, FMX.Platform, FMX.Platform.Win, FMX.Forms
   , Vcl.Controls, Vcl.OleCtrls, Vcl.Forms, Vcl.Graphics
-  , SHDocVw, Winapi.ActiveX
+  , SHDocVw, Winapi.ActiveX, MSHTML
   ;
 
 const
@@ -79,11 +91,14 @@ type
   end;
 
   TWinWebBrowserService = class(TInterfacedObject, ICustomBrowser)
+  private const
+    MAX_WAIT_TIME = 1000 * 10;
   private var
     FURL: String;
     FWebView: TWebBrowser;
     FWebControl: TCustomWebBrowser;
     FTravelLog: ITravelLogStg;
+    FLoading: Boolean;
   protected
     procedure GetTravelLog;
     function CanGo(const iFlag: DWORD): Boolean;
@@ -125,7 +140,7 @@ var
 
 function TWinWBService.DoCreateWebBrowser: ICustomBrowser;
 begin
-  Result := TWinWebBrowserService.Create;
+  Result := TWinWebBrowserService.Create as ICustomBrowser;
 end;
 
 procedure RegisterWebBrowserService;
@@ -277,12 +292,45 @@ end;
 
 procedure TWinWebBrowserService.Navigate;
 begin
-  if (FWebView <> nil) then
+  if (FWebView <> nil) then begin
+    FLoading := True;
+
     FWebView.Navigate(FURL);
+
+    if
+      (FURL.StartsWith('http'))
+      or (FURL.StartsWith('file'))
+    then
+      TThread.CreateAnonymousThread(
+        procedure
+        var
+          Start: TDateTime;
+        begin
+          try
+            Start := Now;
+            while
+              (not Application.Terminated)
+              and (FWebView.ReadyState < READYSTATE_COMPLETE)
+              and (MilliSecondsBetween(Now, Start) < MAX_WAIT_TIME)
+            do begin
+              TThread.Sleep(100);
+            end;
+          except
+          end;
+
+          FLoading := False;
+        end
+      ).Start
+    else
+      FLoading := False;
+  end;
 end;
 
 procedure TWinWebBrowserService.SetURL(const AValue: string);
 begin
+  if (FLoading) then
+    Exit;
+
   FURL := Avalue;
 end;
 
@@ -336,7 +384,7 @@ begin
 
         if (FURL <> '') then
           try
-            FWebView.Refresh;
+            //FWebView.Refresh;
           finally
           end;
 
@@ -350,6 +398,63 @@ begin
       Hide;
     end;
   end;
+end;
+
+procedure CallJS(
+  const iWebBrowser: TWebBrowserEx;
+  const iFunction: String;
+  const iParams: array of String);
+var
+  Params: TStringBuilder;
+  Param: String;
+begin
+  Params := TStringBuilder.Create;
+  try
+    for Param in iParams do begin
+      Params.Append(',');
+      Params.Append(Param);
+    end;
+
+    Params.Remove(0, 1);
+
+    iWebBrowser.Navigate(
+      Format('javascript:%s(%s);', [iFunction, Params.ToString])
+    );
+  finally
+    Params.Free;
+  end;
+end;
+
+function GetTagValue(
+  const iWebBrowser: TWebBrowserEx;
+  const iTagName, iValueName: String): String;
+var
+  [Weak] Web: TWebBrowser;
+  WebService: TWinWebBrowserService;
+  Doc: IHTMLDocument3;
+  Elem: IHTMLElement;
+begin
+  if (iWebBrowser.GetWeb = nil) then
+    Exit;
+
+  WebService := (iWebBrowser.GetWeb as TWinWebBrowserService);
+  if (WebService = nil) then
+    Exit;
+
+  Web := WebService.FWebView;
+
+  if
+    (Web = nil)
+    or (Web.Document = nil)
+    or (Web.Document.QueryInterface(IHTMLDocument3, Doc) <> S_OK)
+  then
+    Exit;
+
+  Elem := Doc.getElementById(iTagName);
+  if (Elem = nil) then
+    Exit;
+
+  Result := Elem.getAttribute(iValueName, 0);
 end;
 
 procedure FreeWebBrowsers;
