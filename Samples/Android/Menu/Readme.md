@@ -5,7 +5,7 @@ Android でオプションメニューを出すサンプルです。
 ![alt サンプル画像](https://raw.github.com/freeonterminate/delphi/master/Samples/Android/Menu/screenshot.png)
 
 ##解説
-Delphi for Android には [TMainMenu](http://docwiki.embarcadero.com/Libraries/XE5/ja/FMX.Menus.TMainMenu) や [TPopup](http://docwiki.embarcadero.com/Libraries/XE5/ja/FMX.Controls.TPopup)Menu はありません。  
+Delphi for Android には [TMainMenu](http://docwiki.embarcadero.com/Libraries/XE5/ja/FMX.Menus.TMainMenu) や [TPopupMenu](http://docwiki.embarcadero.com/Libraries/XE5/ja/FMX.Menus.TPopupMenu) はありません。  
 Activity の OnCreateOptionMenus があるわけでもない（NativeActivity なので）ため、メニューは自前で実装する必要があります。  
 [TMenuBar](http://docwiki.embarcadero.com/Libraries/XE5/ja/FMX.Menus.TMenuBar) の実装でも使われている [TPopup](http://docwiki.embarcadero.com/Libraries/XE5/ja/FMX.Controls.TPopup) を使うと簡単に実装できますが、[TPopup](http://docwiki.embarcadero.com/Libraries/XE5/ja/FMX.Controls.TPopup) の表示が遅いため、本来であれば、これを修正する必要があります（※）  
 
