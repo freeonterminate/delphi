@@ -2,10 +2,16 @@
  * TPopup をトグルで表示できるようにする
  *（ボタンを押す度、表示・非表示を繰り返す）
  *
- * Platforms: Windows, Android
+ * PLATFORMS
+ *   Windows / Android
+ *
+ * USAGE
+ *   Popup1.Toggle(Control);
+ *   // Control は押した時に Popup を表示したいもの。例えば TButton など。
+ *
+ * Programmed by HOSOKAWA Jun (@pik)
  *
  *)
-
 unit FMX.PopupHelper;
 
 interface
@@ -121,15 +127,10 @@ procedure TPopupHelper.Toggle(const iControl: TControl);
 begin
   GPopuped := not GPopuped;
 
-  if (HasPopupForm) then begin
-    Visible := GPopuped;
-  end
-  else begin
-    if (GPopuped) then
-      PopupEx(iControl)
-    else
-      Close;
-  end;
+  if (GPopuped) then
+    PopupEx(iControl)
+  else
+    Close;
 end;
 
 end.

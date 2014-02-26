@@ -1,4 +1,23 @@
-unit FMX.LateExecuter;
+(*
+ * LateExecuter
+ *   タイミングを遅らせて実行する仕組み
+ *
+ * PLATFORMS
+ *   Windows / OS X / iOS / Android
+ *
+ * METHODS
+ *   LateExec(Func, Wait)
+ *     Func: 引数を取らない無名手続き
+ *     Wait: おおよそ何msec 待ってから実行する（省略可）
+ *
+ * USAGE
+ *   LateExec(procedure begin ShowMessage('Late'); end);
+ *
+ * Programmed by HOSOKAWA Jun (@pik)
+ *
+ *)
+
+ unit FMX.LateExecuter;
 
 interface
 
