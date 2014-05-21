@@ -1,8 +1,7 @@
 #TXplatIniFile クラス
 
-このクラスは、プラットフォームを気にせずに IniFile を使用する方法を提供します。
-
-このクラスを使って作った IniFile は下記のようにプラットフォームネイティブな形式になります。
+このクラスは、プラットフォームを気にせずに IniFile を使用する方法を提供します。  
+このクラスを使って作った IniFile は下記のようにプラットフォームネイティブな形式になります。  
 
 |Platform|Format          |
 |--------|----------------|
@@ -40,18 +39,11 @@ end;
 OS X で ReadSections を使うと IniFile のセクション以外にシステムのパラメータも取得されます。
 
 ##著作権
-FMX.IniFile.Apple.pas はエンバカデロ・テクノロジーズが提供する Apple.IniFile.pas を元に作られています。
+FMX.IniFile.Apple.pas はエンバカデロ・テクノロジーズが提供する Apple.IniFile.pas を元に作られています。  
+そのため、FMX.IniFile.Apple.pas の著作権もまたエンバカデロ・テクノロジーズが保有します。  
+この結果、FMX.IniFile を OS X / iOS で使用するためには、正当な Delphi/C++Builder/RAD Studio/AppMethod の使用者で無ければなりません。  
+それ以外のファイルについては、商用・非商用に関わらず自由に使用して構いません。  
 
-そのため、FMX.IniFile.Apple.pas の著作権もまたエンバカデロ・テクノロジーズが保有します。
-
-この結果、FMX.IniFile を OS X / iOS で使用するためには、正当な Delphi/C++Builder/RAD Studio/AppMethod の使用者で無ければなりません。
-
-それ以外のファイルについては、商用・非商用に関わらず自由に使用して構いません。
-
-つまり、Delphi/C++Builder/RAD Studio/AppMethod の使用者であれば普通に使えます。
-
+つまり、Delphi/C++Builder/RAD Studio/AppMethod の使用者であれば普通に使えます。  
 
 なお、著作権は放棄していません。
-
-
-
