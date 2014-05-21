@@ -4,7 +4,6 @@
  * The File is used from FMX.IniFile.
  *
  * [COPYRIGHT]
- * "FMX.IniFile.Apple" based on "FMX.Overbyte.Android.IniFiles".
  * Embarcadero Technologies holds the copyright of "Apple.Inifiles".
  * Therefore, Embarcadero Technologies holds the copyright of "FMX.IniFile.Apple".
  *
