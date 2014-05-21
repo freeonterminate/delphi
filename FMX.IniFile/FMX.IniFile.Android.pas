@@ -64,7 +64,7 @@ type
       const Section, Ident: String;
       Value: Integer); override;
 
-    // Secions
+    // Sections
     procedure ReadSection(const Section: String; Strings: TStrings); override;
     procedure ReadSections(Strings: TStrings); override;
     procedure ReadSectionValues(
