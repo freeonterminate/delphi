@@ -47,5 +47,3 @@ FMX.IniFile.Apple.pas はエンバカデロ・テクノロジーズが提供する Apple.IniFile.pas
 つまり、Delphi/C++Builder/RAD Studio/AppMethod の使用者であれば普通に使えます。  
 
 なお、著作権は放棄していません。  
-
-※FMX.IniFile.Apple.pas の配布について、エンバカデロ・テクノロジーズ社から了承いただきました。ありがとうございます。
