@@ -172,6 +172,13 @@ var
   ActiveTab: TTabItem;
   DoClose: Boolean;
 begin
+  ActiveTab := nil;
+  TC := FTabControl2;
+  i := Index;
+
+  if (TC <> nil) then
+    ActiveTab := TC.ActiveTab;
+
   if (Assigned(FOnClose)) then begin
     DoClose := True;
     FOnClose(Self, DoClose);
@@ -180,26 +187,25 @@ begin
       Exit;
   end;
 
-  ActiveTab := nil;
-  TC := FTabControl2;
+  if (Parent <> nil) then
+    Parent := nil;
 
-  if (TC <> nil) then
-    ActiveTab := TC.ActiveTab;
-
-  i := Index;
-
-  Parent := nil;
-
-  if (ActiveTab = Self) then begin
-    if (i < TC.TabCount) then begin
-      TC.TabIndex := -1;
-      TC.TabIndex := i;
-    end
-    else begin
-      Dec(i);
-
-      if (i > -1) and (i < TC.TabCount) then
+  if (TC <> nil) then begin
+    if (ActiveTab = Self) then begin
+      if (i < TC.TabCount) then begin
+        TC.TabIndex := -1;
         TC.TabIndex := i;
+      end
+      else begin
+        Dec(i);
+
+        if (i > -1) and (i < TC.TabCount) then
+          TC.TabIndex := i;
+      end;
+    end
+    else if (ActiveTab <> nil) then begin
+      TC.TabIndex := -1;
+      TC.TabIndex := ActiveTab.Index;
     end;
   end;
 
