@@ -9,7 +9,7 @@
 |OS X    |WebView(Safari) |
 
 ##“®ìŠÂ‹«
-Delphi / C++Builder / RAD Studio ‚Ì XE5 ˆÈã
+Delphi / C++Builder / RAD Studio ‚Ì XE6
 
 ##ƒtƒ@ƒCƒ‹
 
