@@ -28,6 +28,7 @@ type
     destructor Destroy; override;
     procedure CheckBounds;
     [Weak] function GetWeb: ICustomBrowser;
+    procedure EvaluateJavaScript(const JavaScript: string);
     procedure CallJS(const iFunction: String; const iParams: array of String);
     function GetTagValue(const iTagName, iValueName: String): String;
   end;
@@ -98,6 +99,11 @@ begin
 
   if (Web <> nil)  then
     Web.Hide;
+end;
+
+procedure TWebBrowserEx.EvaluateJavaScript(const JavaScript: string);
+begin
+  CallJS(JavaScript, []);
 end;
 
 [Weak] function TWebBrowserEx.GetWeb: ICustomBrowser;

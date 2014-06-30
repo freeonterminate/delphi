@@ -117,6 +117,8 @@ type
     procedure GoHome;
     procedure Show;
     procedure Hide;
+    procedure EvaluateJavaScript(const JavaScript: String);
+    procedure LoadFromStrings(const Content: String; const BaseUrl: String);
     property URL: string read GetURL write SetURL;
     property CanGoBack: Boolean read GetCanGoBack;
     property CanGoForward: Boolean read GetCanGoForward;
@@ -222,6 +224,11 @@ begin
   inherited;
 end;
 
+procedure TWinWebBrowserService.EvaluateJavaScript(const JavaScript: String);
+begin
+  CallJS(TWebBrowserEx(FWebControl), 'javascritp:' + JavaScript, []);
+end;
+
 function TWinWebBrowserService.GetCanGoBack: Boolean;
 begin
   Result := CanGo(TLEF_RELATIVE_BACK);
@@ -288,6 +295,27 @@ procedure TWinWebBrowserService.Hide;
 begin
   if (FWebView <> nil) then
     FWebView.Hide;
+end;
+
+procedure TWinWebBrowserService.LoadFromStrings(const Content, BaseUrl: String);
+var
+  StreamInit: IPersistStreamInit;
+  SS: TStringStream;
+begin
+  if
+    (FWebView.Document <> nil) and
+    (FWebView.Document.QueryInterface(IPersistStreamInit, StreamInit) = S_OK)
+  then begin
+    SS := TStringStream.Create(Content);
+    try
+      // TStreamAdapter ÇÕé©ìÆìIÇ…âï˙Ç≥ÇÍÇÈÅiRef Count Ç≈Åj
+      StreamInit.InitNew;
+      StreamInit.Load(TStreamAdapter.Create(SS));
+
+    finally
+      SS.Free;
+    end;
+  end;
 end;
 
 procedure TWinWebBrowserService.Navigate;

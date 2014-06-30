@@ -22,6 +22,7 @@ implementation
 uses
   System.Classes, System.SysUtils, System.Types, System.Math
   , Macapi.WebView, Macapi.Foundation, Macapi.AppKit, Macapi.CocoaTypes
+  , Macapi.Helpers
   , FMX.Types, FMX.WebBrowser, FMX.Platform, FMX.Platform.Mac, FMX.Forms
   ;
 
@@ -55,6 +56,8 @@ type
     procedure GoHome;
     procedure Show;
     procedure Hide;
+    procedure EvaluateJavaScript(const JavaScript: String);
+    procedure LoadFromStrings(const Content: String; const BaseUrl: String);
     property URL: string read GetURL write SetURL;
     property CanGoBack: Boolean read GetCanGoBack;
     property CanGoForward: Boolean read GetCanGoForward;
@@ -109,6 +112,11 @@ begin
   FreeLibrary(FModule);
 
   inherited;
+end;
+
+procedure TMacWebBrowserService.EvaluateJavaScript(const JavaScript: String);
+begin
+  CallJS(TWebBrowserEx(FWebControl), JavaScript, []);
 end;
 
 function TMacWebBrowserService.GetBounds: TRectF;
@@ -188,12 +196,25 @@ begin
     FWebView.setHidden(True);
 end;
 
+procedure TMacWebBrowserService.LoadFromStrings(const Content, BaseUrl: String);
+var
+  tmpContent: NSString;
+  URL: NSURL;
+  Base: NSString;
+begin
+  tmpContent := StrToNSStr(Content);
+  Base := StrToNSStr(BaseUrl);
+  URL := TNSUrl.Wrap(TNSUrl.OCClass.URLWithString(Base));
+  FWebView.mainFrame.loadHTMLString(tmpContent, URL);
+  UpdateContentFromControl;
+end;
+
 procedure TMacWebBrowserService.Navigate;
 var
   Url: NSURL;
   Req: NSURLRequest;
 begin
-  Url := TNSURL.Wrap(TNSURL.Alloc.initWithString(NSSTR(FURL)));
+  Url := TNSURL.Wrap(TNSURL.Alloc.initWithString(StrToNSSTR(FURL)));
   Req := TNSURLRequest.Create;
   Req.initWithURL(Url);
 

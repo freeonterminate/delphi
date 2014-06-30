@@ -8,6 +8,9 @@
 |Windows |IWebBrowser(IE) |
 |OS X    |WebView(Safari) |
 
+##動作環境
+Delphi / C++Builder / RAD Studio の XE5 以上
+
 ##ファイル
 
 以下のファイルを全てダウンロードします。
@@ -39,6 +42,7 @@ procedure TForm1.FormCreate(Sender: TObject);
 begin
   FWebBrowser := TWebBrowserEx.Create(Self);
   FWebBrowser.Parent := Panel1;
+  FWebBrowser.Align := TAlignLayout.Client;
 end;
 
 procedure TForm1.Button1Click(Sender: TObject);
