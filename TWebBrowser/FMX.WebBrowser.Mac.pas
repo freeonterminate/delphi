@@ -297,7 +297,7 @@ begin
     Service := (iWebBrowser.GetWeb as TMacWebBrowserService);
     if (Service <> nil) then begin
       Service.FWebView.stringByEvaluatingJavaScriptFromString(
-        NSSTR(Format('%s(%s);', [iFunction, Params.ToString]))
+        StrToNSSTR(Format('%s(%s);', [iFunction, Params.ToString]))
       );
     end;
   finally
@@ -321,7 +321,7 @@ begin
 
   Res :=
     WebService.FWebView.stringByEvaluatingJavaScriptFromString(
-      NSSTR(
+      StrToNSSTR(
         'document.getElementById("' + iTagName + '").' + iValueName
       )
     );
