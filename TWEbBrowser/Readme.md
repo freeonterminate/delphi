@@ -53,9 +53,16 @@ end;
 
 ```pascal
 procedure TForm1.Button2Click(Sender: TObject);
+var
+  Value: String;
 begin
   // HTML に定義されている JavaScript 関数 foo に引数を２つ渡して呼ぶ
   FWebBrowser.CallJS('foo', [Param1, Param2]);
+  
+  // HTML のタグの値を取得する
+  // <input type="text" id="bar" value="" /> というタグがあった場合に
+  // ↓これで bar という id の属性値 value を取得できる
+  Value := FWebBrowser.GetTagValue('bar', 'value'); 
 end;
 ```
 
