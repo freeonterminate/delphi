@@ -19,7 +19,7 @@
 
 ##使用方法
 
-下記のように、VCL の TWebBrowser と同じように使えます。
+下記のように、iOS/Android の TWebBrowser と同じように使えます。
 
 ```pascal
 uses
