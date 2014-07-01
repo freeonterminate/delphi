@@ -70,6 +70,11 @@ begin
 end;
 ```
 
+##既知のバグみたいな仕様
+Tab キーでは TWebBrowserEx にフォーカスを移動できません。  
+同様に TWebBrowserEx がフォーカスを持っている場合 Tab キーで他のコントロールにフォーカスを移動できません。  
+IDocHostUIHandler の DocHostTranslateAccelerator を実装すれば TWebBrowser → FMX Control という方向にはフォーカスを移せると思います。  
+
 ##著作権
 商用・非商用に関わらず自由に使用して構いません。  
 なお、著作権は放棄していません。  
