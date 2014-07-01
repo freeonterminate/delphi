@@ -21,7 +21,7 @@ implementation
 
 uses
   System.Classes, System.SysUtils, System.Types, System.Math, System.DateUtils
-  , System.Generics.Collections, System.Contnrs
+  , System.Generics.Collections
   , Winapi.Windows, Winapi.Messages
   , FMX.Types, FMX.WebBrowser, FMX.Platform, FMX.Platform.Win, FMX.Forms
   , FMX.Controls
@@ -288,9 +288,6 @@ begin
     Result :=
       CallWindowProc(Found.FOldWndProc, iWnd, iMsg, iwParam, ilParam);
 end;
-
-type
-  TBuecktListInternal = class(TBucketList);
 
 function TWebBrowser.CheckIEWnd: Boolean;
 begin
