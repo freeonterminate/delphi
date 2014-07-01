@@ -116,7 +116,7 @@ end;
 
 procedure TMacWebBrowserService.EvaluateJavaScript(const JavaScript: String);
 begin
-  CallJS(TWebBrowserEx(FWebControl), JavaScript, []);
+  FWebView.stringByEvaluatingJavaScriptFromString(JavaScript);
 end;
 
 function TMacWebBrowserService.GetBounds: TRectF;
