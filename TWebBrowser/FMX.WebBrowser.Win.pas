@@ -21,11 +21,13 @@ implementation
 
 uses
   System.Classes, System.SysUtils, System.Types, System.Math, System.DateUtils
-  , System.Generics.Collections
-  , Winapi.Windows
+  , System.Generics.Collections, System.Contnrs
+  , Winapi.Windows, Winapi.Messages
   , FMX.Types, FMX.WebBrowser, FMX.Platform, FMX.Platform.Win, FMX.Forms
+  , FMX.Controls
   , Vcl.Controls, Vcl.OleCtrls, Vcl.Forms, Vcl.Graphics
   , SHDocVw, Winapi.ActiveX, MSHTML
+  , FMX.Log
   ;
 
 const
@@ -73,20 +75,75 @@ type
       out ptle: ITravelLogEntry): HRESULT; stdcall;
   end;
 
+  PDocHostUIInfo = ^TDocHostUIInfo;
+  TDocHostUIInfo = packed record
+    cbSize: ULONG;
+    dwFlags: DWORD;
+    dwDoubleClick: DWORD;
+  end;
+
+  IDocHostUIHandler = interface(IUnknown)
+  ['{bd3f23c0-d43e-11cf-893b-00aa00bdce1a}']
+    function ShowContextMenu(
+      const constdwID: DWORD;
+      const ppt: PPoint;
+      const pcmdtReserved: IUnknown;
+      const pdispReserved: IDispatch): HRESULT; stdcall;
+    function GetHostInfo(var pInfo: TDocHostUIInfo): HRESULT; stdcall;
+    function ShowUI(
+      const constdwID: DWORD;
+      const pActiveObject: IOleInPlaceActiveObject;
+      const pCommandTarget: IOleCommandTarget;
+      const pFrame: IOleInPlaceFrame;
+      const pDoc: IOleInPlaceUIWindow): HRESULT; stdcall;
+    function HideUI: HRESULT; stdcall;
+    function UpdateUI: HRESULT; stdcall;
+    function EnableModeless(const fEnable: BOOL): HRESULT; stdcall;
+    function OnDocWindowActivate(const fActivate: BOOL): HRESULT; stdcall;
+    function OnFrameWindowActivate(const fActivate: BOOL): HRESULT; stdcall;
+    function ResizeBorder(
+      const prcBorder: PRect;
+      const pUIWindow: IOleInPlaceUIWindow;
+      const fRameWindow: BOOL): HRESULT; stdcall;
+    function DocHostTranslateAccelerator(
+      const lpMsg: PMsg;
+      const pguidCmdGroup: PGUID;
+      const nCmdID: DWORD): HRESULT; stdcall;
+    function GetOptionKeyPath(
+      out pchKey: POleStr;
+      const dwReserved: DWORD): HRESULT; stdcall;
+    function GetDropTarget(
+      const pDropTarget: IDropTarget;
+      out ppDropTarget: IDropTarget): HRESULT; stdcall;
+    function GetExternal(out ppDispatch: IDispatch): HRESULT; stdcall;
+    function TranslateUrl(
+      const dwTranslate: DWORD;
+      const pchURLIn: POleStr;
+      out ppchURLOut: POleStr): HRESULT; stdcall;
+    function FilterDataObject(
+      const pDO: IDataObject;
+      out ppDORet: IDataObject): HRESULT; stdcall;
+  end;
+
   TWebBrowser = class(SHDocVw.TWebBrowser, IOleCommandTarget)
   private const
     IID_DocHostCommandHandler: TGUID = '{F38BC242-B950-11D1-8918-00C04FC2C836}';
+  private var
+    FRootFormWnd: HWND;
+    FOldWndProc: Pointer;
+    FIEWnd: HWND;
   protected
+    function CheckIEWnd: Boolean;
     {IOleCommandTarget interface}
     function QueryStatus(
-      CmdGroup: PGUID; 
+      CmdGroup: PGUID;
       cCmds: Cardinal;
-      prgCmds: POleCmd; 
+      prgCmds: POleCmd;
       CmdText: POleCmdText): HResult; stdcall;
     function Exec(
-      CmdGroup: PGUID; 
+      CmdGroup: PGUID;
       nCmdID, nCmdexecopt: DWORD;
-      const vaIn: OleVariant; 
+      const vaIn: OleVariant;
       var vaOut: OleVariant): HResult; stdcall;
   end;
 
@@ -158,16 +215,103 @@ end;
 
 { TWebBrowser }
 
+type
+  PEnumClassName = ^TEnumClassName;
+  TEnumClassName = record
+    WndHandle: HWND;
+    ClassName: String;
+  end;
+
+function EnumChildProc(iWnd: HWND; iLParam: LPARAM): BOOL; stdcall;
+var
+  tmpName: String;
+begin
+  Result := True;
+
+  SetLength(tmpName, $100);
+  SetLength(
+    tmpName,
+    GetClassName(iWnd, PChar(tmpName), Length(tmpName) - 1));
+  tmpName := tmpName.Trim;
+
+  with PEnumClassName(iLParam)^ do begin
+    if ((ClassName = '') or (ClassName = tmpName)) then begin
+      Result := False;
+
+      WndHandle := iWnd;
+    end;
+  end;
+end;
+
+function GetChildWindow(const iTopLevel: HWND; const iClassName: String): HWND;
+var
+  CN: TEnumClassName;
+begin
+  with CN do begin
+    WndHandle := 0;
+    ClassName := iClassName;
+  end;
+
+  EnumChildWindows(iTopLevel, @EnumChildProc, LPARAM(@CN));
+
+  Result := CN.WndHandle;
+end;
+
+function FormWndProc(
+  iWnd: HWND;
+  iMsg: DWORD;
+  iwParam: WPARAM;
+  ilParam: LPARAM): LRESULT; stdcall;
+var
+  WebView: TWebBrowser;
+  Found: TWebBrowser;
+begin
+  Found := nil;
+  for WebView in GWebViews do
+    if (WebView.FRootFormWnd = iWnd) then begin
+      Found := WebView;
+      Break;
+    end;
+
+  case iMsg of
+    WM_LBUTTONDOWN: begin
+      if (Found.CheckIEWnd) then begin
+        EnableWindow(Found.FIEWnd, False);
+        EnableWindow(Found.FIEWnd, True);
+      end;
+    end;
+  end;
+
+  if (Found = nil) then
+    Result := 0
+  else
+    Result :=
+      CallWindowProc(Found.FOldWndProc, iWnd, iMsg, iwParam, ilParam);
+end;
+
+type
+  TBuecktListInternal = class(TBucketList);
+
+function TWebBrowser.CheckIEWnd: Boolean;
+begin
+  if (csDestroying in ComponentState) or (IsWindow(FIEWnd)) then
+    Exit(True);
+
+  FIEWnd := GetChildWindow(Handle, 'Internet Explorer_Server');
+
+  Result := IsWindow(FIEWnd);
+end;
+
 function TWebBrowser.Exec(
-  CmdGroup: PGUID; 
+  CmdGroup: PGUID;
   nCmdID, nCmdexecopt: DWORD;
-  const vaIn: OleVariant; 
+  const vaIn: OleVariant;
   var vaOut: OleVariant): HResult;
 begin
   Result := OLECMDERR_E_NOTSUPPORTED;
 
   if (CmdGroup <> nil) then begin
-    if (IsEqualGuid(cmdGroup^, IID_DocHostCommandHandler)) then 
+    if (IsEqualGuid(cmdGroup^, IID_DocHostCommandHandler)) then
       case nCmdID of
         OLECMDID_SHOWSCRIPTERROR:
           begin
@@ -179,9 +323,9 @@ begin
 end;
 
 function TWebBrowser.QueryStatus(
-  CmdGroup: PGUID; 
+  CmdGroup: PGUID;
   cCmds: Cardinal;
-  prgCmds: POleCmd; 
+  prgCmds: POleCmd;
   CmdText: POleCmdText): HResult;
 begin
   prgCmds.cmdf := OLECMDF_ENABLED;
@@ -226,7 +370,7 @@ end;
 
 procedure TWinWebBrowserService.EvaluateJavaScript(const JavaScript: String);
 begin
-  CallJS(TWebBrowserEx(FWebControl), 'javascritp:' + JavaScript, []);
+  FWebView.Navigate('javascritp:' + JavaScript);
 end;
 
 function TWinWebBrowserService.GetCanGoBack: Boolean;
@@ -364,8 +508,33 @@ end;
 
 procedure TWinWebBrowserService.SetWebBrowserControl(
   const AValue: TCustomWebBrowser);
+var
+  Form: TCommonCustomForm;
+  RootForm: TCommonCustomForm;
+  i: Integer;
 begin
   FWebControl := AValue;
+  RootForm := nil;
+
+  if (FWebControl <> nil) and (FWebControl.Root <> nil) then
+    for i := 0 to FMX.Forms.Screen.FormCount - 1 do begin
+      Form := FMX.Forms.Screen.Forms[i];
+
+      if (Form = FWebControl.Root.GetObject) then begin
+        RootForm := Form;
+        Break;
+      end;
+    end;
+
+  if (RootForm <> nil) then begin
+    FWebView.FRootFormWnd := FormToHWND(RootForm);
+
+    FWebView.FOldWndProc :=
+      Pointer(
+        SetWindowLong(FWebView.FRootFormWnd, GWL_WNDPROC, Integer(@FormWndProc))
+      );
+  end;
+
   UpdateContentFromControl;
 end;
 

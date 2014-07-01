@@ -87,6 +87,7 @@ begin
   inherited;
 
   HitTest := False;
+  TabStop := False;
 end;
 
 destructor TWebBrowserEx.Destroy;
@@ -102,8 +103,13 @@ begin
 end;
 
 procedure TWebBrowserEx.EvaluateJavaScript(const JavaScript: string);
+var
+  [Weak] Web: ICustomBrowser;
 begin
-  CallJS(JavaScript, []);
+  Web := GetWeb;
+
+  if (Web <> nil) then
+    Web.EvaluateJavaScript(JavaScript);
 end;
 
 [Weak] function TWebBrowserEx.GetWeb: ICustomBrowser;
