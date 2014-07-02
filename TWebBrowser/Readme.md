@@ -1,12 +1,14 @@
 #TWebBrowserEx クラス
 
-このクラスは、Windows / OS X の FireMonkey アプリケーションで WebBrowser を使用する方法を提供します。  
+このクラスは、Windows / OS X / iOS / Android の FireMonkey アプリケーションで WebBrowser を統一的に使用する方法を提供します。  
 このクラスを使って作った Web Browser は下記のようにプラットフォームに搭載されているデフォルトのウェブブラウザコントロールを使います。
 
 |Platform|Component       |
 |--------|----------------|
 |Windows |IWebBrowser(IE) |
 |OS X    |WebView(Safari) |
+|iOS     |WebView         |
+|Android |WebView         |
 
 ##動作環境
 Delphi / C++Builder / RAD Studio の XE6
@@ -17,12 +19,12 @@ Delphi / C++Builder / RAD Studio の XE6
 
     FMX.WebBrowser.Mac.pas    OS X 用 WebBrowser クラス
     FMX.WebBrowser.Win.pas    Windows 用 WebBrowser クラス
-    FMX.WebBrowserEx.pas      Windows / OS X 用の WebBrowser を統一的に扱うクラス
+    FMX.WebBrowserEx.pas      マルチプラットフォームの WebBrowser を統一的に扱うクラス
     Macapi.WebView.pas        OS X の WebView の定義を Delphi に移植したユニット
 
 ##使用方法
 
-下記のように、iOS/Android の TWebBrowser と同じように使えます。
+下記のように、iOS / Android の TWebBrowser と同じように使えます。
 
 ```pascal
 uses
