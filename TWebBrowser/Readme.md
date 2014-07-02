@@ -11,7 +11,14 @@
 |Android |WebView         |
 
 ##動作環境
-Delphi / C++Builder / RAD Studio の XE6
+Delphi / C++Builder / RAD Studio の XE6  
+
+XE5 で動かす場合は
+
+    StrToNSSTR を NSSTR に変更
+    Macapi.Helpers を削除
+
+と変更してください。
 
 ##ファイル
 
