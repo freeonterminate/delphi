@@ -36,7 +36,7 @@ type
 implementation
 
 uses
-  System.Rtti
+  System.Rtti, System.SysUtils
   , FMX.Controls
   {$IFDEF MSWINDOWS}
     , FMX.WebBrowser.Win
@@ -51,6 +51,11 @@ uses
 procedure TWebBrowserEx.CallJS(
   const iFunction: String;
   const iParams: array of String);
+{$IF defined(IOS) or defined(ANDROID)}
+var
+  Params: TStringBuilder;
+  Param: String;
+{$ENDIF}
 begin
   {$IFDEF MSWINDOWS}
     FMX.WebBrowser.Win.CallJS(Self, iFunction, iParams);
@@ -58,6 +63,21 @@ begin
   {$IFDEF MACOS}
     FMX.WebBrowser.Mac.CallJS(Self, iFunction, iParams);
     CheckBounds;
+  {$ENDIF}
+  {$IF defined(IOS) or defined(ANDROID)}
+  Params := TStringBuilder.Create;
+  try
+    for Param in iParams do begin
+      Params.Append(',');
+      Params.Append(Param);
+    end;
+
+    Params.Remove(0, 1);
+
+    EvaluateJavaScript(Format('%s(%s);', [iFunction, Params.ToString]));
+  finally
+    Params.Free;
+  end;
   {$ENDIF}
 end;
 
@@ -69,6 +89,11 @@ begin
   {$IFDEF MACOS}
     Result := FMX.WebBrowser.Mac.GetTagValue(Self, iTagName, iValueName);
     CheckBounds;
+  {$ENDIF}
+  {$IF defined(IOS) or defined(ANDROID)}
+    raise
+      ENotSupportedException.Create(
+        'GetTagValue Method is not supported on iOS/Android.');
   {$ENDIF}
 end;
 
