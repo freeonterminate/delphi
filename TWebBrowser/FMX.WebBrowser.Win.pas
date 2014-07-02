@@ -27,7 +27,6 @@ uses
   , FMX.Controls
   , Vcl.Controls, Vcl.OleCtrls, Vcl.Forms, Vcl.Graphics
   , SHDocVw, Winapi.ActiveX, MSHTML
-  , FMX.Log
   ;
 
 const
@@ -73,56 +72,6 @@ type
     function GetRelativeEntry(
       iOffset: Integer;
       out ptle: ITravelLogEntry): HRESULT; stdcall;
-  end;
-
-  PDocHostUIInfo = ^TDocHostUIInfo;
-  TDocHostUIInfo = packed record
-    cbSize: ULONG;
-    dwFlags: DWORD;
-    dwDoubleClick: DWORD;
-  end;
-
-  IDocHostUIHandler = interface(IUnknown)
-  ['{bd3f23c0-d43e-11cf-893b-00aa00bdce1a}']
-    function ShowContextMenu(
-      const constdwID: DWORD;
-      const ppt: PPoint;
-      const pcmdtReserved: IUnknown;
-      const pdispReserved: IDispatch): HRESULT; stdcall;
-    function GetHostInfo(var pInfo: TDocHostUIInfo): HRESULT; stdcall;
-    function ShowUI(
-      const constdwID: DWORD;
-      const pActiveObject: IOleInPlaceActiveObject;
-      const pCommandTarget: IOleCommandTarget;
-      const pFrame: IOleInPlaceFrame;
-      const pDoc: IOleInPlaceUIWindow): HRESULT; stdcall;
-    function HideUI: HRESULT; stdcall;
-    function UpdateUI: HRESULT; stdcall;
-    function EnableModeless(const fEnable: BOOL): HRESULT; stdcall;
-    function OnDocWindowActivate(const fActivate: BOOL): HRESULT; stdcall;
-    function OnFrameWindowActivate(const fActivate: BOOL): HRESULT; stdcall;
-    function ResizeBorder(
-      const prcBorder: PRect;
-      const pUIWindow: IOleInPlaceUIWindow;
-      const fRameWindow: BOOL): HRESULT; stdcall;
-    function DocHostTranslateAccelerator(
-      const lpMsg: PMsg;
-      const pguidCmdGroup: PGUID;
-      const nCmdID: DWORD): HRESULT; stdcall;
-    function GetOptionKeyPath(
-      out pchKey: POleStr;
-      const dwReserved: DWORD): HRESULT; stdcall;
-    function GetDropTarget(
-      const pDropTarget: IDropTarget;
-      out ppDropTarget: IDropTarget): HRESULT; stdcall;
-    function GetExternal(out ppDispatch: IDispatch): HRESULT; stdcall;
-    function TranslateUrl(
-      const dwTranslate: DWORD;
-      const pchURLIn: POleStr;
-      out ppchURLOut: POleStr): HRESULT; stdcall;
-    function FilterDataObject(
-      const pDO: IDataObject;
-      out ppDORet: IDataObject): HRESULT; stdcall;
   end;
 
   TWebBrowser = class(SHDocVw.TWebBrowser, IOleCommandTarget)
@@ -275,10 +224,8 @@ begin
 
   case iMsg of
     WM_LBUTTONDOWN: begin
-      if (Found.CheckIEWnd) then begin
-        EnableWindow(Found.FIEWnd, False);
-        EnableWindow(Found.FIEWnd, True);
-      end;
+      if (Found <> nil) and (Found.CheckIEWnd) then
+        Winapi.Windows.SetFocus(iWnd);
     end;
   end;
 
