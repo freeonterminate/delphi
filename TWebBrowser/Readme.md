@@ -13,7 +13,7 @@
 ##“®ìŠÂ‹«
 Delphi / C++Builder / RAD Studio ‚Ì XE6  
 
-XE5 ‚Å“®‚©‚·ê‡‚Í
+XE5 ˆÈ‘O‚Å“®‚©‚·ê‡‚Í
 
     StrToNSSTR ‚ğ NSSTR ‚É•ÏX
     Macapi.Helpers ‚ğíœ
