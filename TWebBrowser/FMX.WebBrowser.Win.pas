@@ -21,7 +21,7 @@ implementation
 
 uses
   System.Classes, System.SysUtils, System.Types, System.Math, System.DateUtils
-  , System.Generics.Collections
+  , System.Generics.Collections, System.IOUtils
   , Winapi.Windows, Winapi.Messages
   , FMX.Types, FMX.WebBrowser, FMX.Platform, FMX.Platform.Win, FMX.Forms
   , FMX.Controls
@@ -105,6 +105,9 @@ type
     FWebControl: TCustomWebBrowser;
     FTravelLog: ITravelLogStg;
     FLoading: Boolean;
+    FTempFile: String;
+    FMoveFileCalled: Boolean;
+  private
   protected
     procedure GetTravelLog;
     function CanGo(const iFlag: DWORD): Boolean;
@@ -313,8 +316,21 @@ begin
 end;
 
 procedure TWinWebBrowserService.EvaluateJavaScript(const JavaScript: String);
+var
+  Doc: IHTMLDocument2;
+  Win: IHTMLWindow2;
 begin
-  FWebView.Navigate('javascritp:' + JavaScript);
+  Doc := FWebView.Document as IHTMLDocument2;
+
+  if (Doc <> nil) then begin
+    Win := Doc.parentWindow;
+    if (Win <> nil) then begin
+      try
+        Win.execScript(JavaScript, 'JavaScript');
+      except
+      end;
+    end;
+  end;
 end;
 
 function TWinWebBrowserService.GetCanGoBack: Boolean;
@@ -387,22 +403,23 @@ end;
 
 procedure TWinWebBrowserService.LoadFromStrings(const Content, BaseUrl: String);
 var
-  StreamInit: IPersistStreamInit;
-  SS: TStringStream;
+  SL: TStringList;
 begin
-  if
-    (FWebView.Document <> nil) and
-    (FWebView.Document.QueryInterface(IPersistStreamInit, StreamInit) = S_OK)
-  then begin
-    SS := TStringStream.Create(Content);
-    try
-      // TStreamAdapter ÇÕé©ìÆìIÇ…âï˙Ç≥ÇÍÇÈÅiRef Count Ç≈Åj
-      StreamInit.InitNew;
-      StreamInit.Load(TStreamAdapter.Create(SS));
+  FTempFile := TPath.GetTempPath + 'temp.html';
 
-    finally
-      SS.Free;
+  SL := TStringList.Create;
+  try
+    SL.Text := Content;
+    SL.SaveToFile(FTempFile);
+
+    if (not FMoveFileCalled) then begin
+      MoveFileEx(PChar(FTempFile), nil, MOVEFILE_DELAY_UNTIL_REBOOT);
+      FMoveFileCalled := True;
     end;
+
+    FWebView.Navigate('file:///' + FTempFile);
+  finally
+    SL.Free;
   end;
 end;
 
@@ -411,7 +428,7 @@ begin
   if (FWebView <> nil) then begin
     FLoading := True;
 
-    FWebView.Navigate(FURL);
+    FWebView.Navigate2(FURL);
 
     if
       (FURL.StartsWith('http'))
@@ -556,10 +573,11 @@ begin
       Params.Append(Param);
     end;
 
-    Params.Remove(0, 1);
+    if (Params.Length > 0) then
+      Params.Remove(0, 1);
 
-    iWebBrowser.Navigate(
-      Format('javascript:%s(%s);', [iFunction, Params.ToString])
+    iWebBrowser.EvaluateJavaScript(
+      Format('%s(%s);', [iFunction, Params.ToString])
     );
   finally
     Params.Free;

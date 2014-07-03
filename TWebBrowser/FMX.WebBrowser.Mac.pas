@@ -292,7 +292,8 @@ begin
       Params.Append(Param);
     end;
 
-    Params.Remove(0, 1);
+    if (Params.Length > 0) then
+      Params.Remove(0, 1);
 
     Service := (iWebBrowser.GetWeb as TMacWebBrowserService);
     if (Service <> nil) then begin
