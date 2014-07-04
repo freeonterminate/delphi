@@ -72,7 +72,8 @@ begin
       Params.Append(Param);
     end;
 
-    Params.Remove(0, 1);
+    if (Params.Length > 0) then
+      Params.Remove(0, 1);
 
     EvaluateJavaScript(Format('%s(%s);', [iFunction, Params.ToString]));
   finally
