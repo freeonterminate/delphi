@@ -108,6 +108,26 @@ type
     FTempFile: String;
     FMoveFileCalled: Boolean;
   private
+    procedure WebViewBeforeNavigate2(
+      ASender: TObject;
+      const pDisp: IDispatch;
+      const URL: OleVariant;
+      const Flags: OleVariant;
+      const TargetFrameName: OleVariant;
+      const PostData: OleVariant;
+      const Headers: OleVariant;
+      var Cancel: WordBool);
+    procedure WebViewDocumentComplete(
+      ASender: TObject;
+      const pDisp: IDispatch;
+      const URL: OleVariant);
+    procedure WebViewNavigateEror(
+      ASender: TObject;
+      const pDisp: IDispatch;
+      const URL: OleVariant;
+      const Frame: OleVariant;
+      const StatusCode: OleVariant;
+      var Cancel: WordBool);
   protected
     procedure GetTravelLog;
     function CanGo(const iFlag: DWORD): Boolean;
@@ -301,6 +321,9 @@ begin
   FWebView := TWebBrowser.Create(nil);
   FWebView.Align := alClient;
   FWebView.Ctl3D := False;
+  FWebView.OnBeforeNavigate2 := WebViewBeforeNavigate2;
+  FWebView.OnDocumentComplete := WebViewDocumentComplete;
+  FWebView.OnNavigateError := WebViewNavigateEror;
 
   GWebViews.Add(FWebView);
 end;
@@ -556,6 +579,36 @@ begin
       Hide;
     end;
   end;
+end;
+
+procedure TWinWebBrowserService.WebViewBeforeNavigate2(
+  ASender: TObject;
+  const pDisp: IDispatch;
+  const URL, Flags, TargetFrameName, PostData,
+  Headers: OleVariant;
+  var Cancel: WordBool);
+begin
+  if (FWebControl <> nil) then
+    FWebControl.StartLoading;
+end;
+
+procedure TWinWebBrowserService.WebViewDocumentComplete(
+  ASender: TObject;
+  const pDisp: IDispatch;
+  const URL: OleVariant);
+begin
+  if (FWebControl <> nil) then
+    FWebControl.FinishLoading;
+end;
+
+procedure TWinWebBrowserService.WebViewNavigateEror(
+  ASender: TObject;
+  const pDisp: IDispatch;
+  const URL, Frame, StatusCode: OleVariant;
+  var Cancel: WordBool);
+begin
+  if (FWebControl <> nil) then
+    FWebControl.FailLoadingWithError;
 end;
 
 procedure CallJS(

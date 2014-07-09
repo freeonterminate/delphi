@@ -29,7 +29,10 @@ type
     procedure CheckBounds;
     [Weak] function GetWeb: ICustomBrowser;
     procedure EvaluateJavaScript(const JavaScript: string);
-    procedure CallJS(const iFunction: String; const iParams: array of String);
+    procedure CallJS(
+      const iFunction: String;
+      const iParams: array of String); overload;
+    procedure CallJS(const iFunction: String); overload;
     function GetTagValue(const iTagName, iValueName: String): String;
   end;
 
@@ -47,6 +50,11 @@ uses
   ;
 
 { TWebBrowserEx }
+
+procedure TWebBrowserEx.CallJS(const iFunction: String);
+begin
+  CallJS(iFunction, []);
+end;
 
 procedure TWebBrowserEx.CallJS(
   const iFunction: String;
