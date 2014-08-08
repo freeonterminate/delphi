@@ -60,7 +60,7 @@ type
 procedure TForm1.Button1Click(Sender: TObject);
 begin
   Log.i('ボタン１が押されたよ'); // Info Level で出力
-  Log.d(['文字列', 100]);        // Debug Level で出力
+  Log.d(['文字列', 100]);      // Debug Level で出力
 end;
 
 ```
