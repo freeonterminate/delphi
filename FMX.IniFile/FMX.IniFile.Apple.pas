@@ -12,7 +12,11 @@
  *)
 
 // If you use Apple.Utils.pas then comment-out below directive.
-//{$DEFINE USE_APPLEUTILS}
+// {$DEFINE APPLE_UTILS}
+
+{$IFDEF APPLE_UTILS}
+  {$DEFINE USE_APPLEUTILS}
+{$ENDIF}
 
 unit FMX.IniFile.Apple;
 
@@ -381,7 +385,6 @@ var
   i: Cardinal;
   Count: Cardinal;
   Key: Pointer;
-  Obj: Pointer;
 begin
   Strings.BeginUpdate;
   try

@@ -58,7 +58,7 @@ uses
   {$ELSE}
     {$IFDEF ANDROID}
       // Android
-      , FMX.IniFIle.Android
+      , FMX.IniFile.Android
     {$ELSE}
       // Windows
       , System.IOUtils
