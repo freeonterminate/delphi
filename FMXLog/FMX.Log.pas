@@ -2,7 +2,7 @@
  * Log Utility
  *
  * 2014-05-20  Version 1.0  Release
- * 2014-08-05  Version 1.1  IFMXLoggingService ¨ IOS: NSLog, OSX: WriteLn
+ * 2014-08-05  Version 1.1  IFMXLoggingService -> IOS: NSLog, OSX: WriteLn
  *
  * PLATFORMS
  *   Windows / OS X / iOS / Android
