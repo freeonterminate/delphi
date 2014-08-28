@@ -5,7 +5,7 @@
 
 |Platform|Out to                                   |Implementation      |
 |--------|-----------------------------------------|--------------------|
-|Windows |Console                                  |WriteLn             |
+|Windows |Console and Delphi's  Event Log          |WriteLn             |
 |OS X    |Console (PAServer)                       |WriteLn             |
 |iOS     |Console (Organizer -> Device -> Console) |NSLog               |
 |Android |System Log                               |__android_log_write |
@@ -60,7 +60,7 @@ type
 procedure TForm1.Button1Click(Sender: TObject);
 begin
   Log.i('ボタン１が押されたよ'); // Info Level で出力
-  Log.d(['文字列', 100]);      // Debug Level で出力
+  Log.d(['文字列', 100]);        // Debug Level で出力
 end;
 
 ```

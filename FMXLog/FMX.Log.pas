@@ -1,8 +1,10 @@
-(*
+﻿(*
  * Log Utility
  *
  * 2014-05-20  Version 1.0  Release
  * 2014-08-05  Version 1.1  IFMXLoggingService -> IOS: NSLog, OSX: WriteLn
+ * 2014-08-28  Version 1.2  New -> LogToDelphi;
+ *                          if True, Log is displayed on Delphi's Event Log.
  *
  * PLATFORMS
  *   Windows / OS X / iOS / Android
@@ -67,6 +69,7 @@ type
     );
   private
     class var FTag: String;
+    class var FLogToDelphi: Boolean;
     class var FOnLog: TLogEvent;
     {$IFDEF IOS}
       class var FLogText: NSString;
@@ -89,6 +92,8 @@ type
     class procedure f(const iValues: array of TValue); overload;
     class procedure output(const iPriority: Integer; const iText: String);
     class property TAG: String read FTag write FTag;
+    class property LogToDelphi: Boolean
+      read FLogToDelphi write FLogToDelphi default True;
     class property OnLog: TLogEvent read FOnLog write FOnLog;
   end;
 
@@ -178,6 +183,9 @@ end;
 class procedure Log.output(const iPriority: Integer; const iText: String);
 var
   AppService: IFMXApplicationService;
+{$IFDEF MSWINDOWS}
+  LogBody: String;
+{$ENDIF}
 {$IFDEF ANDROID}
   M: TMarshaller;
 {$ELSE}
@@ -209,8 +217,14 @@ begin
     M.AsUtf8(iText).ToPointer);
   {$ELSE}
     {$IFDEF MSWINDOWS}
+      LogBody := GetFormatedText;
+      {$WARNINGS OFF 2039}
+      if (DebugHook <> 0) and (FLogToDelphi) then
+        OutputDebugString(PWideChar(LogBody));
+      {$WARNINGS ON 2039}
+
       AllocConsole;
-      WriteLn(GetFormatedText);
+      WriteLn(LogBody);
     {$ENDIF}
     {$IFDEF MACOS}
       {$IFDEF IOS}
@@ -301,5 +315,8 @@ begin
 
   Result := Log.Join(Texts);
 end;
+
+initialization
+  Log.FLogToDelphi := True;
 
 end.
