@@ -3,8 +3,10 @@
  *
  * 2014-05-20  Version 1.0  Release
  * 2014-08-05  Version 1.1  IFMXLoggingService -> IOS: NSLog, OSX: WriteLn
- * 2014-08-28  Version 1.2  New -> LogToDelphi;
+ * 2014-08-28  Version 1.2  New: LogToDelphi;
  *                          if True, Log is displayed on Delphi's Event Log.
+ * 2014-09-05  Version 1.3  New: UnknownType, use TryAsString
+ *                          Bug: tkEnumeration, AsInteger -> AsOrdinal
  *
  * PLATFORMS
  *   Windows / OS X / iOS / Android
@@ -19,7 +21,7 @@
  *
  * HOW TO USE
  *   1. uses FMX.Log;
- *   2. Log.d("Message");           // Type only String
+ *   2. Log.d('Message');           // Type only String
  *      Log.d([Value1, Value2...]); // multiple arguments, Any type ok.
  *
  * Programmed by HOSOKAWA Jun (twitter: @pik)
@@ -268,6 +270,7 @@ var
   i: Integer;
   Value: TValue;
   B: Boolean;
+  S: String;
 begin
   Result := '';
 
@@ -306,10 +309,14 @@ begin
         if (Value.TryAsType<Boolean>(B)) then
           Texts[i] := BOOL_STR[B]
         else
-          Texts[i] := Value.AsInteger.ToString;
+          Texts[i] := Value.AsOrdinal.ToString;
 
-      else
-        Texts[i] := '?';
+      else begin
+        if (Value.TryAsType<String>(S)) then
+          Texts[i] := S
+        else
+          Texts[i] := '?';
+      end;
     end;
   end;
 
