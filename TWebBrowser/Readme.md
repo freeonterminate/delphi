@@ -11,7 +11,7 @@
 |Android |WebView         |
 
 ##“®ìŠÂ‹«
-Delphi / C++Builder / RAD Studio ‚Ì XE6, XE7
+Delphi / C++Builder / RAD Studio ‚Ì XE6
 
 XE5 ˆÈ‘O‚Å“®‚©‚·ê‡‚Í
 
