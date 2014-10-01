@@ -15,7 +15,7 @@ uses
   , System.Generics.Collections, System.IOUtils
   , Winapi.Windows, Winapi.Messages
   , FMX.Types, FMX.WebBrowser, FMX.Platform, FMX.Platform.Win, FMX.Forms
-  , FMX.Controls
+  , FMX.Controls, FMX.Graphics
   , Vcl.Controls, Vcl.OleCtrls, Vcl.Forms, Vcl.Graphics
   , SHDocVw, Winapi.ActiveX, MSHTML, idoc
   ;
@@ -152,6 +152,7 @@ type
     FLoading: Boolean;
     FTempFile: String;
     FMoveFileCalled: Boolean;
+    FEnableCaching: Boolean;
   private
     procedure WebViewBeforeNavigate2(
       ASender: TObject;
@@ -181,22 +182,28 @@ type
     function CanGo(const iFlag: DWORD): Boolean;
     { ICustomBrowser }
     function GetURL: string;
+    function CaptureBitmap: FMX.Graphics.TBitmap;
     function GetCanGoBack: Boolean;
     function GetCanGoForward: Boolean;
     procedure SetURL(const AValue: string);
+    function GetEnableCaching: Boolean;
+    procedure SetEnableCaching(const Value : Boolean);
     procedure SetWebBrowserControl(const AValue: TCustomWebBrowser);
-    function GetParent : TFmxObject;
+    function GetParent: TFmxObject;
     function GetVisible : Boolean;
     procedure UpdateContentFromControl;
     procedure Navigate;
+    procedure Reload;
+    procedure Stop;
+    procedure EvaluateJavaScript(const JavaScript: string);
+    procedure LoadFromStrings(const Content: string; const BaseUrl: string);
     procedure GoBack;
     procedure GoForward;
     procedure GoHome;
     procedure Show;
     procedure Hide;
-    procedure EvaluateJavaScript(const JavaScript: String);
-    procedure LoadFromStrings(const Content: String; const BaseUrl: String);
     property URL: string read GetURL write SetURL;
+    property EnableCaching: Boolean read GetEnableCaching write SetEnableCaching;
     property CanGoBack: Boolean read GetCanGoBack;
     property CanGoForward: Boolean read GetCanGoForward;
     { IWebBrowserEx }
@@ -460,6 +467,11 @@ begin
     Result := (Count > 0);
 end;
 
+function TWinWebBrowserService.CaptureBitmap: FMX.Graphics.TBitmap;
+begin
+  Result := nil;
+end;
+
 constructor TWinWebBrowserService.Create;
 begin
   inherited;
@@ -514,6 +526,11 @@ end;
 function TWinWebBrowserService.GetCanGoForward: Boolean;
 begin
   Result := CanGo(TLEF_RELATIVE_FORE);
+end;
+
+function TWinWebBrowserService.GetEnableCaching: Boolean;
+begin
+  Result := FEnableCaching;
 end;
 
 function TWinWebBrowserService.GetParent: TFmxObject;
@@ -621,7 +638,10 @@ begin
   if (FWebView <> nil) then begin
     FLoading := True;
 
-    FWebView.Navigate2(FURL);
+    if (FEnableCaching) then
+      FWebView.Navigate2(FURL, navNoReadFromCache)
+    else
+      FWebView.Navigate2(FURL);
 
     if
       (FURL.StartsWith('http'))
@@ -650,6 +670,17 @@ begin
     else
       FLoading := False;
   end;
+end;
+
+procedure TWinWebBrowserService.Reload;
+begin
+  if (FWebView <> nil) then
+    FWebView.Refresh;
+end;
+
+procedure TWinWebBrowserService.SetEnableCaching(const Value: Boolean);
+begin
+  FEnableCaching := Value;
 end;
 
 procedure TWinWebBrowserService.SetURL(const AValue: string);
@@ -690,6 +721,12 @@ procedure TWinWebBrowserService.Show;
 begin
   if (FWebView <> nil) then
     FWebView.Show;
+end;
+
+procedure TWinWebBrowserService.Stop;
+begin
+  if (FWebView <> nil) then
+    FWebView.Stop;
 end;
 
 procedure TWinWebBrowserService.UpdateContentFromControl;

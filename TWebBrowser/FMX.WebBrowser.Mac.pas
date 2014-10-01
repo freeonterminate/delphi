@@ -15,6 +15,7 @@ uses
   , Macapi.WebView, Macapi.Foundation, Macapi.AppKit, Macapi.CocoaTypes
   , Macapi.Helpers
   , FMX.Types, FMX.WebBrowser, FMX.Platform, FMX.Platform.Mac, FMX.Forms
+  , FMX.Graphics
   ;
 
 type
@@ -27,6 +28,7 @@ type
     FURL: String;
     FWebView: WebView;
     FWebControl: TCustomWebBrowser;
+    FNSCachePolicy: NSURLRequestCachePolicy;
     FModule: HMODULE;
     FForm: TCommonCustomForm;
   private
@@ -35,22 +37,28 @@ type
   protected
     { ICustomBrowser }
     function GetURL: string;
+    function CaptureBitmap: TBitmap;
     function GetCanGoBack: Boolean;
     function GetCanGoForward: Boolean;
     procedure SetURL(const AValue: string);
+    function GetEnableCaching: Boolean;
+    procedure SetEnableCaching(const Value : Boolean);
     procedure SetWebBrowserControl(const AValue: TCustomWebBrowser);
-    function GetParent : TFmxObject;
+    function GetParent: TFmxObject;
     function GetVisible : Boolean;
     procedure UpdateContentFromControl;
     procedure Navigate;
+    procedure Reload;
+    procedure Stop;
+    procedure EvaluateJavaScript(const JavaScript: string);
+    procedure LoadFromStrings(const Content: string; const BaseUrl: string);
     procedure GoBack;
     procedure GoForward;
     procedure GoHome;
     procedure Show;
     procedure Hide;
-    procedure EvaluateJavaScript(const JavaScript: String);
-    procedure LoadFromStrings(const Content: String; const BaseUrl: String);
     property URL: string read GetURL write SetURL;
+    property EnableCaching: Boolean read GetEnableCaching write SetEnableCaching;
     property CanGoBack: Boolean read GetCanGoBack;
     property CanGoForward: Boolean read GetCanGoForward;
     { IWebBrowserEx }
@@ -88,11 +96,17 @@ end;
 
 { TMacWebBrowserService }
 
+function TMacWebBrowserService.CaptureBitmap: TBitmap;
+begin
+  Result := nil;
+end;
+
 constructor TMacWebBrowserService.Create;
 begin
   inherited;
 
   FModule := LoadLibrary(PWideChar(WEBKIT_FRAMEWORK));
+  FNSCachePolicy := NSURLRequestReloadRevalidatingCacheData;
 
   FWebView :=
     TWebView.Wrap(
@@ -139,6 +153,11 @@ end;
 function TMacWebBrowserService.GetCanGoForward: Boolean;
 begin
   Result := FWebView.canGoForward;
+end;
+
+function TMacWebBrowserService.GetEnableCaching: Boolean;
+begin
+  Result := (FNSCachePolicy = NSURLRequestReloadRevalidatingCacheData);
 end;
 
 function TMacWebBrowserService.GetNSBounds: NSRect;
@@ -227,15 +246,37 @@ begin
 end;
 
 procedure TMacWebBrowserService.Navigate;
+const
+  cTheTimeoutIntervalForTheNewRequest = 0;
 var
   Url: NSURL;
   Req: NSURLRequest;
 begin
   Url := TNSURL.Wrap(TNSURL.Alloc.initWithString(StrToNSSTR(FURL)));
-  Req := TNSURLRequest.Create;
-  Req.initWithURL(Url);
+
+  Req :=
+    TNSURLRequest.Wrap(
+      TNSURLRequest.OCClass.requestWithURL(
+        Url,
+        FNSCachePolicy,
+        cTheTimeoutIntervalForTheNewRequest
+      )
+    );
 
   FWebView.mainFrame.loadRequest(Req);
+end;
+
+procedure TMacWebBrowserService.Reload;
+begin
+
+end;
+
+procedure TMacWebBrowserService.SetEnableCaching(const Value: Boolean);
+begin
+  if (Value) then
+    FNSCachePolicy := NSURLRequestReloadRevalidatingCacheData
+  else
+    FNSCachePolicy := NSURLRequestReloadIgnoringLocalCacheData;
 end;
 
 procedure TMacWebBrowserService.SetURL(const AValue: string);
@@ -262,6 +303,11 @@ procedure TMacWebBrowserService.Show;
 begin
   if (FWebView <> nil) and (FWebView.isHidden) then
     FWebView.setHidden(False);
+end;
+
+procedure TMacWebBrowserService.Stop;
+begin
+
 end;
 
 procedure TMacWebBrowserService.UpdateContentFromControl;

@@ -11,7 +11,7 @@
 |Android |WebView         |
 
 ##“®ìŠÂ‹«
-Delphi / C++Builder / RAD Studio ‚Ì XE6
+Delphi / C++Builder / RAD Studio ‚Ì XE6, XE7
 
 XE5 ˆÈ‘O‚Å“®‚©‚·ê‡‚Í
 
@@ -57,6 +57,9 @@ end;
 procedure TForm1.Button1Click(Sender: TObject);
 begin
   FWebBrowser.URL := 'http://www.embarcadero.com/';
+
+  // ‚±‚ñ‚È•—‚É String ‚ğ“Ç‚İ‚Ü‚¹‚é–‚à‚Å‚«‚é
+  FWebBrowser.LoadFromStrings('<html><body>Hello WebBrowser!</body></html>', '');
 end;
 
 ```
