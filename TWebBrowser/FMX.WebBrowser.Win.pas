@@ -8,15 +8,6 @@ uses
 procedure RegisterWebBrowserService;
 procedure UnRegisterWebBrowserService;
 
-procedure CallJS(
-  const iWebBrowser: TWebBrowserEx;
-  const iFunction: String;
-  const iParams: array of String);
-
-function GetTagValue(
-  const iWebBrowser: TWebBrowserEx;
-  const iTagName, iValueName: String): String;
-
 implementation
 
 uses
@@ -26,7 +17,7 @@ uses
   , FMX.Types, FMX.WebBrowser, FMX.Platform, FMX.Platform.Win, FMX.Forms
   , FMX.Controls
   , Vcl.Controls, Vcl.OleCtrls, Vcl.Forms, Vcl.Graphics
-  , SHDocVw, Winapi.ActiveX, MSHTML
+  , SHDocVw, Winapi.ActiveX, MSHTML, idoc
   ;
 
 const
@@ -74,13 +65,22 @@ type
       out ptle: ITravelLogEntry): HRESULT; stdcall;
   end;
 
-  TWebBrowser = class(SHDocVw.TWebBrowser, IOleCommandTarget)
+  TWinWebBrowserService = class;
+
+  TWebBrowser = class(SHDocVw.TWebBrowser, IOleCommandTarget, IDocHostUIHandler)
+  public type
+    TCanNavigate =
+      procedure (
+        Sender: TObject;
+        var ioURL: String;
+        out iCanNavigate: Boolean) of object;
   private const
     IID_DocHostCommandHandler: TGUID = '{F38BC242-B950-11D1-8918-00C04FC2C836}';
   private var
     FRootFormWnd: HWND;
     FOldWndProc: Pointer;
     FIEWnd: HWND;
+    FOnShouldStartLoadWithRequest: TWebBrowserShouldStartLoadWithRequest;
   protected
     function CheckIEWnd: Boolean;
     {IOleCommandTarget interface}
@@ -94,9 +94,54 @@ type
       nCmdID, nCmdexecopt: DWORD;
       const vaIn: OleVariant;
       var vaOut: OleVariant): HResult; stdcall;
+    {IDocHostUIHandler}
+    function ShowContextMenu(
+      dwID: UINT;
+      ppt: PtagPOINT;
+      const pcmdtReserved: IUnknown;
+      const pdispReserved: IDispatch): HResult; stdcall;
+    function GetHostInfo(var pInfo: _DOCHOSTUIINFO): HResult; stdcall;
+    function ShowUI(
+      dwID: UINT;
+      const pActiveObject: IOleInPlaceActiveObject;
+      const pCommandTarget: IOleCommandTarget;
+      const pFrame: IOleInPlaceFrame;
+      const pDoc: IOleInPlaceUIWindow): HResult; stdcall;
+    function HideUI: HResult; stdcall;
+    function UpdateUI: HResult; stdcall;
+    function EnableModeless(fEnable: Integer): HResult; stdcall;
+    function OnDocWindowActivate(fActivate: Integer): HResult; stdcall;
+    function OnFrameWindowActivate(fActivate: Integer): HResult; stdcall;
+    function ResizeBorder(
+      var prcBorder: tagRECT;
+      const pUIWindow: IOleInPlaceUIWindow;
+      fRameWindow: Integer): HResult; stdcall;
+    function TranslateAccelerator(
+      var lpmsg: tagMSG;
+      var pguidCmdGroup: TGUID;
+      nCmdID: UINT): HResult; stdcall;
+    function GetOptionKeyPath(
+      out pchKey: PWideChar;
+      dw: UINT): HResult; stdcall;
+    function GetDropTarget(
+      const pDropTarget: IDropTarget;
+      out ppDropTarget: IDropTarget): HResult; stdcall;
+    function GetExternal(out ppDispatch: IDispatch): HResult; stdcall;
+    function TranslateUrl(
+      dwTranslate: UINT;
+      pchURLIn: PWideChar;
+      out ppchURLOut: PWideChar): HResult; stdcall;
+    function FilterDataObject(
+      const pDO: IDataObject;
+      out ppDORet: IDataObject): HResult; stdcall;
+  public
+    property OnShouldStartLoadWithRequest: TWebBrowserShouldStartLoadWithRequest
+      read FOnShouldStartLoadWithRequest
+      write FOnShouldStartLoadWithRequest;
   end;
 
-  TWinWebBrowserService = class(TInterfacedObject, ICustomBrowser)
+  TWinWebBrowserService =
+    class(TInterfacedObject, ICustomBrowser, IWebBrowserEx)
   private const
     MAX_WAIT_TIME = 1000 * 10;
   private var
@@ -128,10 +173,13 @@ type
       const Frame: OleVariant;
       const StatusCode: OleVariant;
       var Cancel: WordBool);
+    procedure WebViewShouldStartLoadWithRequest(
+      ASender: TObject;
+      const URL: String);
   protected
     procedure GetTravelLog;
     function CanGo(const iFlag: DWORD): Boolean;
-    { IFMXWebBrowserService }
+    { ICustomBrowser }
     function GetURL: string;
     function GetCanGoBack: Boolean;
     function GetCanGoForward: Boolean;
@@ -151,6 +199,8 @@ type
     property URL: string read GetURL write SetURL;
     property CanGoBack: Boolean read GetCanGoBack;
     property CanGoForward: Boolean read GetCanGoForward;
+    { IWebBrowserEx }
+    function GetTagValue(const iTagName, iValueName: String): String;
   public
     constructor Create;
     destructor Destroy; override;
@@ -269,6 +319,11 @@ begin
   Result := IsWindow(FIEWnd);
 end;
 
+function TWebBrowser.EnableModeless(fEnable: Integer): HResult;
+begin
+  Result := E_NOTIMPL;
+end;
+
 function TWebBrowser.Exec(
   CmdGroup: PGUID;
   nCmdID, nCmdexecopt: DWORD;
@@ -289,6 +344,50 @@ begin
   end;
 end;
 
+function TWebBrowser.FilterDataObject(
+  const pDO: IDataObject;
+  out ppDORet: IDataObject): HResult;
+begin
+  Result := E_NOTIMPL;
+end;
+
+function TWebBrowser.GetDropTarget(
+  const pDropTarget: IDropTarget;
+  out ppDropTarget: IDropTarget): HResult;
+begin
+  Result := E_NOTIMPL;
+end;
+
+function TWebBrowser.GetExternal(out ppDispatch: IDispatch): HResult;
+begin
+  Result := E_NOTIMPL;
+end;
+
+function TWebBrowser.GetHostInfo(var pInfo: _DOCHOSTUIINFO): HResult;
+begin
+  Result := E_NOTIMPL;
+end;
+
+function TWebBrowser.GetOptionKeyPath(out pchKey: PWideChar; dw: UINT): HResult;
+begin
+  Result := E_NOTIMPL;
+end;
+
+function TWebBrowser.HideUI: HResult;
+begin
+  Result := E_NOTIMPL;
+end;
+
+function TWebBrowser.OnDocWindowActivate(fActivate: Integer): HResult;
+begin
+  Result := E_NOTIMPL;
+end;
+
+function TWebBrowser.OnFrameWindowActivate(fActivate: Integer): HResult;
+begin
+  Result := E_NOTIMPL;
+end;
+
 function TWebBrowser.QueryStatus(
   CmdGroup: PGUID;
   cCmds: Cardinal;
@@ -297,6 +396,56 @@ function TWebBrowser.QueryStatus(
 begin
   prgCmds.cmdf := OLECMDF_ENABLED;
   Result := S_OK;
+end;
+
+function TWebBrowser.ResizeBorder(var prcBorder: tagRECT;
+  const pUIWindow: IOleInPlaceUIWindow;
+  fRameWindow: Integer): HResult;
+begin
+  Result := E_NOTIMPL;
+end;
+
+function TWebBrowser.ShowContextMenu(
+  dwID: UINT;
+  ppt: PtagPOINT;
+  const pcmdtReserved: IInterface;
+  const pdispReserved: IDispatch): HResult;
+begin
+  Result := E_NOTIMPL;
+end;
+
+function TWebBrowser.ShowUI(
+  dwID: UINT;
+  const pActiveObject: IOleInPlaceActiveObject;
+  const pCommandTarget: IOleCommandTarget;
+  const pFrame: IOleInPlaceFrame;
+  const pDoc: IOleInPlaceUIWindow): HResult;
+begin
+  Result := E_NOTIMPL;
+end;
+
+function TWebBrowser.TranslateAccelerator(
+  var lpmsg: tagMSG;
+  var pguidCmdGroup: TGUID;
+  nCmdID: UINT): HResult;
+begin
+  Result := E_NOTIMPL;
+end;
+
+function TWebBrowser.TranslateUrl(
+  dwTranslate: UINT;
+  pchURLIn: PWideChar;
+  out ppchURLOut: PWideChar): HResult;
+begin
+  if (Assigned(FOnShouldStartLoadWithRequest)) then
+    FOnShouldStartLoadWithRequest(Self, String(pchURLIn));
+
+  Result := E_NOTIMPL;
+end;
+
+function TWebBrowser.UpdateUI: HResult;
+begin
+  Result := E_NOTIMPL;
 end;
 
 { TWinWebBrowserService }
@@ -324,6 +473,7 @@ begin
   FWebView.OnBeforeNavigate2 := WebViewBeforeNavigate2;
   FWebView.OnDocumentComplete := WebViewDocumentComplete;
   FWebView.OnNavigateError := WebViewNavigateEror;
+  FWebView.OnShouldStartLoadWithRequest := WebViewShouldStartLoadWithRequest;
 
   GWebViews.Add(FWebView);
 end;
@@ -372,6 +522,26 @@ begin
     Result := nil
   else
     Result := FWebControl.Parent;
+end;
+
+function TWinWebBrowserService.GetTagValue(
+  const iTagName, iValueName: String): String;
+var
+  Doc: IHTMLDocument3;
+  Elem: IHTMLElement;
+begin
+  if
+    (FWebView = nil)
+    or (FWebView.Document = nil)
+    or (FWebView.Document.QueryInterface(IHTMLDocument3, Doc) <> S_OK)
+  then
+    Exit;
+
+  Elem := Doc.getElementById(iTagName);
+  if (Elem = nil) then
+    Exit;
+
+  Result := Elem.getAttribute(iValueName, 0);
 end;
 
 procedure TWinWebBrowserService.GetTravelLog;
@@ -510,14 +680,8 @@ begin
       end;
     end;
 
-  if (RootForm <> nil) then begin
+  if (RootForm <> nil) then
     FWebView.FRootFormWnd := FormToHWND(RootForm);
-
-    FWebView.FOldWndProc :=
-      Pointer(
-        SetWindowLong(FWebView.FRootFormWnd, GWL_WNDPROC, Integer(@FormWndProc))
-      );
-  end;
 
   UpdateContentFromControl;
 end;
@@ -563,13 +727,8 @@ begin
           , Trunc(Bounds.Height)
         );
 
-        if (FURL <> '') then
-          try
-            //FWebView.Refresh;
-          finally
-          end;
-
-        Show;
+        if (FWebControl.Visible) then
+          Show;
       end;
 
       GetTravelLog;
@@ -611,62 +770,11 @@ begin
     FWebControl.FailLoadingWithError;
 end;
 
-procedure CallJS(
-  const iWebBrowser: TWebBrowserEx;
-  const iFunction: String;
-  const iParams: array of String);
-var
-  Params: TStringBuilder;
-  Param: String;
+procedure TWinWebBrowserService.WebViewShouldStartLoadWithRequest(
+  ASender: TObject; const URL: String);
 begin
-  Params := TStringBuilder.Create;
-  try
-    for Param in iParams do begin
-      Params.Append(',');
-      Params.Append(Param);
-    end;
-
-    if (Params.Length > 0) then
-      Params.Remove(0, 1);
-
-    iWebBrowser.EvaluateJavaScript(
-      Format('%s(%s);', [iFunction, Params.ToString])
-    );
-  finally
-    Params.Free;
-  end;
-end;
-
-function GetTagValue(
-  const iWebBrowser: TWebBrowserEx;
-  const iTagName, iValueName: String): String;
-var
-  [Weak] Web: TWebBrowser;
-  WebService: TWinWebBrowserService;
-  Doc: IHTMLDocument3;
-  Elem: IHTMLElement;
-begin
-  if (iWebBrowser.GetWeb = nil) then
-    Exit;
-
-  WebService := (iWebBrowser.GetWeb as TWinWebBrowserService);
-  if (WebService = nil) then
-    Exit;
-
-  Web := WebService.FWebView;
-
-  if
-    (Web = nil)
-    or (Web.Document = nil)
-    or (Web.Document.QueryInterface(IHTMLDocument3, Doc) <> S_OK)
-  then
-    Exit;
-
-  Elem := Doc.getElementById(iTagName);
-  if (Elem = nil) then
-    Exit;
-
-  Result := Elem.getAttribute(iValueName, 0);
+  if (FWebControl <> nil) then
+    FWebControl.ShouldStartLoading(URL);
 end;
 
 procedure FreeWebBrowsers;

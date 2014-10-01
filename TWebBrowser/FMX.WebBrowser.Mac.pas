@@ -8,15 +8,6 @@ uses
 procedure RegisterWebBrowserService;
 procedure UnRegisterWebBrowserService;
 
-procedure CallJS(
-  const iWebBrowser: TWebBrowserEx;
-  const iFunction: String;
-  const iParams: array of String);
-
-function GetTagValue(
-  const iWebBrowser: TWebBrowserEx;
-  const iTagName, iValueName: String): String;
-
 implementation
 
 uses
@@ -27,7 +18,8 @@ uses
   ;
 
 type
-  TMacWebBrowserService = class(TInterfacedObject, ICustomBrowser)
+  TMacWebBrowserService =
+    class(TInterfacedObject, ICustomBrowser, IWebBrowserEx)
   private const
     WEBKIT_FRAMEWORK: String =
       '/System/Library/Frameworks/WebKit.framework/WebKit';
@@ -41,7 +33,7 @@ type
     function GetBounds: TRectF;
     function GetNSBounds: NSRect;
   protected
-    { IFMXWebBrowserService }
+    { ICustomBrowser }
     function GetURL: string;
     function GetCanGoBack: Boolean;
     function GetCanGoForward: Boolean;
@@ -61,6 +53,8 @@ type
     property URL: string read GetURL write SetURL;
     property CanGoBack: Boolean read GetCanGoBack;
     property CanGoForward: Boolean read GetCanGoForward;
+    { IWebBrowserEx }
+    function GetTagValue(const iTagName, iValueName: String): String;
   public
     constructor Create;
     destructor Destroy; override;
@@ -117,6 +111,7 @@ end;
 procedure TMacWebBrowserService.EvaluateJavaScript(const JavaScript: String);
 begin
   FWebView.stringByEvaluatingJavaScriptFromString(StrToNSSTR(JavaScript));
+  UpdateContentFromControl;
 end;
 
 function TMacWebBrowserService.GetBounds: TRectF;
@@ -162,6 +157,21 @@ begin
     Result := nil;
 end;
 
+function TMacWebBrowserService.GetTagValue(
+  const iTagName, iValueName: String): String;
+var
+  Res: NSString;
+begin
+  Res :=
+    FWebView.stringByEvaluatingJavaScriptFromString(
+      StrToNSSTR(
+        'document.getElementById("' + iTagName + '").' + iValueName
+      )
+    );
+
+  Result := String(Res.UTF8String);
+end;
+
 function TMacWebBrowserService.GetURL: string;
 begin
   Result := FURL;
@@ -203,9 +213,16 @@ var
   Base: NSString;
 begin
   tmpContent := StrToNSStr(Content);
-  Base := StrToNSStr(BaseUrl);
-  URL := TNSUrl.Wrap(TNSUrl.OCClass.URLWithString(Base));
+
+  if (BaseUrl.IsEmpty) then
+    URL := nil
+  else begin
+    Base := StrToNSStr(BaseUrl);
+    URL := TNSUrl.Wrap(TNSUrl.OCClass.URLWithString(Base));
+  end;
+
   FWebView.mainFrame.loadHTMLString(tmpContent, URL);
+
   UpdateContentFromControl;
 end;
 
@@ -261,73 +278,20 @@ begin
       Bounds := GetBounds;
 
       View := WindowHandleToPlatform(FForm.Handle).View;
-      View.addSubview(FWebView);
+      if (View <> nil) then begin
+        View.addSubview(FWebView);
 
-      if (SameValue(Bounds.Width, 0)) or (SameValue(Bounds.Height, 0)) then
-        FWebView.setHidden(True)
-      else begin
-        FWebView.setFrame(GetNSBounds);
-        FWebView.setHidden(not FWebControl.ParentedVisible);
+        if (SameValue(Bounds.Width, 0)) or (SameValue(Bounds.Height, 0)) then
+          FWebView.setHidden(True)
+        else begin
+          FWebView.setFrame(GetNSBounds);
+          FWebView.setHidden(not FWebControl.ParentedVisible);
+        end;
       end;
     end
     else
       FWebView.setHidden(True);
   end;
-end;
-
-
-procedure CallJS(
-  const iWebBrowser: TWebBrowserEx;
-  const iFunction: String;
-  const iParams: array of String);
-var
-  Params: TStringBuilder;
-  Param: String;
-  Service: TMacWebBrowserService;
-begin
-  Params := TStringBuilder.Create;
-  try
-    for Param in iParams do begin
-      Params.Append(',');
-      Params.Append(Param);
-    end;
-
-    if (Params.Length > 0) then
-      Params.Remove(0, 1);
-
-    Service := (iWebBrowser.GetWeb as TMacWebBrowserService);
-    if (Service <> nil) then begin
-      Service.FWebView.stringByEvaluatingJavaScriptFromString(
-        StrToNSSTR(Format('%s(%s);', [iFunction, Params.ToString]))
-      );
-    end;
-  finally
-    Params.Free;
-  end;
-end;
-
-function GetTagValue(
-  const iWebBrowser: TWebBrowserEx;
-  const iTagName, iValueName: String): String;
-var
-  WebService: TMacWebBrowserService;
-  Res: NSString;
-begin
-  if (iWebBrowser.GetWeb = nil) then
-    Exit;
-
-  WebService := (iWebBrowser.GetWeb as TMacWebBrowserService);
-  if (WebService = nil) then
-    Exit;
-
-  Res :=
-    WebService.FWebView.stringByEvaluatingJavaScriptFromString(
-      StrToNSSTR(
-        'document.getElementById("' + iTagName + '").' + iValueName
-      )
-    );
-
-  Result := String(Res.UTF8String);
 end;
 
 initialization

@@ -1,5 +1,12 @@
 unit Macapi.WebView;
 
+{$IF not defined(MACOS) or defined(IOS)}
+{$WARNINGS OFF 1011}
+interface
+implementation
+end.
+{$ENDIF}
+
 interface
 
 uses
@@ -135,7 +142,7 @@ type
       MIMEType: NSString;
       encodingName: NSString;
       URL: NSURL); cdecl;
-    procedure loadHTMLString(string_: NSString; URL: NSURL); cdecl;
+    procedure loadHTMLString(string_: NSString; baseURL: NSURL); cdecl;
     procedure loadRequest(request: NSURLRequest); cdecl;
     function name: NSString; cdecl;
     function parentFrame: WebFrame; cdecl;

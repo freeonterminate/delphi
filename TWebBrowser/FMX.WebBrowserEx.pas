@@ -1,5 +1,9 @@
 unit FMX.WebBrowserEx;
 
+{$IF defined(MACOS) and not defined(IOS)}
+  {$DEFINE MACOS_ONLY}
+{$ENDIF}
+
 interface
 
 uses
@@ -8,6 +12,11 @@ uses
   ;
 
 type
+  IWebBrowserEx = interface
+  ['{66AB09D6-6B38-49DA-B831-B00F43EAF471}']
+    function GetTagValue(const iTagName, iValueName: String): String;
+  end;
+
   [
     ComponentPlatformsAttribute(
       pidWin32
@@ -23,6 +32,7 @@ type
     procedure ParentResize(Sender: TObject);
   protected
     procedure SetParent(const Value: TFmxObject); override;
+    procedure SetVisible(const Value: Boolean); override;
   public
     constructor Create(Owner: TComponent); override;
     destructor Destroy; override;
@@ -44,7 +54,7 @@ uses
   {$IFDEF MSWINDOWS}
     , FMX.WebBrowser.Win
   {$ENDIF}
-  {$IFDEF MACOS}
+  {$IF defined(MACOS) and not defined(IOS)}
     , FMX.WebBrowser.Mac
   {$ENDIF}
   ;
@@ -59,20 +69,10 @@ end;
 procedure TWebBrowserEx.CallJS(
   const iFunction: String;
   const iParams: array of String);
-{$IF defined(IOS) or defined(ANDROID)}
 var
   Params: TStringBuilder;
   Param: String;
-{$ENDIF}
 begin
-  {$IFDEF MSWINDOWS}
-    FMX.WebBrowser.Win.CallJS(Self, iFunction, iParams);
-  {$ENDIF}
-  {$IFDEF MACOS}
-    FMX.WebBrowser.Mac.CallJS(Self, iFunction, iParams);
-    CheckBounds;
-  {$ENDIF}
-  {$IF defined(IOS) or defined(ANDROID)}
   Params := TStringBuilder.Create;
   try
     for Param in iParams do begin
@@ -87,23 +87,24 @@ begin
   finally
     Params.Free;
   end;
-  {$ENDIF}
 end;
 
 function TWebBrowserEx.GetTagValue(const iTagName, iValueName: String): String;
+var
+  [Weak] Web: ICustomBrowser;
+  WebEx: IWebBrowserEx;
 begin
-  {$IFDEF MSWINDOWS}
-    Result := FMX.WebBrowser.Win.GetTagValue(Self, iTagName, iValueName);
-  {$ENDIF}
-  {$IFDEF MACOS}
-    Result := FMX.WebBrowser.Mac.GetTagValue(Self, iTagName, iValueName);
-    CheckBounds;
-  {$ENDIF}
-  {$IF defined(IOS) or defined(ANDROID)}
+  Web := GetWeb;
+
+  if (Web = nil) then
+    Exit;
+
+  if (Supports(Web, IWebBrowserEx, WebEx)) then
+    Result := WebEx.GetTagValue(iTagname, iValueName)
+  else
     raise
       ENotSupportedException.Create(
-        'GetTagValue Method is not supported on iOS/Android.');
-  {$ENDIF}
+        'GetTagValue method is not supported on this platform.')
 end;
 
 procedure TWebBrowserEx.CheckBounds;
@@ -186,6 +187,22 @@ begin
     Web.SetWebBrowserControl(Self);
 
     Show;
+  end;
+end;
+
+procedure TWebBrowserEx.SetVisible(const Value: Boolean);
+var
+  [Weak] Web: ICustomBrowser;
+begin
+  inherited;
+
+  Web := GetWeb;
+
+  if (Web <> nil) then begin
+    if (Value) then
+      Web.Show
+    else
+      Web.Hide;
   end;
 end;
 
