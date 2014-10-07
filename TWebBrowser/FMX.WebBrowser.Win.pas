@@ -1,4 +1,4 @@
-unit FMX.WebBrowser.Win;
+﻿unit FMX.WebBrowser.Win;
 
 interface
 
@@ -468,8 +468,44 @@ begin
 end;
 
 function TWinWebBrowserService.CaptureBitmap: FMX.Graphics.TBitmap;
+var
+  HTMLDoc: IHTMLDocument2;
+  Body: IHTMLElement;
+  ResultBmp: TBitmap;
+  Stream: TMemoryStream;
 begin
-  Result := nil;
+  Result := FMX.Graphics.TBitmap.Create;
+
+  if
+    (FWebView = nil) or
+    (FWebView.Document = nil) or
+    (FWebView.Document.QueryInterface(IHTMLDocument2, HTMLDoc) <> S_OK)
+  then
+    Exit;
+
+  Body := HTMLDoc.body;
+
+  ResultBmp := TBitmap.Create;
+  try
+    ResultBmp.SetSize(FWebView.Width, FWebView.Height);
+
+    OleDraw(
+      FWebView.ControlInterface,
+      DVASPECT_DOCPRINT,
+      ResultBmp.Canvas.Handle,
+      Rect(0, 0, ResultBmp.Width, ResultBmp.Height));
+
+    Stream := TMemoryStream.Create;
+    try
+      ResultBmp.SaveToStream(Stream);
+      Stream.Position := 0;
+      Result.LoadFromStream(Stream);
+    finally
+      Stream.DisposeOf;
+    end;
+  finally
+    ResultBmp.DisposeOf;
+  end;
 end;
 
 constructor TWinWebBrowserService.Create;

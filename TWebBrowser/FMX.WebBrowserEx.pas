@@ -149,18 +149,11 @@ end;
 
 [Weak] function TWebBrowserEx.GetWeb: ICustomBrowser;
 var
-  Context: TRttiContext;
   RttiType: TRttiType;
   [Weak] Web: ICustomBrowser;
 begin
-  Context := TRttiContext.Create;
-  try
-    RttiType := Context.GetType(TWebBrowser);
-    Web :=
-      ICustomBrowser(RttiType.GetField('FWeb').GetValue(Self).AsInterface);
-  finally
-    Context.Free;
-  end;
+  RttiType := SharedContext.GetType(TWebBrowser);
+  Web := ICustomBrowser(RttiType.GetField('FWeb').GetValue(Self).AsInterface);
 
   Result := Web;
 end;

@@ -13,9 +13,9 @@ implementation
 uses
   System.Classes, System.SysUtils, System.Types, System.Math
   , Macapi.WebView, Macapi.Foundation, Macapi.AppKit, Macapi.CocoaTypes
-  , Macapi.Helpers
+  , Macapi.CoreGraphics, Macapi.Helpers
   , FMX.Types, FMX.WebBrowser, FMX.Platform, FMX.Platform.Mac, FMX.Forms
-  , FMX.Graphics
+  , FMX.Graphics, FMX.Surfaces
   ;
 
 type
@@ -97,8 +97,45 @@ end;
 { TMacWebBrowserService }
 
 function TMacWebBrowserService.CaptureBitmap: TBitmap;
+var
+  Surface: TBitmapSurface;
+  Size: NSSize;
+  ContRef: CGContextRef;
+  OldWantLayer: Boolean;
 begin
-  Result := nil;
+  Result := TBitmap.Create;
+
+  Surface := TBitmapSurface.Create;
+  try
+    Size := FWebView.frame.size;
+    Surface.SetSize(Ceil(Size.width), Ceil(Size.height));
+
+    ContRef :=
+      CGBitmapContextCreate(
+        Surface.Bits,
+        Surface.Width,
+        Surface.Height,
+        8,
+        4 * Surface.Width,
+        CGColorSpaceCreateDeviceRGB,
+        kCGImageAlphaPremultipliedLast or kCGBitmapByteOrder32Big);
+    try
+      OldWantLayer := FWebView.wantsLayer;
+      FWebView.setWantsLayer(True);
+      try
+        if (FWebView.layer <> nil) then
+          FWebView.layer.renderInContext(ContRef);
+      finally
+        FWebView.setWantsLayer(OldWantLayer);
+      end;
+    finally
+      CGContextRelease(ContRef);
+    end;
+
+    Result.Assign(Surface);
+  finally
+    Surface.Free;
+  end;
 end;
 
 constructor TMacWebBrowserService.Create;
