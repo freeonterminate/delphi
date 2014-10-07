@@ -1,9 +1,5 @@
 unit FMX.WebBrowserEx;
 
-{$IF defined(MACOS) and not defined(IOS)}
-  {$DEFINE MACOS_ONLY}
-{$ENDIF}
-
 interface
 
 uses
