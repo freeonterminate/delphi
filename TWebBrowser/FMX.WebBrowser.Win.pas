@@ -150,8 +150,6 @@ type
     FWebControl: TCustomWebBrowser;
     FTravelLog: ITravelLogStg;
     FLoading: Boolean;
-    FTempFile: String;
-    FMoveFileCalled: Boolean;
     FEnableCaching: Boolean;
   private
     procedure WebViewBeforeNavigate2(
@@ -649,23 +647,24 @@ end;
 
 procedure TWinWebBrowserService.LoadFromStrings(const Content, BaseUrl: String);
 var
-  SL: TStringList;
+  StreamInit: IPersistStreamInit;
+  ContentStream: TStringStream;
 begin
-  FTempFile := TPath.GetTempPath + 'temp.html';
+  if (FWebView.Document = nil) then
+    FWebView.Navigate('about:blank'); // DO NOT LOCALIZE
 
-  SL := TStringList.Create;
-  try
-    SL.Text := Content;
-    SL.SaveToFile(FTempFile);
-
-    if (not FMoveFileCalled) then begin
-      MoveFileEx(PChar(FTempFile), nil, MOVEFILE_DELAY_UNTIL_REBOOT);
-      FMoveFileCalled := True;
+  if
+    (FWebView.Document <> nil) and
+    (FWebView.Document.QueryInterface(IPersistStreamInit, StreamInit) = S_OK)
+  then begin
+    ContentStream := TStringStream.Create(Content);
+    try
+      // TStreamAdapter Instance is "Auto Release"
+      StreamInit.InitNew;
+      StreamInit.Load(TStreamAdapter.Create(ContentStream));
+    finally
+      ContentStream.DisposeOf;
     end;
-
-    FWebView.Navigate('file:///' + FTempFile);
-  finally
-    SL.Free;
   end;
 end;
 
