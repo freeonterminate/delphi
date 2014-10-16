@@ -220,7 +220,7 @@ type
 
 var
   GWBService: TWinWBService;
-  [Weak] GWebViews: TWebBrowserList = nil;
+  GWebViews: TWebBrowserList = nil;
 
 { TWinWBService }
 
@@ -659,7 +659,7 @@ begin
   then begin
     ContentStream := TStringStream.Create(Content);
     try
-      // TStreamAdapter Instance is "Auto Release"
+      // The instance of TStreamAdapter is released automatically
       StreamInit.InitNew;
       StreamInit.Load(TStreamAdapter.Create(ContentStream));
     finally
@@ -678,10 +678,7 @@ begin
     else
       FWebView.Navigate2(FURL);
 
-    if
-      (FURL.StartsWith('http'))
-      or (FURL.StartsWith('file'))
-    then
+    if (FURL.StartsWith('http')) or (FURL.StartsWith('file')) then
       TThread.CreateAnonymousThread(
         procedure
         var

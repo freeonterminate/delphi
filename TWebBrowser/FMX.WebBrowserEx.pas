@@ -33,7 +33,7 @@ type
     constructor Create(Owner: TComponent); override;
     destructor Destroy; override;
     procedure CheckBounds;
-    [Weak] function GetWeb: ICustomBrowser;
+    function GetWeb: ICustomBrowser;
     procedure EvaluateJavaScript(const JavaScript: string);
     procedure CallJS(
       const iFunction: String;
@@ -87,7 +87,7 @@ end;
 
 function TWebBrowserEx.GetTagValue(const iTagName, iValueName: String): String;
 var
-  [Weak] Web: ICustomBrowser;
+  Web: ICustomBrowser;
   WebEx: IWebBrowserEx;
 begin
   Web := GetWeb;
@@ -105,7 +105,7 @@ end;
 
 procedure TWebBrowserEx.CheckBounds;
 var
-  [Weak] Web: ICustomBrowser;
+  Web: ICustomBrowser;
 begin
   Web := GetWeb;
 
@@ -123,7 +123,7 @@ end;
 
 destructor TWebBrowserEx.Destroy;
 var
-  [Weak] Web: ICustomBrowser;
+  Web: ICustomBrowser;
 begin
   Web := GetWeb;
 
@@ -135,7 +135,7 @@ end;
 
 procedure TWebBrowserEx.EvaluateJavaScript(const JavaScript: string);
 var
-  [Weak] Web: ICustomBrowser;
+  Web: ICustomBrowser;
 begin
   Web := GetWeb;
 
@@ -143,10 +143,10 @@ begin
     Web.EvaluateJavaScript(JavaScript);
 end;
 
-[Weak] function TWebBrowserEx.GetWeb: ICustomBrowser;
+function TWebBrowserEx.GetWeb: ICustomBrowser;
 var
   RttiType: TRttiType;
-  [Weak] Web: ICustomBrowser;
+  Web: ICustomBrowser;
 begin
   RttiType := SharedContext.GetType(TWebBrowser);
   Web := ICustomBrowser(RttiType.GetField('FWeb').GetValue(Self).AsInterface);
@@ -161,7 +161,7 @@ end;
 
 procedure TWebBrowserEx.SetParent(const Value: TFmxObject);
 var
-  [Weak] Web: ICustomBrowser;
+  Web: ICustomBrowser;
 begin
   if (Parent <> nil) and (Parent is TControl) then
     TControl(Parent).OnResize := nil;
@@ -181,7 +181,7 @@ end;
 
 procedure TWebBrowserEx.SetVisible(const Value: Boolean);
 var
-  [Weak] Web: ICustomBrowser;
+  Web: ICustomBrowser;
 begin
   inherited;
 
