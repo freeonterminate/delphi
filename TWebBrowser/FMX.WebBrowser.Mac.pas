@@ -12,13 +12,70 @@ implementation
 
 uses
   System.Classes, System.SysUtils, System.Types, System.Math
-  , Macapi.WebView, Macapi.Foundation, Macapi.AppKit, Macapi.CocoaTypes
-  , Macapi.CoreGraphics, Macapi.Helpers
+  , Macapi.ObjectiveC, Macapi.WebView, Macapi.Foundation, Macapi.AppKit
+  , Macapi.CocoaTypes, Macapi.CoreGraphics, Macapi.Helpers
   , FMX.Types, FMX.WebBrowser, FMX.Platform, FMX.Platform.Mac, FMX.Forms
   , FMX.Graphics, FMX.Surfaces
   ;
 
 type
+  TMacWebBrowserService = class;
+
+  TWebFrameLoadDelegate = class(TOCLocal, WebFrameLoadDelegate)
+  private var
+    FWebControl: TCustomWebBrowser;
+  public
+    procedure SetWebControl(const iWebControl: TCustomWebBrowser);
+    procedure webView(
+      sender: WebView;
+      didStartProvisionalLoadForFrame: WebFrame); overload; cdecl;
+    procedure webView(
+      sender: WebView;
+      didReceiveServerRedirectForProvisionalLoadForFrame: WebFrame2);
+      overload; cdecl;
+    procedure webView(
+      sender: WebView;
+      didFailProvisionalLoadWithError: NSError;
+      frame: WebFrame); overload; cdecl;
+    procedure webView(
+      sender: WebView;
+      didCommitLoadForFrame: WebFrame3); overload; cdecl;
+    procedure webView(
+      sender: WebView;
+      didReceiveTitle: NSString;
+      frame: WebFrame); overload; cdecl;
+    procedure webView(
+      sender: WebView;
+      didReceiveIcon: NSImage;
+      frame: WebFrame); overload; cdecl;
+    procedure webView(
+      sender: WebView;
+      didFinishLoadForFrame: WebFrame4); overload; cdecl;
+    procedure webView(
+      sender: WebView;
+      didFailLoadWithError: NSError;
+      frame: WebFrame5); overload; cdecl;
+    procedure webView(
+      sender: WebView;
+      didChangeLocationWithinPageForFrame: WebFrame6); overload; cdecl;
+    procedure webView(
+      sender: WebView;
+      willPerformClientRedirectToURL: NSURL;
+      seconds: NSTimeInterval;
+      date: NSDate;
+      frame: WebFrame); overload; cdecl;
+    procedure webView(
+      sender: WebView;
+      didCancelClientRedirectForFrame: WebFrame7); overload; cdecl;
+    procedure webView(
+      sender: WebView;
+      willCloseFrame: WebFrame8); overload; cdecl;
+    procedure webView(
+      sender: WebView;
+      didClearWindowObject: WebScriptObject;
+      frame: WebFrame); overload; cdecl;
+  end;
+
   TMacWebBrowserService =
     class(TInterfacedObject, ICustomBrowser, IWebBrowserEx)
   private const
@@ -31,6 +88,7 @@ type
     FNSCachePolicy: NSURLRequestCachePolicy;
     FModule: HMODULE;
     FForm: TCommonCustomForm;
+    FDelegate: TWebFrameLoadDelegate;
   private
     function GetBounds: TRectF;
     function GetNSBounds: NSRect;
@@ -145,9 +203,13 @@ begin
   FModule := LoadLibrary(PWideChar(WEBKIT_FRAMEWORK));
   FNSCachePolicy := NSURLRequestReloadRevalidatingCacheData;
 
+  FDelegate := TWebFrameLoadDelegate.Create;
+
   FWebView :=
     TWebView.Wrap(
       TWebView.Alloc.initWithFrame(MakeNSRect(0, 0, 100, 100), nil, nil));
+
+  FWebView.setFrameLoadDelegate(FDelegate.GetObjectID);
 end;
 
 destructor TMacWebBrowserService.Destroy;
@@ -301,11 +363,14 @@ begin
     );
 
   FWebView.mainFrame.loadRequest(Req);
+
+  UpdateContentFromControl;
 end;
 
 procedure TMacWebBrowserService.Reload;
 begin
-
+  if (FWebView <> nil) then
+    FWebView.reload(Pointer(FWebView));
 end;
 
 procedure TMacWebBrowserService.SetEnableCaching(const Value: Boolean);
@@ -326,12 +391,15 @@ procedure TMacWebBrowserService.SetWebBrowserControl(
 begin
   FWebControl := AValue;
 
+  FDelegate.SetWebControl(FWebControl);
+
   if
     (FWebControl <> nil)
     and (FWebControl.Root <> nil)
     and (FWebControl.Root.GetObject is TCommonCustomForm)
-  then
+  then begin
     FForm := TCommonCustomForm(FWebControl.Root.GetObject);
+  end;
 
   UpdateContentFromControl;
 end;
@@ -344,7 +412,8 @@ end;
 
 procedure TMacWebBrowserService.Stop;
 begin
-
+  if (FWebView <> nil) then
+    FWebView.stopLoading(Pointer(FWebView));
 end;
 
 procedure TMacWebBrowserService.UpdateContentFromControl;
@@ -375,6 +444,120 @@ begin
     else
       FWebView.setHidden(True);
   end;
+end;
+
+{ TWebFrameLoadDelegate }
+
+procedure TWebFrameLoadDelegate.webView(
+  sender: WebView;
+  didReceiveTitle: NSString;
+  frame: WebFrame);
+begin
+  // didReceiveTitle
+end;
+
+procedure TWebFrameLoadDelegate.webView(
+  sender: WebView;
+  didReceiveIcon: NSImage; frame: WebFrame);
+begin
+  // didReceiveIcon
+end;
+
+procedure TWebFrameLoadDelegate.webView(
+  sender: WebView;
+  didFinishLoadForFrame: WebFrame4);
+begin
+  // didFinishLoadForFrame
+  if (FWebControl <> nil) then
+    FWebControl.FinishLoading;
+end;
+
+procedure TWebFrameLoadDelegate.webView(
+  sender: WebView;
+  didCommitLoadForFrame: WebFrame3);
+begin
+  // didCommitLoadForFrame
+  if (FWebControl <> nil) then
+    FWebControl.ShouldStartLoading(FWebControl.URL);
+end;
+
+procedure TWebFrameLoadDelegate.webView(
+  sender: WebView;
+  didStartProvisionalLoadForFrame: WebFrame);
+begin
+  // didStartProvisionalLoadForFrame
+  if (FWebControl <> nil) then
+    FWebControl.StartLoading;
+end;
+
+procedure TWebFrameLoadDelegate.webView(
+  sender: WebView;
+  didReceiveServerRedirectForProvisionalLoadForFrame: WebFrame2);
+begin
+  // didReceiveServerRedirectForProvisionalLoadForFrame
+end;
+
+procedure TWebFrameLoadDelegate.webView(
+  sender: WebView;
+  didFailProvisionalLoadWithError: NSError; frame: WebFrame);
+begin
+  // didFailProvisionalLoadWithError
+  if (FWebControl <> nil) then
+    FWebControl.FailLoadingWithError;
+end;
+
+procedure TWebFrameLoadDelegate.webView(
+  sender: WebView;
+  willCloseFrame: WebFrame8);
+begin
+  // willCloseFrame
+end;
+
+procedure TWebFrameLoadDelegate.webView(
+  sender: WebView;
+  didClearWindowObject: WebScriptObject; frame: WebFrame);
+begin
+  // didClearWindowObject
+end;
+
+procedure TWebFrameLoadDelegate.SetWebControl(
+  const iWebControl: TCustomWebBrowser);
+begin
+  FWebControl := iWebControl;
+end;
+
+procedure TWebFrameLoadDelegate.webView(
+  sender: WebView;
+  didCancelClientRedirectForFrame: WebFrame7);
+begin
+  // didCancelClientRedirectForFrame
+end;
+
+procedure TWebFrameLoadDelegate.webView(
+  sender: WebView;
+  didFailLoadWithError: NSError;
+  frame: WebFrame5);
+begin
+  // didFailLoadWithError
+  if (FWebControl <> nil) then
+    FWebControl.FailLoadingWithError;
+end;
+
+procedure TWebFrameLoadDelegate.webView(
+  sender: WebView;
+  didChangeLocationWithinPageForFrame: WebFrame6);
+begin
+  // didChangeLocationWithinPageForFrame
+end;
+
+procedure TWebFrameLoadDelegate.webView(
+  sender: WebView;
+  willPerformClientRedirectToURL: NSURL;
+  seconds: NSTimeInterval;
+  date: NSDate;
+  frame: WebFrame);
+begin
+  // willPerformClientRedirectToURL
 end;
 
 initialization

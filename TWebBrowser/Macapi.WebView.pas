@@ -443,6 +443,74 @@ type
     function usesPageCache: Boolean; cdecl;
   end;
 
+  // Overload needs TypeName from which a name is different.
+  WebFrame2 = type WebFrame;
+  WebFrame3 = type WebFrame;
+  WebFrame4 = type WebFrame;
+  WebFrame5 = type WebFrame;
+  WebFrame6 = type WebFrame;
+  WebFrame7 = type WebFrame;
+  WebFrame8 = type WebFrame;
+
+  WebFrameLoadDelegate = interface(IObjectiveC)
+    ['{00FFAF7F-51EC-4F8D-84C2-B0FE4F24270A}']
+    procedure webView(
+      sender: WebView;
+      didStartProvisionalLoadForFrame: WebFrame); overload; cdecl;
+    procedure webView(
+      sender: WebView;
+      didReceiveServerRedirectForProvisionalLoadForFrame: WebFrame2);
+      overload; cdecl;
+    procedure webView(
+      sender: WebView;
+      didFailProvisionalLoadWithError: NSError;
+      frame: WebFrame); overload; cdecl;
+    procedure webView(
+      sender: WebView;
+      didCommitLoadForFrame: WebFrame3); overload; cdecl;
+    procedure webView(
+      sender: WebView;
+      didReceiveTitle: NSString;
+      frame: WebFrame); overload; cdecl;
+    procedure webView(
+      sender: WebView;
+      didReceiveIcon: NSImage;
+      frame: WebFrame); overload; cdecl;
+    procedure webView(
+      sender: WebView;
+      didFinishLoadForFrame: WebFrame4); overload; cdecl;
+    procedure webView(
+      sender: WebView;
+      didFailLoadWithError: NSError;
+      frame: WebFrame5); overload; cdecl;
+    procedure webView(
+      sender: WebView;
+      didChangeLocationWithinPageForFrame: WebFrame6); overload; cdecl;
+    procedure webView(
+      sender: WebView;
+      willPerformClientRedirectToURL: NSURL;
+      seconds: NSTimeInterval;
+      date: NSDate;
+      frame: WebFrame); overload; cdecl;
+    procedure webView(
+      sender: WebView;
+      didCancelClientRedirectForFrame: WebFrame7); overload; cdecl;
+    procedure webView(
+      sender: WebView;
+      willCloseFrame: WebFrame8); overload; cdecl;
+    procedure webView(
+      sender: WebView;
+      didClearWindowObject: WebScriptObject;
+      frame: WebFrame); overload; cdecl;
+    //procedure webView(
+      //sender: WebView;
+      //windowScriptObjectAvailable: WebScriptObject); overload; cdecl;
+    //procedure webView(
+      //sender: WebView;
+      //didCreateJavaScriptContext: JSContext;
+      //frame: WebFrame); overload; cdecl;
+  end;
+
   TWebCacheModel = (
      WebCacheModelDocumentViewer = 0,
      WebCacheModelDocumentBrowser = 1,
