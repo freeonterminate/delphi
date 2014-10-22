@@ -1,6 +1,6 @@
 #TWebBrowserEx Class
 
-##Other Language Documents
+##日本語のドキュメント
   
 [日本語のドキュメントはこちら](https://github.com/freeonterminate/delphi/blob/master/TWebBrowser/Readme-ja.md)
   
