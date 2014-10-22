@@ -10,6 +10,8 @@ THIS TEXT IS TRANSLATION BY A MACHINE.
 WHEN THERE IS STRANGE WORDING, PLEASE CONTACT ME OR SEND PULL-REQUEST.  
   
 MY TWITTER ACCOUNT: @pik  
+(I AM DELPHI'S MVP OF EMBARCADERO TECHNOLOGIES.)  
+
 
 ##Introduction
 This class provide WebBrowser for All-Platform FireMonkey Applications.  
@@ -24,6 +26,7 @@ This class use Default WebView.
 
 ##Environment Platform
 Delphi / C++Builder / RAD Studio version XE6, XE7.  
+Appmethod 1.14, 1.15.  
 
 If you use XE5, Please make the following correction.   
 
@@ -33,7 +36,7 @@ If you use XE5, Please make the following correction.
 
 ##File
 
-You download following files.
+Please download following files.
 
     FMX.WebBrowser.Mac.pas    WebBrowser class for OS X
     FMX.WebBrowser.Win.pas    WebBrowser class for Windows
