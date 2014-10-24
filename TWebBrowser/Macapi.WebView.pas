@@ -101,7 +101,7 @@ type
     procedure viewWillMoveToHostWindow(hostWindow: NSWindow); cdecl;
   end;
 
-  WebFrameView = interface(NSObject)
+  WebFrameView = interface(NSView)
     ['{348DEC2C-1594-4C5F-B625-4FA382090A49}']
     function allowScrolling: Boolean; cdecl;
     function canPrintHeadersAndFooters: Boolean; cdecl;
@@ -524,5 +524,6 @@ type
   end;
 
 implementation
+
 
 end.

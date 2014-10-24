@@ -11,9 +11,10 @@ procedure UnRegisterWebBrowserService;
 implementation
 
 uses
-  System.Classes, System.SysUtils, System.Types, System.Math
-  , Macapi.ObjectiveC, Macapi.WebView, Macapi.Foundation, Macapi.AppKit
-  , Macapi.CocoaTypes, Macapi.CoreGraphics, Macapi.Helpers
+  System.Classes, System.SysUtils, System.Types, System.Math, System.UITypes
+  , System.Rtti
+  , Macapi.CoreFoundation, Macapi.ObjectiveC, Macapi.WebView, Macapi.Foundation
+  , Macapi.AppKit, Macapi.CocoaTypes, Macapi.CoreGraphics, Macapi.Helpers
   , FMX.Types, FMX.WebBrowser, FMX.Platform, FMX.Platform.Mac, FMX.Forms
   , FMX.Graphics, FMX.Surfaces
   ;
@@ -23,9 +24,10 @@ type
 
   TWebFrameLoadDelegate = class(TOCLocal, WebFrameLoadDelegate)
   private var
+    FMacWebBrowserService: TMacWebBrowserService;
     FWebControl: TCustomWebBrowser;
   public
-    procedure SetWebControl(const iWebControl: TCustomWebBrowser);
+    procedure SetWebControl(const iMacWebBrowserService: TMacWebBrowserService);
     procedure webView(
       sender: WebView;
       didStartProvisionalLoadForFrame: WebFrame); overload; cdecl;
@@ -76,6 +78,15 @@ type
       frame: WebFrame); overload; cdecl;
   end;
 
+  TMacCursorService = class(TInterfacedObject, IFMXCursorService)
+  private var
+    FOrgCursorService: IFMXCursorService;
+    FProhibiting: Boolean;
+  public
+    procedure SetCursor(const ACursor: TCursor);
+    function GetCursor: TCursor;
+  end;
+
   TMacWebBrowserService =
     class(TInterfacedObject, ICustomBrowser, IWebBrowserEx)
   private const
@@ -84,14 +95,28 @@ type
   private var
     FURL: String;
     FWebView: WebView;
+    FWebViewId: Pointer;
     FWebControl: TCustomWebBrowser;
     FNSCachePolicy: NSURLRequestCachePolicy;
     FModule: HMODULE;
     FForm: TCommonCustomForm;
     FDelegate: TWebFrameLoadDelegate;
+    FVMIntercepter: TVirtualMethodInterceptor;
+    FTrackingArea: NSTrackingArea;
+    FCursorService: TMacCursorService;
   private
     function GetBounds: TRectF;
     function GetNSBounds: NSRect;
+    procedure RemoveIntercepter;
+    function GetView: NSView; inline;
+    procedure RemoveTrackingArea;
+    procedure AddTrackingArea;
+    procedure SetCursorService;
+    procedure ResetCursorService;
+    procedure ProcMouseMove(
+      const iMethod: TRttiMethod;
+      const iArgs: TArray<TValue>;
+      const iSet: Boolean);
   protected
     { ICustomBrowser }
     function GetURL: string;
@@ -131,6 +156,8 @@ type
     function DoCreateWebBrowser: ICustomBrowser; override;
   end;
 
+  TOpenForm = class(TCommonCustomForm);
+
 var
   GWBService: TMacWBService;
 
@@ -152,7 +179,46 @@ begin
   TPlatformServices.Current.RemovePlatformService(IFMXWBService);
 end;
 
+{ TMacCursorService }
+
+function TMacCursorService.GetCursor: TCursor;
+begin
+  Result := FOrgCursorService.GetCursor;
+end;
+
+procedure TMacCursorService.SetCursor(const ACursor: TCursor);
+begin
+  if (not FProhibiting) then
+    FOrgCursorService.SetCursor(ACursor);
+end;
+
 { TMacWebBrowserService }
+
+procedure TMacWebBrowserService.AddTrackingArea;
+var
+  View: NSView;
+begin
+  RemoveTrackingArea;
+
+  View := GetView;
+
+  if (View = nil) then
+    Exit;
+
+  FTrackingArea :=
+    TNSTrackingArea.Wrap(
+      TNSTrackingArea.Alloc.initWithRect(
+        GetNSBounds,
+        NSTrackingMouseMoved
+          or NSTrackingActiveAlways
+          or NSTrackingAssumeInside,
+        View.superview,
+        nil
+      )
+    );
+
+  View.addTrackingArea(FTrackingArea);
+end;
 
 function TMacWebBrowserService.CaptureBitmap: TBitmap;
 var
@@ -205,15 +271,24 @@ begin
 
   FDelegate := TWebFrameLoadDelegate.Create;
 
-  FWebView :=
-    TWebView.Wrap(
-      TWebView.Alloc.initWithFrame(MakeNSRect(0, 0, 100, 100), nil, nil));
+  FCursorService := TMacCursorService.Create;
 
+  FWebViewId :=
+    TWebView.Alloc.initWithFrame(MakeNSRect(0, 0, 100, 100), nil, nil);
+  FWebView := TWebView.Wrap(FWebViewId);
+
+  FWebView.setAcceptsTouchEvents(True);
   FWebView.setFrameLoadDelegate(FDelegate.GetObjectID);
 end;
 
 destructor TMacWebBrowserService.Destroy;
 begin
+  //RemoveTrackingArea; // Already destroid View.
+  RemoveIntercepter;
+  ResetCursorService;
+
+  FCursorService := nil;
+
   FWebView.release;
 
   FreeLibrary(FModule);
@@ -295,6 +370,14 @@ begin
   Result := FURL;
 end;
 
+function TMacWebBrowserService.GetView: NSView;
+begin
+  if (FForm = nil) then
+    Result := nil
+  else
+    Result := WindowHandleToPlatform(FForm.Handle).View;
+end;
+
 function TMacWebBrowserService.GetVisible: Boolean;
 begin
   if (FWebControl <> nil) then
@@ -367,10 +450,67 @@ begin
   UpdateContentFromControl;
 end;
 
+procedure TMacWebBrowserService.ProcMouseMove(
+  const iMethod: TRttiMethod;
+  const iArgs: TArray<TValue>;
+  const iSet: Boolean);
+var
+  P: TPointF;
+begin
+  if (iMethod.Name = 'MouseMove') then begin
+    P := PointF(iArgs[1].AsType<Single>, iArgs[2].AsType<Single>);
+
+    if (FWebControl.PointInObject(P.X, P.Y)) then begin
+      FCursorService.FProhibiting := iSet;
+    end;
+  end;
+end;
+
 procedure TMacWebBrowserService.Reload;
 begin
   if (FWebView <> nil) then
-    FWebView.reload(Pointer(FWebView));
+    FWebView.reload(FWebViewId);
+end;
+
+procedure TMacWebBrowserService.RemoveIntercepter;
+begin
+  if (FVMIntercepter <> nil) then begin
+    if  (FForm <> nil) then
+      FVMIntercepter.Unproxify(FForm);
+
+    FVMIntercepter.DisposeOf;
+    FVMIntercepter := nil;
+  end;
+end;
+
+procedure TMacWebBrowserService.RemoveTrackingArea;
+var
+  View: NSView;
+begin
+  View := GetView;
+
+  if (FTrackingArea <> nil) and (View <> nil) then
+    View.removeTrackingArea(FTrackingArea);
+
+  FTrackingArea := nil;
+end;
+
+procedure TMacWebBrowserService.ResetCursorService;
+begin
+  if (FForm <> nil) and (FCursorService.FOrgCursorService <> nil) then begin
+    TOpenForm(FForm).FCursorService := FCursorService.FOrgCursorService;
+    FCursorService.FOrgCursorService := nil;
+  end;
+end;
+
+procedure TMacWebBrowserService.SetCursorService;
+begin
+  ResetCursorService;
+
+  if (FForm <> nil) then begin
+    FCursorService.FOrgCursorService := TOpenForm(FForm).FCursorService;
+    TOpenForm(FForm).FCursorService := FCursorService;
+  end;
 end;
 
 procedure TMacWebBrowserService.SetEnableCaching(const Value: Boolean);
@@ -389,19 +529,45 @@ end;
 procedure TMacWebBrowserService.SetWebBrowserControl(
   const AValue: TCustomWebBrowser);
 begin
+  RemoveIntercepter;
+
   FWebControl := AValue;
 
-  FDelegate.SetWebControl(FWebControl);
+  FDelegate.SetWebControl(Self);
 
   if
     (FWebControl <> nil)
     and (FWebControl.Root <> nil)
     and (FWebControl.Root.GetObject is TCommonCustomForm)
   then begin
+    ResetCursorService;
     FForm := TCommonCustomForm(FWebControl.Root.GetObject);
-  end;
+    SetCursorService;
 
-  UpdateContentFromControl;
+    FVMIntercepter := TVirtualMethodInterceptor.Create(FForm.ClassType);
+    FVMIntercepter.OnBefore :=
+      procedure(
+        iInstance: TObject;
+        iMethod: TRttiMethod;
+        const iArgs: TArray<TValue>;
+        out iDoInvoke: Boolean;
+        out iResult: TValue)
+      begin
+        ProcMouseMove(iMethod, iArgs, True);
+      end;
+
+    FVMIntercepter.OnAfter :=
+      procedure(
+        iInstance: TObject;
+        iMethod: TRttiMethod;
+        const iArgs: TArray<TValue>;
+        var iResult: TValue)
+      begin
+        ProcMouseMove(iMethod, iArgs, False);
+      end;
+
+    FVMIntercepter.Proxify(FForm);
+  end;
 end;
 
 procedure TMacWebBrowserService.Show;
@@ -429,13 +595,16 @@ begin
     then begin
       Bounds := GetBounds;
 
-      View := WindowHandleToPlatform(FForm.Handle).View;
+      View := GetView;
       if (View <> nil) then begin
         View.addSubview(FWebView);
+        AddTrackingArea;
 
         if (SameValue(Bounds.Width, 0)) or (SameValue(Bounds.Height, 0)) then
+          // Hide WebView
           FWebView.setHidden(True)
         else begin
+          // Show WebView
           FWebView.setFrame(GetNSBounds);
           FWebView.setHidden(not FWebControl.ParentedVisible);
         end;
@@ -521,9 +690,10 @@ begin
 end;
 
 procedure TWebFrameLoadDelegate.SetWebControl(
-  const iWebControl: TCustomWebBrowser);
+  const iMacWebBrowserService: TMacWebBrowserService);
 begin
-  FWebControl := iWebControl;
+  FMacWebBrowserService := iMacWebBrowserService;
+  FWebControl := FMacWebBrowserService.FWebControl;
 end;
 
 procedure TWebFrameLoadDelegate.webView(
