@@ -173,7 +173,8 @@ begin
       TControl(Parent).OnResize := ParentResize;
 
     Web := GetWeb;
-    Web.SetWebBrowserControl(Self);
+    if (Web <> nil) then
+      Web.SetWebBrowserControl(Self);
 
     Show;
   end;
