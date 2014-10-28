@@ -7,6 +7,7 @@
  *                          if True, Log is displayed on Delphi's Event Log.
  * 2014-09-05  Version 1.3  New: UnknownType, use TryAsString
  *                          Bug: tkEnumeration, AsInteger -> AsOrdinal
+ * 2014-10-28  Version 1.4  Bug: XE5, XE7 can not compile.
  *
  * PLATFORMS
  *   Windows / OS X / iOS / Android
@@ -24,7 +25,7 @@
  *   2. Log.d('Message');           // Type only String
  *      Log.d([Value1, Value2...]); // multiple arguments, Any type ok.
  *
- * Programmed by HOSOKAWA Jun (twitter: @pik)
+ * Programmed by HOSOKAWA Jun / Delphi MVP / twitter: @pik
  *)
 
 unit FMX.Log;
@@ -102,7 +103,11 @@ type
 implementation
 
 uses
-  System.SysUtils, System.TypInfo, System.Classes
+  System.SysUtils
+  {$IF RTLVersion < 28}
+  , System.TypInfo
+  {$ENDIF}
+  , System.Classes
   {$IFDEF ANDROID}
   , Androidapi.Log, Androidapi.JNI.JavaTypes, FMX.Helpers.Android
   {$ENDIF}
@@ -208,8 +213,10 @@ begin
   then begin
     Log.FTag := AppService.GetTitle;
 
+    {$IF RTLVersion > 26}
     if (Log.FTag = '') then
       Log.FTag := AppService.GetDefaultTitle;
+    {$ENDIF}
   end;
 
   {$IFDEF ANDROID}
