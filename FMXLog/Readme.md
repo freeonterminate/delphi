@@ -11,8 +11,8 @@
 |Android |System Log                               |__android_log_write |
 
 ##“®ìŠÂ‹«
-Delphi / C++Builder / RAD Studio ‚Ì XE5, XE6  
-Appmethod 1.14  
+Delphi / C++Builder / RAD Studio ‚Ì XE5, XE6, XE7  
+Appmethod 1.14, 1.15  
 
 ##ƒtƒ@ƒCƒ‹
 
