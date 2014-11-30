@@ -1,8 +1,10 @@
-﻿(*
+(*
  * TWebBrowserEx Classes
  *   WebBrowser Componet for FireMonkey.
  *
  * Copyright (c) 2013, 2014 HOSOKAWA Jun.
+ *
+ * Last Update 2014/12/01
  *
  * Platform:
  *   Windows, OS X, iOS, Android
@@ -32,24 +34,24 @@
  *      end;
  *
  * LICENSE:
- *   本ソフトウェアは「現状のまま」で、明示であるか暗黙であるかを問わず、
- *   何らの保証もなく提供されます。
- *   本ソフトウェアの使用によって生じるいかなる損害についても、
- *   作者は一切の責任を負わないものとします。
+ *   �{�\�t�g�E�F�A�́u����̂܂܁v�ŁA�����ł��邩�Öقł��邩���킸�A
+ *   ����̕ۏ؂��Ȃ��񋟂���܂��B
+ *   �{�\�t�g�E�F�A�̎g�p�ɂ���Đ����邢���Ȃ鑹�Q�ɂ��Ă��A
+ *   ��҂͈�؂̐ӔC�𕉂�Ȃ����̂Ƃ��܂��B
  *
- *   以下の制限に従う限り、商用アプリケーションを含めて、本ソフトウェアを
- *   任意の目的に使用し、自由に改変して再頒布することをすべての人に許可します。
+ *   �ȉ��̐����ɏ]������A���p�A�v���P�[�V�������܂߂āA�{�\�t�g�E�F�A��
+ *   �C�ӂ̖ړI�Ɏg�p���A���R�ɉ��ς��čĔЕz���邱�Ƃ����ׂĂ̐l�ɋ����܂��B
  *
- *   1. 本ソフトウェアの出自について虚偽の表示をしてはなりません。
- *      あなたがオリジナルのソフトウェアを作成したと主張してはなりません。
- *      あなたが本ソフトウェアを製品内で使用する場合、製品の文書に謝辞を入れて
- *      いただければ幸いですが、必須ではありません。
+ *   1. �{�\�t�g�E�F�A�̏o���ɂ��ċ��U�̕\�������Ă͂Ȃ�܂���B
+ *      ���Ȃ����I���W�i���̃\�t�g�E�F�A���쐬�����Ǝ咣���Ă͂Ȃ�܂���B
+ *      ���Ȃ����{�\�t�g�E�F�A�𐻕i���Ŏg�p����ꍇ�A���i�̕����Ɏӎ�������
+ *      ����������΍K���ł����A�K�{�ł͂���܂���B
  *
- *   2. ソースを変更した場合は、そのことを明示しなければなりません。
- *      オリジナルのソフトウェアであるという虚偽の表示をしてはなりません。
+ *   2. �\�[�X��ύX�����ꍇ�́A���̂��Ƃ𖾎����Ȃ���΂Ȃ�܂���B
+ *      �I���W�i���̃\�t�g�E�F�A�ł���Ƃ������U�̕\�������Ă͂Ȃ�܂���B
  *
- *   3. ソースの頒布物から、この表示を削除したり、表示の内容を変更したりしては
- *      なりません。
+ *   3. �\�[�X�̔Еz������A���̕\�����폜������A�\���̓��e��ύX�����肵�Ă�
+ *      �Ȃ�܂���B
  *
  *   This software is provided 'as-is', without any express or implied warranty.
  *   In no event will the authors be held liable for any damages arising from
@@ -600,6 +602,13 @@ destructor TWinWebBrowserService.Destroy;
 begin
   if (Vcl.Forms.Application <> nil) then begin
     GWebViews.Remove(FWebView);
+
+    if (FWebView.FOldWndProc <> nil) then
+      SetWindowLong(
+        FWebView.FRootFormWnd,
+        GWL_WNDPROC,
+        Integer(FWebView.FOldWndProc));
+
     FWebView.DisposeOf;
   end;
 
@@ -815,8 +824,17 @@ begin
       end;
     end;
 
-  if (RootForm <> nil) then
+  if (RootForm <> nil) then begin
     FWebView.FRootFormWnd := FormToHWND(RootForm);
+    FWebView.FOldWndProc :=
+      Pointer(
+        SetWindowLong(
+          FWebView.FRootFormWnd,
+          GWL_WNDPROC,
+          Integer(@FormWndProc)
+        )
+      );
+  end;
 
   UpdateContentFromControl;
 end;
