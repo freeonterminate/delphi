@@ -52,7 +52,7 @@ type
   public
     destructor Destroy; override;
     // 通知して欲しい ACTION の登録と削除
-    procedure AddAction(const iAction: JString);
+    procedure AddAction(const iActions: array of JString);
     procedure RemoveAction(const iAction: JString);
     procedure ClearAction;
     // Boradcast Receiver を受け取った時のイベント
@@ -132,28 +132,37 @@ end;
 
 { TReceiverListener }
 
-procedure TBroadcastReceiver.AddAction(const iAction: JString);
+procedure TBroadcastReceiver.AddAction(const iActions: array of JString);
 var
   Str: String;
   JStr: String;
+  Action: JString;
   OK: Boolean;
+  Changed: Boolean;
 begin
-  OK := True;
+  Changed := False;
 
-  JStr := JStringToString(iAction);
-
-  for Str in FActions do
-    if (Str = JStr) then
-    begin
-      OK := False;
-      Break;
-    end;
-
-  if (OK) then
+  for Action in iActions do
   begin
-    FActions.Add(JStr);
-    SetReceiver;
+    OK := True;
+
+    JStr := JStringToString(Action);
+
+    for Str in FActions do
+      if (Str = JStr) then
+      begin
+        OK := False;
+        Break;
+      end;
+
+    if (OK) then begin
+      FActions.Add(JStr);
+      Changed := True;
+    end;
   end;
+
+  if (Changed) then
+    SetReceiver;
 end;
 
 procedure TBroadcastReceiver.ClearAction;
