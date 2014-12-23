@@ -61,6 +61,9 @@ begin
   // 元々のサービスの値を返すこともできる
   // 置き換える予定の無いメソッドについては inline 指定をすると
   // 呼び出しオーバーヘッドが少なくなる
+  // と思ったのですが、そんなことは無いそうです！！
+  // 詳しくは、Lyna さんのこのツイートをご覧ください
+  // https://twitter.com/lynatan/status/547410499164336128
   Result := FOrgFMXSystemFontService.GetDefaultFontSize;
 end;
 
