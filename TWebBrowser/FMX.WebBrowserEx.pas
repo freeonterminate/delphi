@@ -2,7 +2,9 @@
  * TWebBrowserEx Classes
  *   WebBrowser Componet for FireMonkey.
  *
- * Copyright (c) 2013, 2014 HOSOKAWA Jun.
+ * Copyright (c) 2013, 2015 HOSOKAWA Jun.
+ *
+ * Last Update 2015/01/08
  *
  * Platform:
  *   Windows, OS X, iOS, Android
@@ -83,6 +85,7 @@ type
   IWebBrowserEx = interface
   ['{66AB09D6-6B38-49DA-B831-B00F43EAF471}']
     function GetTagValue(const iTagName, iValueName: String): String;
+    function GetHTMLSource: String;
   end;
 
   [
@@ -98,9 +101,11 @@ type
   TWebBrowserEx = class(TWebBrowser)
   private
     procedure ParentResize(Sender: TObject);
+    function GetHTMLSource: String;
   protected
     procedure SetParent(const Value: TFmxObject); override;
     procedure SetVisible(const Value: Boolean); override;
+    procedure RaiseNotSupport(const iMsg: String);
   public
     constructor Create(Owner: TComponent); override;
     destructor Destroy; override;
@@ -112,6 +117,7 @@ type
       const iParams: array of String); overload;
     procedure CallJS(const iFunction: String); overload;
     function GetTagValue(const iTagName, iValueName: String): String;
+    property HTMLSource: String read GetHTMLSource;
   end;
 
 implementation
@@ -157,6 +163,22 @@ begin
   end;
 end;
 
+function TWebBrowserEx.GetHTMLSource: String;
+var
+  Web: ICustomBrowser;
+  WebEx: IWebBrowserEx;
+begin
+  Web := GetWeb;
+
+  if (Web = nil) then
+    Exit;
+
+  if (Supports(Web, IWebBrowserEx, WebEx)) then
+    Result := WebEx.GetHTMLSource
+  else
+    RaiseNotSupport('GetHTML method');
+end;
+
 function TWebBrowserEx.GetTagValue(const iTagName, iValueName: String): String;
 var
   Web: ICustomBrowser;
@@ -170,9 +192,7 @@ begin
   if (Supports(Web, IWebBrowserEx, WebEx)) then
     Result := WebEx.GetTagValue(iTagname, iValueName)
   else
-    raise
-      ENotSupportedException.Create(
-        'GetTagValue method is not supported on this platform.')
+    RaiseNotSupport('GetTagValue method');
 end;
 
 procedure TWebBrowserEx.CheckBounds;
@@ -229,6 +249,12 @@ end;
 procedure TWebBrowserEx.ParentResize(Sender: TObject);
 begin
   CheckBounds;
+end;
+
+procedure TWebBrowserEx.RaiseNotSupport(const iMsg: String);
+begin
+  raise
+    ENotSupportedException.Create(iMsg + ' is not supported on this platform.');
 end;
 
 procedure TWebBrowserEx.SetParent(const Value: TFmxObject);

@@ -2,7 +2,9 @@
  * TWebBrowserEx Classes
  *   WebBrowser Componet for FireMonkey.
  *
- * Copyright (c) 2013, 2014 HOSOKAWA Jun.
+ * Copyright (c) 2013, 2015 HOSOKAWA Jun.
+ *
+ * Last Update 2015/01/08
  *
  * Platform:
  *   Windows, OS X, iOS, Android
@@ -218,6 +220,7 @@ type
     property CanGoForward: Boolean read GetCanGoForward;
     { IWebBrowserEx }
     function GetTagValue(const iTagName, iValueName: String): String;
+    function GetHTMLSource: String;
   public
     constructor Create;
     destructor Destroy; override;
@@ -404,6 +407,16 @@ end;
 function TMacWebBrowserService.GetEnableCaching: Boolean;
 begin
   Result := (FNSCachePolicy = NSURLRequestReloadRevalidatingCacheData);
+end;
+
+function TMacWebBrowserService.GetHTMLSource: String;
+begin
+  Result :=
+    NSStrToStr(
+      FWebView.stringByEvaluatingJavaScriptFromString(
+        StrToNSSTR('document.getElementsByTagName("html")[0].outerHTML')
+      )
+    );
 end;
 
 function TMacWebBrowserService.GetNSBounds: NSRect;

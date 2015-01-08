@@ -1,10 +1,10 @@
-(*
+ï»¿(*
  * TWebBrowserEx Classes
  *   WebBrowser Componet for FireMonkey.
  *
- * Copyright (c) 2013, 2014 HOSOKAWA Jun.
+ * Copyright (c) 2013, 2015 HOSOKAWA Jun.
  *
- * Last Update 2014/12/01
+ * Last Update 2015/01/08
  *
  * Platform:
  *   Windows, OS X, iOS, Android
@@ -34,24 +34,24 @@
  *      end;
  *
  * LICENSE:
- *   –{ƒ\ƒtƒgƒEƒFƒA‚ÍuŒ»ó‚Ì‚Ü‚Üv‚ÅA–¾¦‚Å‚ ‚é‚©ˆÃ–Ù‚Å‚ ‚é‚©‚ğ–â‚í‚¸A
- *   ‰½‚ç‚Ì•ÛØ‚à‚È‚­’ñ‹Ÿ‚³‚ê‚Ü‚·B
- *   –{ƒ\ƒtƒgƒEƒFƒA‚Ìg—p‚É‚æ‚Á‚Ä¶‚¶‚é‚¢‚©‚È‚é‘¹ŠQ‚É‚Â‚¢‚Ä‚àA
- *   ìÒ‚ÍˆêØ‚ÌÓ”C‚ğ•‰‚í‚È‚¢‚à‚Ì‚Æ‚µ‚Ü‚·B
+ *   æœ¬ã‚½ãƒ•ãƒˆã‚¦ã‚§ã‚¢ã¯ã€Œç¾çŠ¶ã®ã¾ã¾ã€ã§ã€æ˜ç¤ºã§ã‚ã‚‹ã‹æš—é»™ã§ã‚ã‚‹ã‹ã‚’å•ã‚ãšã€
+ *   ä½•ã‚‰ã®ä¿è¨¼ã‚‚ãªãæä¾›ã•ã‚Œã¾ã™ã€‚
+ *   æœ¬ã‚½ãƒ•ãƒˆã‚¦ã‚§ã‚¢ã®ä½¿ç”¨ã«ã‚ˆã£ã¦ç”Ÿã˜ã‚‹ã„ã‹ãªã‚‹æå®³ã«ã¤ã„ã¦ã‚‚ã€
+ *   ä½œè€…ã¯ä¸€åˆ‡ã®è²¬ä»»ã‚’è² ã‚ãªã„ã‚‚ã®ã¨ã—ã¾ã™ã€‚
  *
- *   ˆÈ‰º‚Ì§ŒÀ‚É]‚¤ŒÀ‚èA¤—pƒAƒvƒŠƒP[ƒVƒ‡ƒ“‚ğŠÜ‚ß‚ÄA–{ƒ\ƒtƒgƒEƒFƒA‚ğ
- *   ”CˆÓ‚Ì–Ú“I‚Ég—p‚µA©—R‚É‰ü•Ï‚µ‚ÄÄ”Ğ•z‚·‚é‚±‚Æ‚ğ‚·‚×‚Ä‚Ìl‚É‹–‰Â‚µ‚Ü‚·B
+ *   ä»¥ä¸‹ã®åˆ¶é™ã«å¾“ã†é™ã‚Šã€å•†ç”¨ã‚¢ãƒ—ãƒªã‚±ãƒ¼ã‚·ãƒ§ãƒ³ã‚’å«ã‚ã¦ã€æœ¬ã‚½ãƒ•ãƒˆã‚¦ã‚§ã‚¢ã‚’
+ *   ä»»æ„ã®ç›®çš„ã«ä½¿ç”¨ã—ã€è‡ªç”±ã«æ”¹å¤‰ã—ã¦å†é ’å¸ƒã™ã‚‹ã“ã¨ã‚’ã™ã¹ã¦ã®äººã«è¨±å¯ã—ã¾ã™ã€‚
  *
- *   1. –{ƒ\ƒtƒgƒEƒFƒA‚Ìo©‚É‚Â‚¢‚Ä‹•‹U‚Ì•\¦‚ğ‚µ‚Ä‚Í‚È‚è‚Ü‚¹‚ñB
- *      ‚ ‚È‚½‚ªƒIƒŠƒWƒiƒ‹‚Ìƒ\ƒtƒgƒEƒFƒA‚ğì¬‚µ‚½‚Æå’£‚µ‚Ä‚Í‚È‚è‚Ü‚¹‚ñB
- *      ‚ ‚È‚½‚ª–{ƒ\ƒtƒgƒEƒFƒA‚ğ»•i“à‚Åg—p‚·‚éê‡A»•i‚Ì•¶‘‚ÉÓ«‚ğ“ü‚ê‚Ä
- *      ‚¢‚½‚¾‚¯‚ê‚ÎK‚¢‚Å‚·‚ªA•K{‚Å‚Í‚ ‚è‚Ü‚¹‚ñB
+ *   1. æœ¬ã‚½ãƒ•ãƒˆã‚¦ã‚§ã‚¢ã®å‡ºè‡ªã«ã¤ã„ã¦è™šå½ã®è¡¨ç¤ºã‚’ã—ã¦ã¯ãªã‚Šã¾ã›ã‚“ã€‚
+ *      ã‚ãªãŸãŒã‚ªãƒªã‚¸ãƒŠãƒ«ã®ã‚½ãƒ•ãƒˆã‚¦ã‚§ã‚¢ã‚’ä½œæˆã—ãŸã¨ä¸»å¼µã—ã¦ã¯ãªã‚Šã¾ã›ã‚“ã€‚
+ *      ã‚ãªãŸãŒæœ¬ã‚½ãƒ•ãƒˆã‚¦ã‚§ã‚¢ã‚’è£½å“å†…ã§ä½¿ç”¨ã™ã‚‹å ´åˆã€è£½å“ã®æ–‡æ›¸ã«è¬è¾ã‚’å…¥ã‚Œã¦
+ *      ã„ãŸã ã‘ã‚Œã°å¹¸ã„ã§ã™ãŒã€å¿…é ˆã§ã¯ã‚ã‚Šã¾ã›ã‚“ã€‚
  *
- *   2. ƒ\[ƒX‚ğ•ÏX‚µ‚½ê‡‚ÍA‚»‚Ì‚±‚Æ‚ğ–¾¦‚µ‚È‚¯‚ê‚Î‚È‚è‚Ü‚¹‚ñB
- *      ƒIƒŠƒWƒiƒ‹‚Ìƒ\ƒtƒgƒEƒFƒA‚Å‚ ‚é‚Æ‚¢‚¤‹•‹U‚Ì•\¦‚ğ‚µ‚Ä‚Í‚È‚è‚Ü‚¹‚ñB
+ *   2. ã‚½ãƒ¼ã‚¹ã‚’å¤‰æ›´ã—ãŸå ´åˆã¯ã€ãã®ã“ã¨ã‚’æ˜ç¤ºã—ãªã‘ã‚Œã°ãªã‚Šã¾ã›ã‚“ã€‚
+ *      ã‚ªãƒªã‚¸ãƒŠãƒ«ã®ã‚½ãƒ•ãƒˆã‚¦ã‚§ã‚¢ã§ã‚ã‚‹ã¨ã„ã†è™šå½ã®è¡¨ç¤ºã‚’ã—ã¦ã¯ãªã‚Šã¾ã›ã‚“ã€‚
  *
- *   3. ƒ\[ƒX‚Ì”Ğ•z•¨‚©‚çA‚±‚Ì•\¦‚ğíœ‚µ‚½‚èA•\¦‚Ì“à—e‚ğ•ÏX‚µ‚½‚è‚µ‚Ä‚Í
- *      ‚È‚è‚Ü‚¹‚ñB
+ *   3. ã‚½ãƒ¼ã‚¹ã®é ’å¸ƒç‰©ã‹ã‚‰ã€ã“ã®è¡¨ç¤ºã‚’å‰Šé™¤ã—ãŸã‚Šã€è¡¨ç¤ºã®å†…å®¹ã‚’å¤‰æ›´ã—ãŸã‚Šã—ã¦ã¯
+ *      ãªã‚Šã¾ã›ã‚“ã€‚
  *
  *   This software is provided 'as-is', without any express or implied warranty.
  *   In no event will the authors be held liable for any damages arising from
@@ -209,6 +209,7 @@ type
       const pDO: IDataObject;
       out ppDORet: IDataObject): HResult; stdcall;
   public
+    procedure SetFocus; override;
     property OnShouldStartLoadWithRequest: TWebBrowserShouldStartLoadWithRequest
       read FOnShouldStartLoadWithRequest
       write FOnShouldStartLoadWithRequest;
@@ -280,6 +281,7 @@ type
     property CanGoForward: Boolean read GetCanGoForward;
     { IWebBrowserEx }
     function GetTagValue(const iTagName, iValueName: String): String;
+    function GetHTMLSource: String;
   public
     constructor Create;
     destructor Destroy; override;
@@ -484,6 +486,20 @@ begin
   Result := E_NOTIMPL;
 end;
 
+procedure TWebBrowser.SetFocus;
+begin
+  inherited;
+
+  if (Vcl.Forms.Application <> nil) then
+    (Vcl.Forms.Application  as IOleObject).DoVerb(
+      OLEIVERB_UIACTIVATE,
+      nil,
+      Self,
+      0,
+      Handle,
+      ClientRect);
+end;
+
 function TWebBrowser.ShowContextMenu(
   dwID: UINT;
   ppt: PtagPOINT;
@@ -602,13 +618,6 @@ destructor TWinWebBrowserService.Destroy;
 begin
   if (Vcl.Forms.Application <> nil) then begin
     GWebViews.Remove(FWebView);
-
-    if (FWebView.FOldWndProc <> nil) then
-      SetWindowLong(
-        FWebView.FRootFormWnd,
-        GWL_WNDPROC,
-        Integer(FWebView.FOldWndProc));
-
     FWebView.DisposeOf;
   end;
 
@@ -646,6 +655,17 @@ end;
 function TWinWebBrowserService.GetEnableCaching: Boolean;
 begin
   Result := FEnableCaching;
+end;
+
+function TWinWebBrowserService.GetHTMLSource: String;
+begin
+  Result := '';
+
+  if (FWebView <> nil) and (FWebView.Document <> nil) then
+    try
+      Result := FWebView.OleObject.Document.documentElement.outerHTML;
+    except
+    end;
 end;
 
 function TWinWebBrowserService.GetParent: TFmxObject;
@@ -824,17 +844,8 @@ begin
       end;
     end;
 
-  if (RootForm <> nil) then begin
+  if (RootForm <> nil) then
     FWebView.FRootFormWnd := FormToHWND(RootForm);
-    FWebView.FOldWndProc :=
-      Pointer(
-        SetWindowLong(
-          FWebView.FRootFormWnd,
-          GWL_WNDPROC,
-          Integer(@FormWndProc)
-        )
-      );
-  end;
 
   UpdateContentFromControl;
 end;
