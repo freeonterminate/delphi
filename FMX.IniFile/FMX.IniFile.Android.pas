@@ -4,6 +4,7 @@
  * The File is used from FMX.IniFile.
  *
  * 2014/05/20 version 1.0
+ * 2015/01/22 version 1.0.1 Fix for Lollipop.
  * Programmed by HOSOKAWA Jun (@pik)
  *)
 
@@ -134,7 +135,7 @@ begin
     FPrefs :=
       SharedActivityContext.getSharedPreferences(
         StringToJString(GetAppName),
-        TJActivity.JavaClass.MODE_PRIVATE
+        TJContext.JavaClass.MODE_PRIVATE
       );
 end;
 
