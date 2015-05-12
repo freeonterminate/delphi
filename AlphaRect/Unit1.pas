@@ -4,7 +4,8 @@ interface
 
 uses
   System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants,
-  FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs, FMX.Objects;
+  FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs, FMX.Objects,
+  FMX.Layouts;
 
 type
   TForm1 = class(TForm)
@@ -16,6 +17,7 @@ type
       Shift: TShiftState; X, Y: Single);
     procedure FormKeyDown(Sender: TObject; var Key: Word; var KeyChar: Char;
       Shift: TShiftState);
+    procedure FormCreate(Sender: TObject);
   private
     FStartPos: TPointF;
   public
@@ -30,6 +32,14 @@ uses
   System.Math;
 
 {$R *.fmx}
+
+procedure TForm1.FormCreate(Sender: TObject);
+begin
+  SetBounds(0, 0, Screen.Width, Screen.Height);
+  {$IFDEF MACOS}
+  Fill.Color := $10000000
+  {$ENDIF};
+end;
 
 procedure TForm1.FormKeyDown(Sender: TObject; var Key: Word; var KeyChar: Char;
   Shift: TShiftState);
