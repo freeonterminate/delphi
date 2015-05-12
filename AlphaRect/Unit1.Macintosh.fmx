@@ -1,0 +1,4 @@
+inherited Form1_Macintosh: TForm1_Macintosh
+  Fill.Color = x10000000
+  DesignerMasterStyle = 0
+end

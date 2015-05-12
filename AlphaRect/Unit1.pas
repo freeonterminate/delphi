@@ -5,18 +5,15 @@ interface
 uses
   System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants,
   FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs, FMX.Objects,
-  FMX.Layouts;
+  FMX.Layouts, System.Math;
 
 type
   TForm1 = class(TForm)
     Rectangle1: TRectangle;
-    procedure FormMouseDown(Sender: TObject; Button: TMouseButton;
-      Shift: TShiftState; X, Y: Single);
+    procedure FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Single);
     procedure FormMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Single);
-    procedure FormMouseUp(Sender: TObject; Button: TMouseButton;
-      Shift: TShiftState; X, Y: Single);
-    procedure FormKeyDown(Sender: TObject; var Key: Word; var KeyChar: Char;
-      Shift: TShiftState);
+    procedure FormMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Single);
+    procedure FormKeyDown(Sender: TObject; var Key: Word; var KeyChar: Char; Shift: TShiftState);
     procedure FormCreate(Sender: TObject);
   private
     FStartPos: TPointF;
@@ -28,28 +25,21 @@ var
 
 implementation
 
-uses
-  System.Math;
-
 {$R *.fmx}
+{$R *.Macintosh.fmx MACOS}
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
   SetBounds(0, 0, Screen.Width, Screen.Height);
-  {$IFDEF MACOS}
-  Fill.Color := $10000000
-  {$ENDIF};
 end;
 
-procedure TForm1.FormKeyDown(Sender: TObject; var Key: Word; var KeyChar: Char;
-  Shift: TShiftState);
+procedure TForm1.FormKeyDown(Sender: TObject; var Key: Word; var KeyChar: Char; Shift: TShiftState);
 begin
   if (Key = vkEscape) then
     Close;
 end;
 
-procedure TForm1.FormMouseDown(Sender: TObject; Button: TMouseButton;
-  Shift: TShiftState; X, Y: Single);
+procedure TForm1.FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Single);
 begin
   FStartPos := TPointF.Create(X, Y);
 
@@ -57,8 +47,7 @@ begin
   Rectangle1.Visible := True;
 end;
 
-procedure TForm1.FormMouseMove(Sender: TObject; Shift: TShiftState; X,
-  Y: Single);
+procedure TForm1.FormMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Single);
 var
   MinX, MinY, MaxX, MaxY: Single;
 
@@ -74,7 +63,6 @@ begin
 
   GetMinMax(MinX, MaxX, [FStartPos.X, X]);
   GetMinMax(MinY, MaxY, [FStartPos.Y, Y]);
-
   Rectangle1.SetBounds(MinX, MinY, MaxX - MinX, MaxY - MinY);
 end;
 
