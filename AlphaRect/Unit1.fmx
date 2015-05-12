@@ -1,0 +1,27 @@
+object Form1: TForm1
+  Left = 0
+  Top = 0
+  Caption = 'Form1'
+  ClientHeight = 480
+  ClientWidth = 640
+  Fill.Color = x01000000
+  Fill.Kind = Solid
+  Transparency = True
+  WindowState = wsMaximized
+  FormFactor.Width = 320
+  FormFactor.Height = 480
+  FormFactor.Devices = [Desktop]
+  OnKeyDown = FormKeyDown
+  OnMouseDown = FormMouseDown
+  OnMouseMove = FormMouseMove
+  OnMouseUp = FormMouseUp
+  DesignerMasterStyle = 0
+  object Rectangle1: TRectangle
+    Fill.Color = x80000000
+    HitTest = False
+    Size.Width = 8.000000000000000000
+    Size.Height = 8.000000000000000000
+    Size.PlatformDefault = False
+    Visible = False
+  end
+end
