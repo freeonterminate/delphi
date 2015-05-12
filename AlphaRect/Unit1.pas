@@ -63,11 +63,11 @@ begin
 
   GetMinMax(MinX, MaxX, [FStartPos.X, X]);
   GetMinMax(MinY, MaxY, [FStartPos.Y, Y]);
+
   Rectangle1.SetBounds(MinX, MinY, MaxX - MinX, MaxY - MinY);
 end;
 
-procedure TForm1.FormMouseUp(Sender: TObject; Button: TMouseButton;
-  Shift: TShiftState; X, Y: Single);
+procedure TForm1.FormMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Single);
 begin
   Rectangle1.Visible := False;
 end;
