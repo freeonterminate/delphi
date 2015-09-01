@@ -1,4 +1,4 @@
-#XE8IDESettingChanger
+#IDESettingChanger
   
 ##CAUTION
 THIS TEXT IS TRANSLATION BY A MACHINE.  
@@ -8,21 +8,21 @@ MY TWITTER ACCOUNT: @pik
 (I AM DELPHI'S MVP OF EMBARCADERO TECHNOLOGIES.)  
 
 ##Introduction
-This application changes the setting of XE8 IDE (FontName, FontSize, MainToolBarColor).
+This application changes the setting of XE8/10 IDE (FontName, FontSize, MainToolBarColor).
 
 ##Environment Platform
-Delphi / RAD Studio version XE8.  
-Appmethod 1.16  
+Delphi / RAD Studio version XE8, 10 seattle.
+Appmethod 1.16, 1.17
 
 ##File
 Please download following files.  
 
-    XE8IDESettingChanger.dpr  Project file.
+    IDESettingChanger.dpr  Project file.
     uMain.pas                 Main Form
     uMain.fmx                 Main Form
 
 ##How to use
-Open XE8IDESettingChanger.dpr.  
+Open IDESettingChanger.dpr.
 Build & Run.  
 You change FontName, FontSize, MainToolBarColor appropriately.  
   

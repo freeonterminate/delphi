@@ -1,9 +1,10 @@
 ﻿(*
- * XE8 IDE setting changer
+ * IDE setting changer
  *
  * Copyright (c) 2015 HOSOKAWA Jun.
  *
- * Last Update 2015/04/09
+ * First Release 2015/04/09 XE8 対応
+ * Last Update   2015/09/01 10 seattle 対応
  *
  * Contact:
  *   Twitter @pik or freeonterminate@gmail.com
@@ -77,6 +78,8 @@ type
     btnReset: TButton;
     memoLog: TMemo;
     btnXE7Color: TButton;
+    cmbbxTarget: TComboBox;
+    lblTarget: TLabel;
     procedure cmbbxFontNameChange(Sender: TObject);
     procedure colorBaseColorChange(Sender: TObject);
     procedure spinFontSizeChange(Sender: TObject);
@@ -97,7 +100,10 @@ uses
   Winapi.Windows;
 
 const
-  REG_KEY = 'Software\Embarcadero\BDS\16.0\ModernTheme';
+  REG_KEY = 'Software\Embarcadero\BDS\%s\ModernTheme';
+
+  VER_XE8 = '16.0';
+  VER_SEATTLE = '17.0';
 
   REG_KEY_FONT_NAME = 'FontName';
   REG_KEY_FONT_SIZE = 'FontSize';
@@ -138,7 +144,30 @@ var
     hReg: HKEY;
     Disposition: DWORD;
     Res: DWORD;
+    Ver: String;
+    RegKey: String;
   begin
+    case cmbbxTarget.ItemIndex of
+      0:
+        Ver := VER_XE8;
+
+      1:
+      begin
+        Ver := VER_SEATTLE;
+      end;
+
+      else
+        Ver := '';
+    end;
+
+    if (Ver.IsEmpty) then
+    begin
+      Log('ERROR, Target IDE unknown');
+      Exit;
+    end;
+
+    RegKey := Format(REG_KEY, [Ver]);
+
     if (iType = REG_SZ) then
       Log(Format('%s: String = %s', [iKey, String(PChar(iValue))]))
     else
@@ -149,7 +178,7 @@ var
     Res :=
       RegCreateKeyEx(
         HKEY_CURRENT_USER,
-        PChar(REG_KEY),
+        PChar(RegKey),
         0,
         nil,
         REG_OPTION_NON_VOLATILE,

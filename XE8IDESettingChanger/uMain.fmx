@@ -1,8 +1,9 @@
 object Form1: TForm1
   Left = 0
   Top = 0
+  BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = Single
-  Caption = 'XE8 IDE Settings Changer'
+  Caption = 'IDE Settings Changer'
   ClientHeight = 232
   ClientWidth = 488
   FormFactor.Width = 320
@@ -20,7 +21,7 @@ object Form1: TForm1
     Size.PlatformDefault = False
     TextSettings.Font.Size = 20.000000000000000000
     TextSettings.Font.Style = [fsBold]
-    Text = 'XE8 IDE Setting changer'
+    Text = 'IDE Setting changer'
   end
   object pnlPreviewBase: TPanel
     Position.X = 8.000000000000000000
@@ -28,7 +29,7 @@ object Form1: TForm1
     Size.Width = 193.000000000000000000
     Size.Height = 81.000000000000000000
     Size.PlatformDefault = False
-    TabOrder = 0
+    TabOrder = 8
     TabStop = False
     object rectPreviewColor: TRectangle
       Align = Contents
@@ -177,7 +178,7 @@ object Form1: TForm1
     Size.Width = 81.000000000000000000
     Size.Height = 22.000000000000000000
     Size.PlatformDefault = False
-    TabOrder = 3
+    TabOrder = 4
     OnChange = colorBaseColorChange
   end
   object btnSave: TButton
@@ -187,7 +188,7 @@ object Form1: TForm1
     Size.Width = 192.000000000000000000
     Size.Height = 81.000000000000000000
     Size.PlatformDefault = False
-    TabOrder = 5
+    TabOrder = 6
     Text = 'Save'
     TextSettings.Font.Size = 20.000000000000000000
     TextSettings.Font.Style = [fsBold]
@@ -199,7 +200,7 @@ object Form1: TForm1
     Size.Width = 193.000000000000000000
     Size.Height = 22.000000000000000000
     Size.PlatformDefault = False
-    TabOrder = 1
+    TabOrder = 2
     OnChange = cmbbxFontNameChange
   end
   object lblFontNameTitle: TLabel
@@ -235,7 +236,7 @@ object Form1: TForm1
   end
   object spinFontSize: TSpinBox
     Touch.InteractiveGestures = [LongTap, DoubleTap]
-    TabOrder = 2
+    TabOrder = 3
     Cursor = crIBeam
     Position.X = 288.000000000000000000
     Position.Y = 72.000000000000000000
@@ -250,7 +251,7 @@ object Form1: TForm1
     Size.Width = 56.000000000000000000
     Size.Height = 22.000000000000000000
     Size.PlatformDefault = False
-    TabOrder = 7
+    TabOrder = 1
     Text = 'Reset'
     OnClick = btnResetClick
   end
@@ -265,7 +266,7 @@ object Form1: TForm1
     Size.Width = 273.000000000000000000
     Size.Height = 81.000000000000000000
     Size.PlatformDefault = False
-    TabOrder = 6
+    TabOrder = 7
     Viewport.Width = 269.000000000000000000
     Viewport.Height = 77.000000000000000000
   end
@@ -275,8 +276,28 @@ object Form1: TForm1
     Size.Width = 104.000000000000000000
     Size.Height = 22.000000000000000000
     Size.PlatformDefault = False
-    TabOrder = 4
+    TabOrder = 5
     Text = 'Set XE7 Color'
     OnClick = btnXE7ColorClick
+  end
+  object cmbbxTarget: TComboBox
+    Items.Strings = (
+      'XE8'
+      '10 seattle')
+    ItemIndex = 1
+    Position.X = 288.000000000000000000
+    Position.Y = 8.000000000000000000
+    Size.Width = 124.000000000000000000
+    Size.Height = 22.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 0
+  end
+  object lblTarget: TLabel
+    Position.X = 224.000000000000000000
+    Position.Y = 8.000000000000000000
+    Size.Width = 65.000000000000000000
+    Size.Height = 17.000000000000000000
+    Size.PlatformDefault = False
+    Text = 'Target IDE'
   end
 end

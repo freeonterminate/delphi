@@ -3,7 +3,8 @@
  *
  * Copyright (c) 2015 HOSOKAWA Jun.
  *
- * Last Update 2015/04/09
+ * First Release 2015/04/09 XE8 対応
+ * Last Update   2015/09/01 10 seattle 対応
  *
  * Contact:
  *   Twitter @pik or freeonterminate@gmail.com
@@ -49,7 +50,7 @@
  *
  *   3. This notice may not be removed or altered from any source distribution.
  *)
- program XE8IDESettingChanger;
+ program IDESettingChanger;
 
 uses
   Winapi.Windows,
