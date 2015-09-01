@@ -8,11 +8,11 @@ MY TWITTER ACCOUNT: @pik
 (I AM DELPHI'S MVP OF EMBARCADERO TECHNOLOGIES.)  
 
 ##Introduction
-This application changes the setting of XE8/10 IDE (FontName, FontSize, MainToolBarColor).
+This application changes the setting of XE8/10 IDE (FontName, FontSize, MainToolBarColor).  
 
 ##Environment Platform
-Delphi / RAD Studio version XE8, 10 seattle.
-Appmethod 1.16, 1.17
+Delphi / RAD Studio version XE8, 10 seattle.  
+Appmethod 1.16, 1.17  
 
 ##File
 Please download following files.  
