@@ -35,7 +35,7 @@ implementation
 uses
   System.IOUtils
   , System.Net.HttpClient
-  //, uFileStreamFixForAndroid4
+  , uFileStreamFixForAndroid4
   ;
 
 {$R *.fmx}
