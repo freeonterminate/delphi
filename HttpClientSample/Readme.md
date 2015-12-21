@@ -1,5 +1,5 @@
 # Download Image sample
 
-���̃R�[�h�� Delphi Advent Calendaer 2015 �Q�S���ڂ̃T���v���R�[�h�ł��B
+このコードは Delphi Advent Calendaer 2015 ２５日目のサンプルコードです。
 
-Project1.dpr ���r���h���Ď��s����� THttpClient �𗘗p���ĉ摜���_�E�����[�h���Ă��܂��B
+Project1.dpr をビルドして実行すると THttpClient を利用して画像をダウンロードしてきます。
