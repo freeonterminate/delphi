@@ -219,7 +219,6 @@ type
     function GetBounds: TRectF;
     function GetNSBounds: NSRect;
     procedure RemoveIntercepter;
-    function GetView: NSView; inline;
     procedure RemoveTrackingArea;
     procedure AddTrackingArea;
     procedure SetCursorService;
@@ -229,6 +228,7 @@ type
       const iArgs: TArray<TValue>;
       const iSet: Boolean);
   protected
+    function GetView: NSView; inline;
     { ICustomBrowser }
     function GetURL: string;
     function CaptureBitmap: TBitmap;
