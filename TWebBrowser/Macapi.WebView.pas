@@ -2,11 +2,14 @@
  * TWebBrowserEx Classes
  *   WebBrowser Componet for FireMonkey.
  *
- * Copyright (c) 2013, 2014 HOSOKAWA Jun.
+ * Copyright (c) 2013, 2015 HOSOKAWA Jun.
+ *
+ * Last Update 2015/10/29
  *
  * Platform:
  *   Windows, OS X, iOS, Android
- *   Delphi / C++Builder XE5, XE6, XE7 and Appmethod 1.14, 1.15
+ *   Delphi / C++Builder XE5, XE6, XE7, XE8, 10 seattle
+ *   Appmethod 1.14, 1.15, 1.16, 1.17
  *
  * Contact:
  *   Twitter @pik or freeonterminate@gmail.com
@@ -86,6 +89,154 @@ uses
   , Macapi.ObjectiveC, Macapi.CocoaTypes, Macapi.Foundation, Macapi.AppKit
   , FMX.Types, FMX.Controls
   ;
+
+const
+  WEBKIT_FRAMEWORK: String =
+    '/System/Library/Frameworks/WebKit.framework/WebKit';
+
+type
+  TWebKitError = record
+  public const
+    CannotShowMIMEType = 100;
+    CannotShowURL = 101;
+    FrameLoadInterruptedByPolicyChange = 102;
+    CannotFindPlugIn = 200;
+    CannotLoadPlugIn = 201;
+    JavaUnavailable = 202;
+    BlockedPlugInVersion = 203;
+  end;
+
+  TWebNavigationType = record
+  public const
+    LinkClicked = 0;
+    FormSubmitted = 1;
+    BackForward = 2;
+    Reload = 3;
+    FormResubmitted = 4;
+    Other = 5;
+  end;
+
+  TWebMenuItem = record
+  public const
+    TagOpenLinkInNewWindow = 1;
+    TagDownloadLinkToDisk = 2;
+    TagCopyLinkToClipboard = 3;
+    TagOpenImageInNewWindow = 4;
+    TagDownloadImageToDisk = 5;
+    TagCopyImageToClipboard = 6;
+    TagOpenFrameInNewWindow = 7;
+    TagCopy = 8;
+    TagGoBack = 9;
+    TagGoForward = 10;
+    TagStop = 11;
+    TagReload = 12;
+    TagCut = 13;
+    TagPaste = 14;
+    TagSpellingGuess = 15;
+    TagNoGuessesFound = 16;
+    TagIgnoreSpelling = 17;
+    TagLearnSpelling = 18;
+    TagOther = 19;
+    TagSearchInSpotlight = 20;
+    TagSearchWeb = 21;
+    TagLookUpInDictionary = 22;
+    TagOpenWithDefaultApplication = 23;
+    PDFActualSize = 24;
+    PDFZoomIn = 25;
+    PDFZoomOut = 26;
+    PDFAutoSize = 27;
+    PDFSinglePage = 28;
+    PDFFacingPages = 29;
+    PDFContinuous = 30;
+    PDFNextPage = 31;
+    PDFPreviousPage = 32;
+  end;
+
+  TWebDragDestinationAction = record
+  public const
+    None = 0;
+    DHTML = 1;
+    Edit = 2;
+    Load = 4;
+    Any = 429496729;
+  end;
+
+  TWebDragSourceAction = record
+  public const
+    None = 0;
+    DHTML = 1;
+    Image = 2;
+    Link = 4;
+    Selection = 8;
+    Any = 429496729;
+  end;
+
+  TWebCacheModel = record
+  public const
+     DocumentViewer = 0;
+     DocumentBrowser = 1;
+     PrimaryWebBrowser = 2;
+  end;
+
+  TWebActionKeys = record
+  public const
+    NavigationTypeKey = 'WebActionNavigationTypeKey';
+    ElementKey = 'WebActionElementKey';
+    ButtonKey = 'WebActionButtonKey';
+    ModifierFlagsKey = 'WebActionModifierFlagsKey';
+    OriginalURLKey = 'WebActionOriginalURLKey';
+  public
+    class function GetNavigationTypeKey: NSString; static;
+    class function GetElementKey: NSString; static;
+    class function GetButtonKey: NSString; static;
+    class function GetModifierFlagsKey: NSString; static;
+    class function GetOriginalURLKey: NSString; static;
+
+    class function GetNavigationTypeKeyObj: Pointer; static;
+    class function GetElementKeyObj: Pointer; static;
+    class function GetButtonKeyObj: Pointer; static;
+    class function GetModifierFlagsKeyObj: Pointer; static;
+    class function GetOriginalURLKeyObj: Pointer; static;
+  end;
+
+  TWebElement = record
+  public const
+    DOMNodeKey = 'WebElementDOMNodeKey';
+    FrameKey = 'WebElementFrameKey';
+    ImageAltStringKey = 'WebElementImageAltStringKey';
+    ImageKey = 'WebElementImageKey';
+    ImageRectKey = 'WebElementImageRectKey';
+    ImageURLKey = 'WebElementImageURLKey';
+    IsSelectedKey = 'WebElementIsSelectedKey';
+    LinkURLKey = 'WebElementLinkURLKey';
+    LinkTargetFrameKey = 'WebElementLinkTargetFrameKey';
+    LinkTitleKey = 'WebElementLinkTitleKey';
+    LinkLabelKey = 'WebElementLinkLabelKey';
+  public
+    class function GetDOMNodeKey: NSString; static;
+    class function GetFrameKey: NSString; static;
+    class function GetImageAltStringKey: NSString; static;
+    class function GetImageKey: NSString; static;
+    class function GetImageRectKey: NSString; static;
+    class function GetImageURLKey: NSString; static;
+    class function GetIsSelectedKey: NSString; static;
+    class function GetLinkURLKey: NSString; static;
+    class function GetLinkTargetFrameKey: NSString; static;
+    class function GetLinkTitleKey: NSString; static;
+    class function GetLinkLabelKey: NSString; static;
+
+    class function GetDOMNodeKeyObj: Pointer; static;
+    class function GetFrameKeyObj: Pointer; static;
+    class function GetImageAltStringKeyObj: Pointer; static;
+    class function GetImageKeyObj: Pointer; static;
+    class function GetImageRectKeyObj: Pointer; static;
+    class function GetImageURLKeyObj: Pointer; static;
+    class function GetIsSelectedKeyObj: Pointer; static;
+    class function GetLinkURLKeyObj: Pointer; static;
+    class function GetLinkTargetFrameKeyObj: Pointer; static;
+    class function GetLinkTitleKeyObj: Pointer; static;
+    class function GetLinkLabelKeyObj: Pointer; static;
+  end;
 
 type
   WebFrame = interface;
@@ -244,6 +395,43 @@ type
     procedure setWebScriptValueAtIndex(index: UInt32; value: Pointer); cdecl;
     function stringRepresentation: NSString; cdecl;
     function webScriptValueAtIndex(index: UInt32): Pointer; cdecl;
+  end;
+
+  WebPolicyDelegate = interface(IObjectiveC)
+    ['{0BE9E848-E8DF-4736-B10B-63B565D3EA6D}']
+    [MethodName('webView:decidePolicyForNavigationAction:request:frame:decisionListener:')]
+    procedure webViewDecidePolicyForNavigationActionRequestFrameDecisionListener(
+      WebView: WebView;
+      decidePolicyForNavigationAction: NSDictionary;
+      request: NSURLRequest;
+      frame: WebFrame;
+      decisionListener: Pointer); cdecl;
+    [MethodName('webView:decidePolicyForNewWindowAction:request:newFrameName:decisionListener:')]
+    procedure webViewDecidePolicyForNewWindowActionRequestNewFrameNameDecisionListener(
+      WebView: WebView;
+      decidePolicyForNewWindowAction: NSDictionary;
+      request: NSURLRequest;
+      newFrameName: NSString;
+      decisionListener: Pointer); cdecl;
+    [MethodName('webView:decidePolicyForMIMEType:request:frame:decisionListener:')]
+    procedure webViewDecidePolicyForMIMETypeRequestFrameDecisionListener(
+      WebView: WebView;
+      decidePolicyForMIMEType: NSString;
+      request: NSURLRequest;
+      frame: WebFrame;
+      decisionListener: Pointer); cdecl;
+    [MethodName('webView:unableToImplementPolicyWithError:frame:')]
+    procedure webViewUnableToImplementPolicyWithErrorFrame(
+      WebView: WebView;
+      unableToImplementPolicyWithError: NSError;
+      frame: WebFrame); cdecl;
+  end;
+
+  WebPolicyDecisionListener = interface(IObjectiveCInstance)
+    ['{3D5D132B-B8C7-4227-A414-F590E93477F2}']
+    procedure use; cdecl;
+    procedure download; cdecl;
+    procedure ignore; cdecl;
   end;
 
   WebViewClass = interface(NSViewClass)
@@ -583,12 +771,6 @@ type
       //frame: WebFrame); overload; cdecl;
   end;
 
-  TWebCacheModel = (
-     WebCacheModelDocumentViewer = 0,
-     WebCacheModelDocumentBrowser = 1,
-     WebCacheModelPrimaryWebBrowser = 2
-   );
-
   TWebFrame = class(TOCGenericImport<WebFrameClass, WebFrame>)
   end;
 
@@ -597,5 +779,176 @@ type
 
 implementation
 
+uses
+  Macapi.Helpers;
+
+function KeyToNSStr(const iKey: String): NSString; inline;
+begin
+  Result := CocoaNSStringConst(WEBKIT_FRAMEWORK, iKey);
+end;
+
+{ TWebActionKeys }
+
+class function TWebActionKeys.GetButtonKey: NSString;
+begin
+  Result := KeyToNSStr(TWebActionKeys.ButtonKey);
+end;
+
+class function TWebActionKeys.GetButtonKeyObj: Pointer;
+begin
+  Result := (GetButtonKey as ILocalObject).GetObjectID;
+end;
+
+class function TWebActionKeys.GetElementKey: NSString;
+begin
+  Result := KeyToNSStr(TWebActionKeys.ElementKey);
+end;
+
+class function TWebActionKeys.GetElementKeyObj: Pointer;
+begin
+  Result := (GetElementKey as ILocalObject).GetObjectID;
+end;
+
+class function TWebActionKeys.GetModifierFlagsKey: NSString;
+begin
+  Result := KeyToNSStr(TWebActionKeys.ModifierFlagsKey);
+end;
+
+class function TWebActionKeys.GetModifierFlagsKeyObj: Pointer;
+begin
+  Result := (GetModifierFlagsKey as ILocalObject).GetObjectID;
+end;
+
+class function TWebActionKeys.GetNavigationTypeKey: NSString;
+begin
+  Result := KeyToNSStr(TWebActionKeys.NavigationTypeKey);
+end;
+
+class function TWebActionKeys.GetNavigationTypeKeyObj: Pointer;
+begin
+  Result := (GetNavigationTypeKey as ILocalObject).GetObjectID;
+end;
+
+class function TWebActionKeys.GetOriginalURLKey: NSString;
+begin
+  Result := KeyToNSStr(TWebActionKeys.OriginalURLKey);
+end;
+
+class function TWebActionKeys.GetOriginalURLKeyObj: Pointer;
+begin
+  Result := (GetOriginalURLKey as ILocalObject).GetObjectID;
+end;
+
+{ TWebElement }
+
+class function TWebElement.GetDOMNodeKey: NSString;
+begin
+  Result := KeyToNSStr(TWebElement.DOMNodeKey);
+end;
+
+class function TWebElement.GetDOMNodeKeyObj: Pointer;
+begin
+  Result := (GetDOMNodeKey as ILocalObject).GetObjectID;
+end;
+
+class function TWebElement.GetFrameKey: NSString;
+begin
+  Result := KeyToNSStr(TWebElement.FrameKey);
+end;
+
+class function TWebElement.GetFrameKeyObj: Pointer;
+begin
+  Result := (GetFrameKey as ILocalObject).GetObjectID;
+end;
+
+class function TWebElement.GetImageAltStringKey: NSString;
+begin
+  Result := KeyToNSStr(TWebElement.ImageAltStringKey);
+end;
+
+class function TWebElement.GetImageAltStringKeyObj: Pointer;
+begin
+  Result := (GetImageAltStringKey as ILocalObject).GetObjectID;
+end;
+
+class function TWebElement.GetImageKey: NSString;
+begin
+  Result := KeyToNSStr(TWebElement.ImageKey);
+end;
+
+class function TWebElement.GetImageKeyObj: Pointer;
+begin
+  Result := (GetImageKey as ILocalObject).GetObjectID;
+end;
+
+class function TWebElement.GetImageRectKey: NSString;
+begin
+  Result := KeyToNSStr(TWebElement.ImageRectKey);
+end;
+
+class function TWebElement.GetImageRectKeyObj: Pointer;
+begin
+  Result := (GetImageRectKey as ILocalObject).GetObjectID;
+end;
+
+class function TWebElement.GetImageURLKey: NSString;
+begin
+  Result := KeyToNSStr(TWebElement.ImageURLKey);
+end;
+
+class function TWebElement.GetImageURLKeyObj: Pointer;
+begin
+  Result := (GetImageURLKey as ILocalObject).GetObjectID;
+end;
+
+class function TWebElement.GetIsSelectedKey: NSString;
+begin
+  Result := KeyToNSStr(TWebElement.IsSelectedKey);
+end;
+
+class function TWebElement.GetIsSelectedKeyObj: Pointer;
+begin
+  Result := (GetIsSelectedKey as ILocalObject).GetObjectID;
+end;
+
+class function TWebElement.GetLinkLabelKey: NSString;
+begin
+  Result := KeyToNSStr(TWebElement.LinkLabelKey);
+end;
+
+class function TWebElement.GetLinkLabelKeyObj: Pointer;
+begin
+  Result := (GetLinkLabelKey as ILocalObject).GetObjectID;
+end;
+
+class function TWebElement.GetLinkTargetFrameKey: NSString;
+begin
+  Result := KeyToNSStr(TWebElement.LinkTargetFrameKey);
+end;
+
+class function TWebElement.GetLinkTargetFrameKeyObj: Pointer;
+begin
+  Result := (GetLinkTargetFrameKey as ILocalObject).GetObjectID;
+end;
+
+class function TWebElement.GetLinkTitleKey: NSString;
+begin
+  Result := KeyToNSStr(TWebElement.LinkTitleKey);
+end;
+
+class function TWebElement.GetLinkTitleKeyObj: Pointer;
+begin
+  Result := (GetLinkTitleKey as ILocalObject).GetObjectID;
+end;
+
+class function TWebElement.GetLinkURLKey: NSString;
+begin
+  Result := KeyToNSStr(TWebElement.LinkURLKey);
+end;
+
+class function TWebElement.GetLinkURLKeyObj: Pointer;
+begin
+  Result := (GetLinkURLKey as ILocalObject).GetObjectID;
+end;
 
 end.

@@ -4,11 +4,12 @@
  *
  * Copyright (c) 2013, 2015 HOSOKAWA Jun.
  *
- * Last Update 2015/01/08
+ * Last Update 2015/10/29
  *
  * Platform:
  *   Windows, OS X, iOS, Android
- *   Delphi / C++Builder XE5, XE6, XE7 and Appmethod 1.14, 1.15
+ *   Delphi / C++Builder XE5, XE6, XE7, XE8, 10 seattle
+ *   Appmethod 1.14, 1.15, 1.16, 1.17
  *
  * Contact:
  *   Twitter @pik or freeonterminate@gmail.com
@@ -82,10 +83,21 @@ uses
   ;
 
 type
+  TCanNavigateEvent =
+    procedure (
+      Sender: TObject;
+      const iURL: String;
+      var ioCanNavigate: Boolean) of object;
+
   IWebBrowserEx = interface
   ['{66AB09D6-6B38-49DA-B831-B00F43EAF471}']
     function GetTagValue(const iTagName, iValueName: String): String;
     function GetHTMLSource: String;
+  end;
+
+  IWebBrowserCanNavigate = interface
+  ['{04EE8067-DEBD-425F-A407-19A473C82049}']
+    function CanNavigate(const iURL: String): Boolean;
   end;
 
   [
@@ -98,10 +110,12 @@ type
       or pidAndroid
     )
   ]
-  TWebBrowserEx = class(TWebBrowser)
+  TWebBrowserEx = class(TWebBrowser, IWebBrowserCanNavigate)
   private
+    FOnCanNavigate: TCanNavigateEvent;
     procedure ParentResize(Sender: TObject);
     function GetHTMLSource: String;
+    function CanNavigate(const iURL: String): Boolean;
   protected
     procedure SetParent(const Value: TFmxObject); override;
     procedure SetVisible(const Value: Boolean); override;
@@ -118,6 +132,8 @@ type
     procedure CallJS(const iFunction: String); overload;
     function GetTagValue(const iTagName, iValueName: String): String;
     property HTMLSource: String read GetHTMLSource;
+    property OnCanNavigate: TCanNavigateEvent
+      read FOnCanNavigate write FOnCanNavigate;
   end;
 
 implementation
@@ -129,7 +145,7 @@ uses
     , FMX.WebBrowser.Win
   {$ENDIF}
   {$IF defined(MACOS) and not defined(IOS)}
-    , FMX.WebBrowser.Mac
+    , FMX.WebBrowser.Cocoa
   {$ENDIF}
   ;
 
@@ -138,6 +154,14 @@ uses
 procedure TWebBrowserEx.CallJS(const iFunction: String);
 begin
   CallJS(iFunction, []);
+end;
+
+function TWebBrowserEx.CanNavigate(const iURL: String): Boolean;
+begin
+  Result := True;
+
+  if (Assigned(FOnCanNavigate)) then
+    FOnCanNavigate(Self, iURL, Result);
 end;
 
 procedure TWebBrowserEx.CallJS(
@@ -294,7 +318,11 @@ begin
   end;
 end;
 
+// XE8 以降は Win/OSX にも TWebBrowser が提供されている
+// クラス名が被って実行時エラーになるのを防ぐ
+{$IF RTLVersion < 29}
 initialization
   RegisterFmxClasses([TWebBrowser]);
+{$ENDIF}
 
 end.

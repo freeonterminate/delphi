@@ -25,8 +25,8 @@ This class use Default WebView.
 |Android |WebView         |
 
 ##Environment Platform
-Delphi / C++Builder / RAD Studio version XE6, XE7.  
-Appmethod 1.14, 1.15.  
+Delphi / C++Builder / RAD Studio version XE6, XE7, XE8, 10 Seattle.  
+Appmethod 1.14, 1.15, 1.16, 1.17.  
 
 If you use XE5, Please make the following correction.   
 
@@ -38,10 +38,11 @@ If you use XE5, Please make the following correction.
 
 Please download following files.
 
-    FMX.WebBrowser.Mac.pas    WebBrowser class for OS X
-    FMX.WebBrowser.Win.pas    WebBrowser class for Windows
-    FMX.WebBrowserEx.pas      WebBrowser for MultiPlatform.
-    Macapi.WebView.pas        WebView API Unit.
+    FMX.WebBrowser.Cocoa.pas    WebBrowser class for OS X
+    FMX.WebBrowser.Win.pas      WebBrowser class for Windows
+    FMX.WebBrowserEx.pas        WebBrowser for MultiPlatform.
+    FMX.WebBrowser.Helpers.pas  WebBrowser helper rootines.
+    Macapi.WebView.pas          WebView API Unit.
 
 ##How to use
 As follows, it can use like TWebBrowser of iOS /Android.  
@@ -103,7 +104,7 @@ TWebBrowserEx can't move a focus by Tab key.
 When TWebBrowserEx has a focus, A focus is unmovable to other control by a Tab key.  
 
 ##Copyright
-Copyright (C) 2013,2014 HOSOKAWA Jun (as @pik).  
+Copyright (C) 2013,2015 HOSOKAWA Jun (as @pik).  
 This software is provided 'as-is', without any express or implied warranty. In no event will the authors be held liable for any damages arising from the use of this software.  
 
 Permission is granted to anyone to use this software for any purpose, including commercial applications, and to alter it and redistribute it freely, subject to the following restrictions:  

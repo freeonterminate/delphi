@@ -1,4 +1,4 @@
-#TWebBrowserEx クラス
+﻿#TWebBrowserEx クラス
 
 このクラスは、Windows / OS X / iOS / Android の FireMonkey アプリケーションで WebBrowser を統一的に使用する方法を提供します。  
 このクラスを使って作った Web Browser は下記のようにプラットフォームに搭載されているデフォルトのウェブブラウザコントロールを使います。
@@ -11,7 +11,7 @@
 |Android |WebView         |
 
 ##動作環境
-Delphi / C++Builder / RAD Studio の XE6, XE7
+Delphi / C++Builder / RAD Studio の XE6, XE7, XE8, 10 Seattle
 
 XE5 以前で動かす場合は
 
@@ -24,10 +24,11 @@ XE5 以前で動かす場合は
 
 以下のファイルを全てダウンロードします。
 
-    FMX.WebBrowser.Mac.pas    OS X 用 WebBrowser クラス
-    FMX.WebBrowser.Win.pas    Windows 用 WebBrowser クラス
-    FMX.WebBrowserEx.pas      マルチプラットフォームの WebBrowser を統一的に扱うクラス
-    Macapi.WebView.pas        OS X の WebView の定義を Delphi に移植したユニット
+    FMX.WebBrowser.Cocoa.pas    OS X 用 WebBrowser クラス
+    FMX.WebBrowser.Win.pas      Windows 用 WebBrowser クラス
+    FMX.WebBrowserEx.pas        マルチプラットフォームの WebBrowser を統一的に扱うクラス
+    FMX.WebBrowser.Helpers.pas  WebBrowser 用のヘルパルーチン
+    Macapi.WebView.pas          OS X の WebView の定義を Delphi に移植したユニット
 
 ##使用方法
 
@@ -58,7 +59,7 @@ procedure TForm1.Button1Click(Sender: TObject);
 begin
   FWebBrowser.URL := 'http://www.embarcadero.com/';
 
-  // こんな風に String を読み込ませる事もできる
+  // こんな風に String を読み込ませる事もできます
   FWebBrowser.LoadFromStrings('<html><body>Hello WebBrowser!</body></html>', '');
 end;
 
@@ -91,7 +92,7 @@ IDocHostUIHandler の DocHostTranslateAccelerator を実装すれば TWebBrowser
 TWebBrowserEx の SetFocus を override すれば FMX Control → TWebBrowser 方向にもフォーカスを移せるかもしれません。  
 
 ##著作権
-Copyright (c) 2013, 2014 HOSOKAWA Jun(@pik).  
+Copyright (c) 2013, 2015 HOSOKAWA Jun(@pik).
   
 本ソフトウェアは「現状のまま」で、明示であるか暗黙であるかを問わず、何らの保証もなく提供されます。 本ソフトウェアの使用によって生じるいかなる損害についても、作者は一切の責任を負わないものとします。  
   

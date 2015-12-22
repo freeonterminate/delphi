@@ -4,11 +4,12 @@
  *
  * Copyright (c) 2013, 2015 HOSOKAWA Jun.
  *
- * Last Update 2015/01/08
+ * Last Update 2015/10/29
  *
  * Platform:
  *   Windows, OS X, iOS, Android
- *   Delphi / C++Builder XE5, XE6, XE7 and Appmethod 1.14, 1.15
+ *   Delphi / C++Builder XE5, XE6, XE7, XE8, 10 seattle
+ *   Appmethod 1.14, 1.15, 1.16, 1.17
  *
  * Contact:
  *   Twitter @pik or freeonterminate@gmail.com
@@ -142,19 +143,15 @@ type
   TWinWebBrowserService = class;
 
   TWebBrowser = class(SHDocVw.TWebBrowser, IOleCommandTarget, IDocHostUIHandler)
-  public type
-    TCanNavigate =
-      procedure (
-        Sender: TObject;
-        var ioURL: String;
-        out iCanNavigate: Boolean) of object;
   private const
+    TRANSLATE_WAIT_TIME = 500;
     IID_DocHostCommandHandler: TGUID = '{F38BC242-B950-11D1-8918-00C04FC2C836}';
   private var
     FRootFormWnd: HWND;
     FOldWndProc: Pointer;
     FIEWnd: HWND;
-    FOnShouldStartLoadWithRequest: TWebBrowserShouldStartLoadWithRequest;
+    FService: TWinWebBrowserService;
+    FOnShouldStartLoadWithRequest: TCanNavigateEvent;
   protected
     function CheckIEWnd: Boolean;
     {IOleCommandTarget interface}
@@ -210,7 +207,7 @@ type
       out ppDORet: IDataObject): HResult; stdcall;
   public
     procedure SetFocus; override;
-    property OnShouldStartLoadWithRequest: TWebBrowserShouldStartLoadWithRequest
+    property OnShouldStartLoadWithRequest: TCanNavigateEvent
       read FOnShouldStartLoadWithRequest
       write FOnShouldStartLoadWithRequest;
   end;
@@ -225,6 +222,7 @@ type
     FWebControl: TCustomWebBrowser;
     FTravelLog: ITravelLogStg;
     FLoading: Boolean;
+    FLoadedTime: TDateTime;
     FEnableCaching: Boolean;
   private
     procedure WebViewBeforeNavigate2(
@@ -248,8 +246,9 @@ type
       const StatusCode: OleVariant;
       var Cancel: WordBool);
     procedure WebViewShouldStartLoadWithRequest(
-      ASender: TObject;
-      const URL: String);
+      Sender: TObject;
+      const iURL: String;
+      var ioCanNavigate: Boolean);
   protected
     procedure GetTravelLog;
     function CanGo(const iFlag: DWORD): Boolean;
@@ -337,8 +336,10 @@ begin
     GetClassName(iWnd, PChar(tmpName), Length(tmpName) - 1));
   tmpName := tmpName.Trim;
 
-  with PEnumClassName(iLParam)^ do begin
-    if ((ClassName = '') or (ClassName = tmpName)) then begin
+  with PEnumClassName(iLParam)^ do
+  begin
+    if ((ClassName = '') or (ClassName = tmpName)) then
+    begin
       Result := False;
 
       WndHandle := iWnd;
@@ -350,7 +351,8 @@ function GetChildWindow(const iTopLevel: HWND; const iClassName: String): HWND;
 var
   CN: TEnumClassName;
 begin
-  with CN do begin
+  with CN do
+  begin
     WndHandle := 0;
     ClassName := iClassName;
   end;
@@ -371,13 +373,15 @@ var
 begin
   Found := nil;
   for WebView in GWebViews do
-    if (WebView.FRootFormWnd = iWnd) then begin
+    if (WebView.FRootFormWnd = iWnd) then
+    begin
       Found := WebView;
       Break;
     end;
 
   case iMsg of
-    WM_LBUTTONDOWN: begin
+    WM_LBUTTONDOWN:
+    begin
       if (Found <> nil) and (Found.CheckIEWnd) then
         Winapi.Windows.SetFocus(iWnd);
     end;
@@ -413,14 +417,15 @@ function TWebBrowser.Exec(
 begin
   Result := OLECMDERR_E_NOTSUPPORTED;
 
-  if (CmdGroup <> nil) then begin
+  if (CmdGroup <> nil) then
+  begin
     if (IsEqualGuid(cmdGroup^, IID_DocHostCommandHandler)) then
       case nCmdID of
         OLECMDID_SHOWSCRIPTERROR:
-          begin
-            vaOut := True;
-            Result := S_OK;
-          end;
+        begin
+          vaOut := True;
+          Result := S_OK;
+        end;
       end;
   end;
 end;
@@ -531,11 +536,21 @@ function TWebBrowser.TranslateUrl(
   dwTranslate: UINT;
   pchURLIn: PWideChar;
   out ppchURLOut: PWideChar): HResult;
+var
+  CanNavigate: Boolean;
 begin
-  if (Assigned(FOnShouldStartLoadWithRequest)) then
-    FOnShouldStartLoadWithRequest(Self, String(pchURLIn));
+  Result := S_OK;
 
-  Result := E_NOTIMPL;
+  if
+    (MilliSecondsBetween(Now, FService.FLoadedTime) > TRANSLATE_WAIT_TIME) and
+    (Assigned(FOnShouldStartLoadWithRequest))
+  then
+  begin
+    FOnShouldStartLoadWithRequest(Self, String(pchURLIn), CanNavigate);
+
+    if (not CanNavigate) then
+      Result := E_ABORT;
+  end;
 end;
 
 function TWebBrowser.UpdateUI: HResult;
@@ -604,6 +619,7 @@ begin
     GWebViews := TWebBrowserList.Create;
 
   FWebView := TWebBrowser.Create(nil);
+  FWebView.FService := Self;
   FWebView.Align := alClient;
   FWebView.Ctl3D := False;
   FWebView.OnBeforeNavigate2 := WebViewBeforeNavigate2;
@@ -631,9 +647,11 @@ var
 begin
   Doc := FWebView.Document as IHTMLDocument2;
 
-  if (Doc <> nil) then begin
+  if (Doc <> nil) then
+  begin
     Win := Doc.parentWindow;
-    if (Win <> nil) then begin
+    if (Win <> nil) then
+    begin
       try
         Win.execScript(JavaScript, 'JavaScript');
       except
@@ -757,7 +775,8 @@ begin
   if
     (FWebView.Document <> nil) and
     (FWebView.Document.QueryInterface(IPersistStreamInit, StreamInit) = S_OK)
-  then begin
+  then
+  begin
     ContentStream := TStringStream.Create(Content);
     try
       // The instance of TStreamAdapter is released automatically
@@ -771,7 +790,8 @@ end;
 
 procedure TWinWebBrowserService.Navigate;
 begin
-  if (FWebView <> nil) then begin
+  if (FWebView <> nil) then
+  begin
     FLoading := True;
 
     if (FEnableCaching) then
@@ -798,6 +818,7 @@ begin
           end;
 
           FLoading := False;
+          FLoadedTime := Now;
         end
       ).Start
     else
@@ -835,10 +856,12 @@ begin
   RootForm := nil;
 
   if (FWebControl <> nil) and (FWebControl.Root <> nil) then
-    for i := 0 to FMX.Forms.Screen.FormCount - 1 do begin
+    for i := 0 to FMX.Forms.Screen.FormCount - 1 do
+    begin
       Form := FMX.Forms.Screen.Forms[i];
 
-      if (Form = FWebControl.Root.GetObject) then begin
+      if (Form = FWebControl.Root.GetObject) then
+      begin
         RootForm := Form;
         Break;
       end;
@@ -868,12 +891,14 @@ var
   RootForm: TCommonCustomForm;
   Wnd: HWND;
 begin
-  if (FWebView <> nil) then begin
+  if (FWebView <> nil) then
+  begin
     if (FWebControl <> nil)
       and not (csDesigning in FWebControl.ComponentState)
       and (FWebControl.Root <> nil)
       and (FWebControl.Root.GetObject is TCommonCustomForm)
-    then begin
+    then
+    begin
       RootForm := TCommonCustomForm(FWebControl.Root.GetObject);
 
       Bounds := TRectF.Create(0, 0, FWebControl.Width, FWebControl.Height);
@@ -887,7 +912,8 @@ begin
         or (SameValue(Bounds.Height, 0))
       then
         Hide
-      else begin
+      else
+      begin
         TWinControl(FWebView).ParentWindow := Wnd;
 
         FWebView.SetBounds(
@@ -903,7 +929,8 @@ begin
 
       GetTravelLog;
     end
-    else begin
+    else
+    begin
       FWebView.ParentWindow := 0;
       Hide;
     end;
@@ -941,10 +968,19 @@ begin
 end;
 
 procedure TWinWebBrowserService.WebViewShouldStartLoadWithRequest(
-  ASender: TObject; const URL: String);
+  Sender: TObject;
+  const iURL: String;
+  var ioCanNavigate: Boolean);
+var
+  WebBrowserCanNavigate: IWebBrowserCanNavigate;
 begin
   if (FWebControl <> nil) then
+  begin
     FWebControl.ShouldStartLoading(URL);
+
+    if Supports(FWebControl, IWebBrowserCanNavigate, WebBrowserCanNavigate) then
+      ioCanNavigate := WebBrowserCanNavigate.CanNavigate(iURL);
+  end;
 end;
 
 procedure FreeWebBrowsers;
@@ -958,6 +994,8 @@ begin
   GWebViews.DisposeOf;
 end;
 
+// XE8 以降は RegisterWebBrowserService が自動的に呼ばれる
+{$IF RTLVersion < 29}
 initialization
 begin
   CoInitialize(nil);
@@ -969,5 +1007,6 @@ begin
   FreeWebBrowsers;
   CoUninitialize;
 end;
+{$ENDIF}
 
 end.
