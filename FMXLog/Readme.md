@@ -11,8 +11,8 @@
 |Android |System Log                               |__android_log_write |
 
 ##動作環境
-Delphi / C++Builder / RAD Studio の XE5, XE6, XE7, XE8, 10 Seattle
-Appmethod 1.14, 1.15, 1.16, 1.17
+Delphi / C++Builder / RAD Studio の XE5, XE6, XE7, XE8, 10 Seattle  
+Appmethod 1.14, 1.15, 1.16, 1.17  
 
 ##最終更新日
 2016/02/05  
@@ -49,8 +49,8 @@ Log.d といったクラスメソッドを使うとログが出力されます。
 TRectF, TPointF, TSizeF を文字列に変換するメソッドもあります。  
 
 ```pascal
-  Log.d(PointFToString(TPointF.Create(100, 100)));    
-  Log.d(RectFToString(TRectF.Create(100, 100, 100, 100)));    
+  Log.d(Log.PointFToString(TPointF.Create(100, 100)));    
+  Log.d(Log.RectFToString(TRectF.Create(100, 100, 100, 100)));    
 ```
 
 Enabled プロパティによって、出力を抑制可能です。  
@@ -59,6 +59,7 @@ Enabled プロパティによって、出力を抑制可能です。
   {$IFDEF RELEASE}  
   Log.Enabled := False; // リリースビルドではログを出力しない  
   {$ENDIF}  
+```
 
 ##例
 ```pascal
