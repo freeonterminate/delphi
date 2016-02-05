@@ -8,6 +8,9 @@
  * 2014-09-05  Version 1.3  New: UnknownType, use TryAsString
  *                          Bug: tkEnumeration, AsInteger -> AsOrdinal
  * 2014-10-28  Version 1.4  Bug: XE5, XE7 can not compile.
+ * 2016-02-05  Version 1.5  New: Rect/PointF/SizeF to String methods
+ *                               Enabled property
+ *                               NumberOfSignifiantFigures property
  *
  * PLATFORMS
  *   Windows / OS X / iOS / Android
@@ -33,7 +36,7 @@ unit FMX.Log;
 interface
 
 uses
-  System.Rtti, FMX.Platform
+  System.Types, System.SysUtils, System.Rtti, FMX.Platform
   {$IFDEF MACOS}
     {$IFDEF IOS}
     , iOSapi.Foundation
@@ -70,17 +73,29 @@ type
       'FATAL',
       'SILENT'
     );
-  private
-    class var FTag: String;
-    class var FLogToDelphi: Boolean;
-    class var FOnLog: TLogEvent;
+  private const
+    DEFAULT_NUMBER_OF_SIGNIFIANT_FIGURES = 4;
+  private class var
+    FTag: String;
+    FEnabled: Boolean;
+    FLogToDelphi: Boolean;
+    FNumberOfSignifiantFigures: Integer;
+    FOnLog: TLogEvent;
     {$IFDEF IOS}
       class var FLogText: NSString;
     {$ENDIF}
-  public
+  protected // constructor
     constructor Create; reintroduce;
+  protected // methods
+    class function GetFloatFormat: String; inline;
+    class procedure output(const iPriority: Integer; const iText: String);
+  public // methods
     class function Join(const iTexts: array of String): String;
     class function JoinV(const iValues: array of TValue): String;
+    class function RectFToString(const iRect: TRectF): String;
+    class function PointFToString(const iPoint: TPointF): String;
+    class function SizeFToString(const iSize: TSizeF): String;
+  public // log methods
     class procedure v(const Text: String); overload;
     class procedure v(const iValues: array of TValue); overload;
     class procedure d(const Text: String); overload;
@@ -93,21 +108,28 @@ type
     class procedure e(const iValues: array of TValue); overload;
     class procedure f(const Text: String); overload;
     class procedure f(const iValues: array of TValue); overload;
-    class procedure output(const iPriority: Integer; const iText: String);
+  public // properties
     class property TAG: String read FTag write FTag;
+    class property Enabled: Boolean read FEnabled write FEnabled;
     class property LogToDelphi: Boolean
-      read FLogToDelphi write FLogToDelphi default True;
+      read FLogToDelphi
+      write FLogToDelphi
+      default True;
+    class property NumberOfSignifiantFigures: Integer
+      read FNumberOfSignifiantFigures
+      write FNumberOfSignifiantFigures
+      default DEFAULT_NUMBER_OF_SIGNIFIANT_FIGURES;
+  public // events
     class property OnLog: TLogEvent read FOnLog write FOnLog;
   end;
 
 implementation
 
 uses
-  System.SysUtils
+  System.Classes
   {$IF RTLVersion < 28}
   , System.TypInfo
   {$ENDIF}
-  , System.Classes
   {$IFDEF ANDROID}
   , Androidapi.Log, Androidapi.JNI.JavaTypes, FMX.Helpers.Android
   {$ENDIF}
@@ -157,6 +179,11 @@ begin
   f(JoinV(iValues));
 end;
 
+class function Log.GetFloatFormat: String;
+begin
+  Result := '%.' + FNumberOfSignifiantFigures.ToString + 'f';
+end;
+
 class procedure Log.i(const Text: String);
 begin
   output(Ord(TLogLevel.INFO), Text);
@@ -196,7 +223,6 @@ var
 {$IFDEF ANDROID}
   M: TMarshaller;
 {$ELSE}
-
   function GetFormatedText: String;
   begin
     Result :=
@@ -204,13 +230,17 @@ var
   end;
 {$ENDIF}
 begin
+  if (not FEnabled) then
+    Exit;
+
   if
     (FTag = '') and
     (
       TPlatformServices.Current
       .SupportsPlatformService(IFMXApplicationService, IInterface(AppService))
     )
-  then begin
+  then
+  begin
     Log.FTag := AppService.GetTitle;
 
     {$IF RTLVersion > 26}
@@ -249,6 +279,35 @@ begin
     FOnLog(iPriority, iText);
 end;
 
+class function Log.PointFToString(const iPoint: TPointF): String;
+var
+  Fmt: String;
+begin
+  Fmt := GetFloatFormat;
+  Result := Format('PointF(' + Fmt + ', ' + Fmt + ')', [iPoint.X, iPoint.Y]);
+end;
+
+class function Log.RectFToString(const iRect: TRectF): String;
+var
+  Fmt: String;
+begin
+  Fmt := GetFloatFormat;
+
+  Result :=
+    Format(
+      'RectF(' + Fmt + ', ' + Fmt + ', ' + Fmt + ', ' + Fmt + ')',
+      [iRect.Left, iRect.Top, iRect.Width, iRect.Height]);
+end;
+
+class function Log.SizeFToString(const iSize: TSizeF): String;
+var
+  Fmt: String;
+begin
+  Fmt := GetFloatFormat;
+  Result :=
+    Format('SizeF(' + Fmt + ', ' + Fmt + ')', [iSize.Width, iSize.Width]);
+end;
+
 class function Log.Join(const iTexts: array of String): String;
 var
   SB: TStringBuilder;
@@ -278,12 +337,14 @@ var
   Value: TValue;
   B: Boolean;
   S: String;
+  Obj: TObject;
 begin
   Result := '';
 
   SetLength(Texts, Length(iValues));
 
-  for i := Low(Texts) to High(Texts) do begin
+  for i := Low(Texts) to High(Texts) do
+  begin
     Value := iValues[i];
     case (Value.Kind) of
       TTypeKind.tkInteger:
@@ -301,16 +362,22 @@ begin
         Texts[i] := Value.AsString;
 
       TTypeKind.tkClass:
-        Texts[i] := Value.AsObject.ClassName;
+      begin
+        Obj := Value.AsObject;
+        if (Obj = nil) then
+          Texts[i] := 'nil'
+        else
+          Texts[i] := Obj.ClassName;
+      end;
 
       TTypeKind.tkClassRef:
         Texts[i] := Value.AsClass.ClassName;
 
       TTypeKind.tkFloat:
-        Texts[i] := Format('%f', [Value.AsType<Double>]);
+        Texts[i] := Format(GetFloatFormat, [Value.AsType<Double>]);
 
       TTypeKind.tkPointer:
-        Texts[i] := Integer(Value.AsType<Pointer>).ToString;
+        Texts[i] := Format(GetFloatFormat, [Integer(Value.AsType<Pointer>)]);
 
       TTypeKind.tkEnumeration:
         if (Value.TryAsType<Boolean>(B)) then
@@ -318,7 +385,8 @@ begin
         else
           Texts[i] := Value.AsOrdinal.ToString;
 
-      else begin
+      else
+      begin
         if (Value.TryAsType<String>(S)) then
           Texts[i] := S
         else
@@ -332,5 +400,7 @@ end;
 
 initialization
   Log.FLogToDelphi := True;
+  Log.FEnabled := True;
+  Log.FNumberOfSignifiantFigures := Log.DEFAULT_NUMBER_OF_SIGNIFIANT_FIGURES;
 
 end.
