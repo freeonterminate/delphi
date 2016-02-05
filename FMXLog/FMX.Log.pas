@@ -367,7 +367,7 @@ begin
         if (Obj = nil) then
           Texts[i] := 'nil'
         else
-        Texts[i] := Format('%s($%p)', [Obj.ClassName, Pointer(Obj)]);
+          Texts[i] := Format('%s($%p)', [Obj.ClassName, Pointer(Obj)]);
       end;
 
       TTypeKind.tkClassRef:
