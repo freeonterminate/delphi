@@ -367,7 +367,7 @@ begin
         if (Obj = nil) then
           Texts[i] := 'nil'
         else
-          Texts[i] := Obj.ClassName;
+        Texts[i] := Format('%s($%p)', [Obj.ClassName, Pointer(Obj)]);
       end;
 
       TTypeKind.tkClassRef:
@@ -377,7 +377,7 @@ begin
         Texts[i] := Format(GetFloatFormat, [Value.AsType<Double>]);
 
       TTypeKind.tkPointer:
-        Texts[i] := Format(GetFloatFormat, [Integer(Value.AsType<Pointer>)]);
+        Texts[i] := Format('$%p', [Value.AsType<Pointer>]);
 
       TTypeKind.tkEnumeration:
         if (Value.TryAsType<Boolean>(B)) then
