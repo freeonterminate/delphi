@@ -7,8 +7,8 @@
 |--------|-----------------------------------------|--------------------|
 |Windows |Console and Delphi's  Event Log          |WriteLn             |
 |OS X    |Console (PAServer)                       |WriteLn             |
-|iOS     |Console (Xcode -> Devices -> Log)        |NSLog               |
-|Android |System Log                               |__android_log_write |
+|iOS     |Device Log (Xcode -> Devices -> Log)     |NSLog               |
+|Android |System Log (adb logcat)                  |__android_log_write |
 
 ##動作環境
 Delphi / C++Builder / RAD Studio の XE5, XE6, XE7, XE8, 10 Seattle  
