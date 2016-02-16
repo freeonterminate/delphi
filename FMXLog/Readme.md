@@ -1,7 +1,7 @@
-#Log ���[�e�B���e�B�[
+﻿#Log ユーティリティー
 
-���̃��[�e�B���e�B�[�́AWindows / OS X / iOS / Android �̃A�v���P�[�V�����Łu���O�o�́v�𓝈�I�Ɏg�p������@��񋟂��܂��B  
-���̃��[�e�B���e�B�[��p�������O�͉��L�̏ꏊ�ɏo�͂���܂��B  
+このユーティリティーは、Windows / OS X / iOS / Android のアプリケーションで「ログ出力」を統一的に使用する方法を提供します。  
+このユーティリティーを用いたログは下記の場所に出力されます。  
 
 |Platform|Out to                                   |Implementation      |
 |--------|-----------------------------------------|--------------------|
@@ -10,25 +10,25 @@
 |iOS     |Console (Organizer -> Device -> Console) |NSLog               |
 |Android |System Log                               |__android_log_write |
 
-##�����
-Delphi / C++Builder / RAD Studio �� XE5, XE6, XE7, XE8, 10 Seattle  
+##動作環境
+Delphi / C++Builder / RAD Studio の XE5, XE6, XE7, XE8, 10 Seattle  
 Appmethod 1.14, 1.15, 1.16, 1.17  
 
-##�ŏI�X�V��
-2016/02/05  
+##最終更新日
+2016/02/09
 
-##�t�@�C��
+##ファイル
 
-�ȉ��̃t�@�C�����_�E�����[�h���܂��B  
+以下のファイルをダウンロードします。  
 
     FMX.Log.pas
 
-##�g�p���@
+##使用方法
 
-FMX.Log �� uses ����� Log �N���X���g����悤�ɂȂ�܂��B  
-Log.d �Ƃ������N���X���\�b�h���g���ƃ��O���o�͂���܂��B  
+FMX.Log を uses すると Log クラスが使えるようになります。  
+Log.d といったクラスメソッドを使うとログが出力されます。  
   
-���x���ɂ���ĉ��L�̗l�Ɏg�����\�b�h���ς��܂��B  
+レベルによって下記の様に使うメソッドが変わります。  
 
 |Level   |Method Name|
 |--------|-----------|
@@ -39,29 +39,29 @@ Log.d �Ƃ������N���X���\�b�h���g���ƃ��O���o�͂���܂��B
 |ERROR   |Log.e      |
 |FATAL   |Log.f      |
 
-�����̒l��n�����Ƃ��ł��܂��B  
+複数の値を渡すこともできます。  
 
 ```pascal
-  Log.d('������');              // �P�̈����ł͕�����̂ݎw��\  
-  Log.d(['������', 123, True]); // ���������ł́A�l�X�Ȓl���w��\  
+  Log.d('文字列');              // １つの引数版は文字列のみ指定可能  
+  Log.d(['文字列', 123, True]); // 複数引数版は、様々な値を指定可能  
 ```
 
-TRectF, TPointF, TSizeF �𕶎���ɕϊ����郁�\�b�h������܂��B  
+TRectF, TPointF, TSizeF, TRect, TPoint を文字列に変換するメソッドもあります。
 
 ```pascal
   Log.d(Log.PointFToString(TPointF.Create(100, 100)));    
   Log.d(Log.RectFToString(TRectF.Create(100, 100, 100, 100)));    
 ```
 
-Enabled �v���p�e�B�ɂ���āA�o�͂�}���\�ł��B  
+Enabled プロパティによって、出力を抑制できます。
 
 ```pascal
   {$IFDEF RELEASE}  
-  Log.Enabled := False; // �����[�X�r���h�ł̓��O���o�͂��Ȃ�  
+  Log.Enabled := False; // リリースビルドではログを出力しない  
   {$ENDIF}  
 ```
 
-##��
+##例
 ```pascal
 uses
   FMX.Log;
@@ -74,26 +74,26 @@ type
 
 procedure TForm1.Button1Click(Sender: TObject);
 begin
-  Log.i('�{�^���P�������ꂽ��'); // Info Level �ŏo��
-  Log.d(['������', 100]);        // Debug Level �ŏo��
+  Log.i('ボタン１が押されたよ'); // Info Level で出力
+  Log.d(['文字列', 100]);        // Debug Level で出力
 end;
 
 ```
 
-##���쌠
-�{�\�t�g�E�F�A�́u����̂܂܁v�ŁA�����ł��邩�Öقł��邩���킸�A����̕ۏ؂��Ȃ��񋟂���܂��B
-�{�\�t�g�E�F�A�̎g�p�ɂ���Đ����邢���Ȃ鑹�Q�ɂ��Ă��A��҂͈�؂̐ӔC�𕉂�Ȃ����̂Ƃ��܂��B
+##著作権
+本ソフトウェアは「現状のまま」で、明示であるか暗黙であるかを問わず、何らの保証もなく提供されます。
+本ソフトウェアの使用によって生じるいかなる損害についても、作者は一切の責任を負わないものとします。
 
-�ȉ��̐����ɏ]������A���p�A�v���P�[�V�������܂߂āA�{�\�t�g�E�F�A��C�ӂ̖ړI�Ɏg�p���A���R�ɉ��ς��čĔЕz���邱�Ƃ����ׂĂ̐l�ɋ����܂��B
+以下の制限に従う限り、商用アプリケーションを含めて、本ソフトウェアを任意の目的に使用し、自由に改変して再頒布することをすべての人に許可します。
 
-1. �{�\�t�g�E�F�A�̏o���ɂ��ċ��U�̕\�������Ă͂Ȃ�܂���B
-   ���Ȃ����I���W�i���̃\�t�g�E�F�A���쐬�����Ǝ咣���Ă͂Ȃ�܂���B
-   ���Ȃ����{�\�t�g�E�F�A�𐻕i���Ŏg�p����ꍇ�A���i�̕����Ɏӎ������Ă���������΍K���ł����A�K�{�ł͂���܂���B
+1. 本ソフトウェアの出自について虚偽の表示をしてはなりません。
+   あなたがオリジナルのソフトウェアを作成したと主張してはなりません。
+   あなたが本ソフトウェアを製品内で使用する場合、製品の文書に謝辞を入れていただければ幸いですが、必須ではありません。
 
-2. �\�[�X��ύX�����ꍇ�́A���̂��Ƃ𖾎����Ȃ���΂Ȃ�܂���B
-   �I���W�i���̃\�t�g�E�F�A�ł���Ƃ������U�̕\�������Ă͂Ȃ�܂���B
+2. ソースを変更した場合は、そのことを明示しなければなりません。
+   オリジナルのソフトウェアであるという虚偽の表示をしてはなりません。
 
-3. �\�[�X�̔Еz������A���̕\�����폜������A�\���̓��e��ύX�����肵�Ă͂Ȃ�܂���B
+3. ソースの頒布物から、この表示を削除したり、表示の内容を変更したりしてはなりません。
 
 This software is provided 'as-is', without any express or implied warranty.
 In no event will the authors be held liable for any damages arising from the use of this software.

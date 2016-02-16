@@ -8,9 +8,10 @@
  * 2014-09-05  Version 1.3  New: UnknownType, use TryAsString
  *                          Bug: tkEnumeration, AsInteger -> AsOrdinal
  * 2014-10-28  Version 1.4  Bug: XE5, XE7 can not compile.
- * 2016-02-05  Version 1.5  New: Rect/PointF/SizeF to String methods
+ * 2016-02-05  Version 1.5  New: RectF/PointF/SizeF to String methods
  *                               Enabled property
  *                               NumberOfSignifiantFigures property
+ * 2016-02-09  Version 1.6  New: Rect/Point to String methods
  *
  * PLATFORMS
  *   Windows / OS X / iOS / Android
@@ -95,6 +96,8 @@ type
     class function RectFToString(const iRect: TRectF): String;
     class function PointFToString(const iPoint: TPointF): String;
     class function SizeFToString(const iSize: TSizeF): String;
+    class function RectToString(const iRect: TRect): String;
+    class function PointToString(const iPoint: TPoint): String;
   public // log methods
     class procedure v(const Text: String); overload;
     class procedure v(const iValues: array of TValue); overload;
@@ -287,6 +290,11 @@ begin
   Result := Format('PointF(' + Fmt + ', ' + Fmt + ')', [iPoint.X, iPoint.Y]);
 end;
 
+class function Log.PointToString(const iPoint: TPoint): String;
+begin
+  Result := Format('Point(%d, %d)', [iPoint.X, iPoint.Y]);
+end;
+
 class function Log.RectFToString(const iRect: TRectF): String;
 var
   Fmt: String;
@@ -297,6 +305,14 @@ begin
     Format(
       'RectF(' + Fmt + ', ' + Fmt + ', ' + Fmt + ', ' + Fmt + ')',
       [iRect.Left, iRect.Top, iRect.Width, iRect.Height]);
+end;
+
+class function Log.RectToString(const iRect: TRect): String;
+begin
+  Result :=
+    Format(
+      'Rect(%d, %d, %d, %d)',
+      [iRect.Left, iRect.Top, iRect.Right, iRect.Bottom]);
 end;
 
 class function Log.SizeFToString(const iSize: TSizeF): String;
