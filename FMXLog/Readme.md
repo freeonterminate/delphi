@@ -7,7 +7,7 @@
 |--------|-----------------------------------------|--------------------|
 |Windows |Console and Delphi's  Event Log          |WriteLn             |
 |OS X    |Console (PAServer)                       |WriteLn             |
-|iOS     |Console (Organizer -> Device -> Console) |NSLog               |
+|iOS     |Console (Xcode -> Devices -> Log)        |NSLog               |
 |Android |System Log                               |__android_log_write |
 
 ##動作環境
