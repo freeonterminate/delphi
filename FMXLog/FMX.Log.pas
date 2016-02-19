@@ -12,6 +12,7 @@
  *                               Enabled property
  *                               NumberOfSignifiantFigures property
  * 2016-02-09  Version 1.6  New: Rect/Point to String methods
+ * 2016-02-16  Version 1.7  New: RectFSize/RectSize to String methods
  *
  * PLATFORMS
  *   Windows / OS X / iOS / Android
@@ -94,9 +95,11 @@ type
     class function Join(const iTexts: array of String): String;
     class function JoinV(const iValues: array of TValue): String;
     class function RectFToString(const iRect: TRectF): String;
+    class function RectFSizeToString(const iRect: TRectF): String;
     class function PointFToString(const iPoint: TPointF): String;
     class function SizeFToString(const iSize: TSizeF): String;
     class function RectToString(const iRect: TRect): String;
+    class function RectSizeToString(const iRect: TRect): String;
     class function PointToString(const iPoint: TPoint): String;
   public // log methods
     class procedure v(const Text: String); overload;
@@ -295,6 +298,16 @@ begin
   Result := Format('Point(%d, %d)', [iPoint.X, iPoint.Y]);
 end;
 
+class function Log.RectFSizeToString(const iRect: TRectF): String;
+var
+  Fmt: String;
+begin
+  Fmt := GetFloatFormat;
+
+  Result :=
+    Format('RectF.Size(' + Fmt + ', ' + Fmt + ')', [iRect.Width, iRect.Height]);
+end;
+
 class function Log.RectFToString(const iRect: TRectF): String;
 var
   Fmt: String;
@@ -304,7 +317,12 @@ begin
   Result :=
     Format(
       'RectF(' + Fmt + ', ' + Fmt + ', ' + Fmt + ', ' + Fmt + ')',
-      [iRect.Left, iRect.Top, iRect.Width, iRect.Height]);
+      [iRect.Left, iRect.Top, iRect.Right, iRect.Bottom]);
+end;
+
+class function Log.RectSizeToString(const iRect: TRect): String;
+begin
+  Result := Format('Rect.Size(%d, %d)', [iRect.Width, iRect.Height]);
 end;
 
 class function Log.RectToString(const iRect: TRect): String;

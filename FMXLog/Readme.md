@@ -15,7 +15,7 @@ Delphi / C++Builder / RAD Studio の XE5, XE6, XE7, XE8, 10 Seattle
 Appmethod 1.14, 1.15, 1.16, 1.17  
 
 ##最終更新日
-2016/02/09
+2016/02/16
 
 ##ファイル
 
