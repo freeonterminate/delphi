@@ -6,7 +6,7 @@ Auto setting: Clang Path, SDKRoot Path (from RAD Studio's Environment Variable o
 
 You only input an output path & press start button !
 
-Please see below article.
+Please see below article (It was written in Japanese).
 
 http://qiita.com/pik/items/52fbbbfa0f391ad95c92/
 
