@@ -6,7 +6,8 @@ uses
   uMain in 'uMain.pas' {frmMain},
   uExecCMD in 'uExecCMD.pas',
   uGetEnvironmentVariables in 'uGetEnvironmentVariables.pas',
-  uCautionForm in 'uCautionForm.pas' {frmCaution};
+  uCautionForm in 'uCautionForm.pas' {frmCaution},
+  uRegistoryUtils in 'uRegistoryUtils.pas';
 
 {$R *.res}
 

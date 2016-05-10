@@ -1,4 +1,4 @@
-unit uMain;
+Ôªøunit uMain;
 
 interface
 
@@ -74,12 +74,16 @@ type
     FIOSSDKs: TSDKList;
     FOSXSDKs: TSDKList;
   private
+    function ReadReg(const iKey: String): String;
+
     procedure AddLog(const iMsg: String);
     procedure AddError(const iMsg: String);
+
     procedure FindSDKs(
       const iPrefix: String;
       const iList: TSDKList;
       const iComboBox: TComboBox);
+
     procedure SelectDir(const iTitle: String; const iEdit: TEdit);
   public
   end;
@@ -97,6 +101,7 @@ uses
   FMX.Platform,
   uGetEnvironmentVariables,
   uExecCMD,
+  uRegistoryUtils,
   uCautionForm
   ;
 
@@ -152,6 +157,12 @@ const
   NDK_PATH = 'android-ndk-r9c';
   CLANG_PATH = 'toolchains\llvm-3.3\prebuilt\windows\lib\clang\3.3\include';
 
+  BDS_REG_PATH = 'Software\Embarcadero\BDS\18.0\';
+  BDS_REG_KEY_ROOT_DIR = 'RootDir';
+  BDS_REG_KEY_APP = 'App';
+
+  IMPORTED_SDKS_PATH = 'Embarcadero\Studio\SDKs';
+
 {$R *.fmx}
 
 { TfrmMain.TSDKData }
@@ -181,7 +192,7 @@ end;
 procedure TfrmMain.btnClearLogClick(Sender: TObject);
 begin
   memoLog.Lines.Clear;
-  memoLog.Lines.Add(''); // Scroll bar Çè¡Ç∑ÇΩÇﬂ
+  memoLog.Lines.Add(''); // Scroll bar „ÇíÊ∂à„Åô„Åü„ÇÅ
   memoLog.Lines.Clear;
 end;
 
@@ -297,7 +308,8 @@ end;
 
 procedure TfrmMain.btnSDKTransPathRefClick(Sender: TObject);
 begin
-  dlgOpen.InitialDir := TPath.GetDirectoryName(edtSDKTransPath.Text);
+  if (TDirectory.Exists(edtSDKTransPath.Text)) then
+    dlgOpen.InitialDir := TPath.GetDirectoryName(edtSDKTransPath.Text);
 
   if (dlgOpen.Execute) then
     edtSDKTransPath.Text := dlgOpen.FileName;
@@ -354,6 +366,7 @@ end;
 procedure TfrmMain.FormCreate(Sender: TObject);
 var
   SDKFound: Boolean;
+  RegValue: String;
 
   procedure FindClangPath(const iDirs: array of String);
   var
@@ -408,6 +421,28 @@ begin
     end
   );
 
+  if (FBDSPath.IsEmpty) then
+  begin
+    RegValue := ReadReg(BDS_REG_KEY_ROOT_DIR);
+
+    if (not RegValue.IsEmpty) then
+      FBDSPath := RegValue;
+  end;
+
+  if (FBinPath.IsEmpty) then
+  begin
+    RegValue := ReadReg(BDS_REG_KEY_APP);
+    if (TFile.Exists(RegValue)) then
+      FBinPath := TPath.GetDirectoryName(RegValue);
+  end;
+
+  if (FPlatformSdkPath.IsEmpty) then
+  begin
+    RegValue := TPath.Combine(TPath.GetDocumentsPath, IMPORTED_SDKS_PATH);
+    if (TDirectory.Exists(RegValue)) then
+      FPlatformSdkPath := RegValue;
+  end;
+
   // Path Check
   CheckPath('BDS', FBDSPath);
   CheckPath('BDS\Bin', FBinPath);
@@ -447,6 +482,11 @@ procedure TfrmMain.FormDestroy(Sender: TObject);
 begin
   FIOSSDKs.DisposeOf;
   FOSXSDKs.DisposeOf;
+end;
+
+function TfrmMain.ReadReg(const iKey: String): String;
+begin
+  Result := GetRegValue2(HKEY_CURRENT_USER, BDS_REG_PATH + iKey);
 end;
 
 procedure TfrmMain.SelectDir(const iTitle: String; const iEdit: TEdit);
