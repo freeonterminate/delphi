@@ -2,6 +2,10 @@
 
 This Program execute SDKTransoform.exe with GUI.
 
+Auto setting: Clang Path, SDKRoot Path (from RAD Studio's Environment Variable or Registory).
+
+You only input an output path & press start button !
+
 Please see below article.
 
 http://qiita.com/pik/items/52fbbbfa0f391ad95c92/
