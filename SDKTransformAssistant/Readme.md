@@ -7,6 +7,12 @@ Please see below article.
 http://qiita.com/pik/items/52fbbbfa0f391ad95c92/
 
 
+
+![SdkTransformAssistantImage](https://github.com/freeonterminate/delphi/blob/master/SDKTransformAssistant/SdkTransformAssistant.png)
+
+
+
+
 ##著作権
 本ソフトウェアは「現状のまま」で、明示であるか暗黙であるかを問わず、何らの保証もなく提供されます。
 本ソフトウェアの使用によって生じるいかなる損害についても、作者は一切の責任を負わないものとします。
