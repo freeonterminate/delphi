@@ -155,11 +155,21 @@ const
 
   SDKS_PATH = 'PlatformSDKs';
   NDK_PATH = 'android-ndk-r9c';
+
   CLANG_PATH = 'toolchains\llvm-3.3\prebuilt\windows\lib\clang\3.3\include';
+
+  // for GetIt
+  NDK_PATTERN = 'AndroidNDK*';
+  NDK_PATTERN2 = 'android-ndk*';
+  CLANG_PATH2 =
+    'Embarcadero\Studio\18.0\CatalogRepository\' +
+    'AndroidNDK-9c_x86_GIB.Build.22858.6822\' +
+    CLANG_PATH;
 
   BDS_REG_PATH = 'Software\Embarcadero\BDS\18.0\';
   BDS_REG_KEY_ROOT_DIR = 'RootDir';
   BDS_REG_KEY_APP = 'App';
+  BDS_REF_KEY_ANDROID_PATH = 'AndroidPath';
 
   IMPORTED_SDKS_PATH = 'Embarcadero\Studio\SDKs';
 
@@ -367,6 +377,7 @@ procedure TfrmMain.FormCreate(Sender: TObject);
 var
   SDKFound: Boolean;
   RegValue: String;
+  ClangPath: String;
 
   procedure FindClangPath(const iDirs: array of String);
   var
@@ -389,6 +400,26 @@ var
 
     if (OK) then
       FClang := Path;
+  end;
+
+  function FindClangPath2(const iPattern: String): Boolean;
+  var
+    Dirs: TStringDynArray;
+    Dir: String;
+  begin
+    Result := False;
+
+    Dirs := TDirectory.GetDirectories(RegValue, iPattern);
+    for Dir in Dirs do
+    begin
+      ClangPath := TPath.Combine(Dir, CLANG_PATH);
+      Result := TDirectory.Exists(ClangPath);
+      if (Result) then
+      begin
+        FClang := ClangPath;
+        Break;
+      end;
+    end;
   end;
 
   procedure CheckPath(const iTitle: String; var ioPath: String);
@@ -448,8 +479,34 @@ begin
   CheckPath('BDS\Bin', FBinPath);
   CheckPath('PlatformSDK', FPlatformSdkPath);
 
-  // Clang Path
+  // Find Clang Path
+  // Find Clang Path: Check Installed by ISO
   FindClangPath([FBDSPath, SDKS_PATH, NDK_PATH, CLANG_PATH]);
+
+  // Find Clang Path: Check Installed by GetIt
+  if (FClang.IsEmpty) then
+  begin
+    ClangPath := TPath.Combine(TPath.GetSharedDocumentsPath, CLANG_PATH2);
+    if (TDirectory.Exists(ClangPath)) then
+      FClang := ClangPath;
+  end;
+
+  // Find Clang Path: from Registory
+  if (FClang.IsEmpty) then
+  begin
+    RegValue := ReadReg(BDS_REF_KEY_ANDROID_PATH);
+
+    if (TDirectory.Exists(RegValue)) then
+    begin
+      RegValue := TPath.GetDirectoryName(RegValue);
+      if (TDirectory.Exists(RegValue)) then
+      begin
+        if (not FindClangPath2(NDK_PATTERN)) then
+          FindClangPath2(NDK_PATTERN2);
+      end;
+    end;
+  end;
+
   CheckPath('NDK', FClang);
   edtClang.Text := FClang;
 
