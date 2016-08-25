@@ -1,4 +1,4 @@
-unit uJudge;
+﻿unit uJudge;
 
 interface
 
@@ -11,12 +11,20 @@ type
 
   TJankenResult = (jrLose, jrDraw, jrWin);
 
+function JankenResultToStr(const iResult: TJankenResult): String;
 function IntToJanken(const iInt: Integer): TJanken; inline;
 
 function Judge(const iPlayer1, iPlayer2: Integer): TJankenResult; overload;
 function Judge(const iPlayer1, iPlayer2: TJanken): TJankenResult; overload;
 
 implementation
+
+function JankenResultToStr(const iResult: TJankenResult): String;
+const
+  JANKEN_RESULT_STR: array [TJankenResult] of String = ('Lose', 'Draw', 'Win');
+begin
+  Result := JANKEN_RESULT_STR[iResult];
+end;
 
 function IntToJanken(const iInt: Integer): TJanken;
 begin

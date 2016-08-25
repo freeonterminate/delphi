@@ -1,4 +1,4 @@
-unit uMain;
+Ôªøunit uMain;
 
 interface
 
@@ -13,7 +13,7 @@ type
     imgChoki: TImage;
     imgPar: TImage;
     lblUser: TLabel;
-    StyleBook1: TStyleBook;
+    styleMain: TStyleBook;
     effectGlowChoki: TGlowEffect;
     effectGlowGoo: TGlowEffect;
     effectGlowPar: TGlowEffect;
@@ -24,13 +24,11 @@ type
     imgPCPar: TImage;
     effectGlowPCPar: TGlowEffect;
     lblPC: TLabel;
-    lblWin: TLabel;
+    lblResult: TLabel;
     effectGlowWin: TGlowEffect;
-    lblLose: TLabel;
     effectGlowLose: TGlowEffect;
     pnlDisabler: TPanel;
     btnRetry: TButton;
-    lblDraw: TLabel;
     effectGlowDraw: TGlowEffect;
     animPC: TFloatAnimation;
     animResult: TFloatAnimation;
@@ -109,8 +107,7 @@ begin
 
   FClickedImage.Scale.X := SCALE_BY;
   FClickedImage.Scale.Y := SCALE_BY;
-  FClickedImage.Position.X := FScaledPos[IntToJanken(FClickedImage.Tag)].X;
-  FClickedImage.Position.Y := FScaledPos[IntToJanken(FClickedImage.Tag)].Y;
+  FClickedImage.Position.Point := FScaledPos[IntToJanken(FClickedImage.Tag)];
 end;
 
 procedure TfrmMain.imageLeave(Sender: TObject);
@@ -123,9 +120,7 @@ end;
 
 procedure TfrmMain.InitResultView;
 begin
-  lblLose.Visible := False;
-  lblDraw.Visible := False;
-  lblWin.Visible := False;
+  lblResult.Visible := False;
 end;
 
 procedure TfrmMain.InitView;
@@ -164,35 +159,37 @@ begin
 
   FClickedImage.Scale.X := 1;
   FClickedImage.Scale.Y := 1;
-  FClickedImage.Position.X := FNormalPos[IntToJanken(FClickedImage.Tag)].X;
-  FClickedImage.Position.Y := FNormalPos[IntToJanken(FClickedImage.Tag)].Y;
+  FClickedImage.Position.Point := FNormalPos[IntToJanken(FClickedImage.Tag)];
 
   FClickedImage := nil;
 end;
 
 procedure TfrmMain.ShowResult(const iResult: TJankenResult);
-var
-  LabelResult: TLabel;
 begin
   InitResultView;
   ResetImage;
 
+  effectGlowLose.Enabled := False;
+  effectGlowDraw.Enabled := False;
+  effectGlowWin.Enabled := False;
+
   case iResult of
     jrLose:
-      LabelResult := lblLose;
+      effectGlowLose.Enabled := True;
 
     jrDraw:
-      LabelResult := lblDraw;
+      effectGlowDraw.Enabled := True;
 
-    else
-      LabelResult := lblWin;
+    jrWin:
+      effectGlowWin.Enabled := True;
   end;
 
   pnlDisabler.Visible := True;
   btnRetry.Visible := True;
 
-  LabelResult.Visible := True;
-  LabelResult.AddObject(animResult);
+  lblResult.Text := JankenResultToStr(iResult);
+  lblResult.Visible := True;
+
   animResult.Start;
 end;
 
@@ -215,10 +212,13 @@ begin
 
   FUser := TImage(Sender).Tag;
 
-  ImagePC := imgPCGoo; // åxçêÇÊÇØ
   case Random(3) of
-    1: ImagePC := imgPCChoki;
-    2: ImagePC := imgPCPar;
+    0:
+      ImagePC := imgPCGoo;
+    1:
+      ImagePC := imgPCChoki;
+  else
+    ImagePC := imgPCPar;
   end;
 
   FPC := ImagePC.Tag;
@@ -228,6 +228,7 @@ begin
   ImagePC.Scale.X := 1;
   ImagePC.Scale.Y := 1;
   ImagePC.AddObject(animPC);
+
   animPC.Start;
 end;
 
