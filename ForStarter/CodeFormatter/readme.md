@@ -24,7 +24,7 @@ Delphi / C++Builder Starter Edition には「ソースの整形」が存在し�
 
 ##謝辞
 @KinuiKei さんが Starter Edition にはコードフォーマッタが存在しない事に気づきました！  
-@ht_deko さんが Starter Edtion でも、Formatter.exe のコマンドライン版は存在していることを教えてくれました！  
+@ht_deko さんが Starter Edtion でも、Formatter.exe（コマンドライン版フォーマッタ）は存在していることを教えてくれました！  
 
 ##著作権
 Copyright (C) 2016 HOSOKAWA Jun(@pik).
