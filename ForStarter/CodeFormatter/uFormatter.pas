@@ -270,7 +270,7 @@ begin
         0,
         'menuCodeFormatter');
 
-    NTAServices.AddActionMenu('EditMenu', nil, MenuFormatter, True, True);
+    NTAServices.AddActionMenu('ToolsMenu', nil, MenuFormatter, True, True);
 
     Initialized := True;
   end;
