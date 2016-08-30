@@ -17,12 +17,6 @@ type
     procedure FormatterClick(Sender: TObject);
   end;
 
-var
-  Initialized: Boolean = False;
-  NTAServices: INTAServices = nil;
-  MenuFormatter: TMenuItem = nil;
-  Formatter: TFormatter = nil;
-
 const
   EXT_PAS = '.PAS';
 
@@ -273,7 +267,14 @@ begin
   end;
 end;
 
+var
+  Initialized: Boolean = False;
+  MenuFormatter: TMenuItem = nil;
+  Formatter: TFormatter = nil;
+
 procedure Initialize;
+var
+  NTAServices: INTAServices;
 begin
   if Supports(BorlandIDEServices, INTAServices, NTAServices) then
   begin
