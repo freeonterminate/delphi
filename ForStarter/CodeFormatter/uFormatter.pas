@@ -1,4 +1,4 @@
-unit uFormatter;
+ï»¿unit uFormatter;
 
 interface
 
@@ -114,11 +114,11 @@ end;
 procedure TFormatter.FormatterClick(Sender: TObject);
 const
   EXT_PAS = '.PAS';
-  ERR_MSG_INTERFACE = 'Interface ‚Ìæ“¾‚É¸”s‚µ‚Ü‚µ‚½';
-  ERR_MSG_FORMATTER_PATH = 'Formatter.exe ‚ªŒ©‚Â‚©‚è‚Ü‚¹‚ñ (%S)';
-  ERR_MSG_EXECUTE = 'Às‚É¸”s‚µ‚Ü‚µ‚½';
-  ERR_MSG_FILE_NOT_FOUND = 'ƒ\[ƒXƒtƒ@ƒCƒ‹‚ª‚ ‚è‚Ü‚¹‚ñ (%S)';
-  ERR_MSG_CREATE_TEMPFILE = 'ˆêƒtƒ@ƒCƒ‹‚Ìì¬‚É¸”s‚µ‚Ü‚µ‚½';
+  ERR_MSG_INTERFACE = 'Interface ã®å–å¾—ã«å¤±æ•—ã—ã¾ã—ãŸ';
+  ERR_MSG_FORMATTER_PATH = 'Formatter.exe ãŒè¦‹ã¤ã‹ã‚Šã¾ã›ã‚“ (%S)';
+  ERR_MSG_EXECUTE = 'å®Ÿè¡Œã«å¤±æ•—ã—ã¾ã—ãŸ';
+  ERR_MSG_FILE_NOT_FOUND = 'ã‚½ãƒ¼ã‚¹ãƒ•ã‚¡ã‚¤ãƒ«ãŒã‚ã‚Šã¾ã›ã‚“ (%S)';
+  ERR_MSG_CREATE_TEMPFILE = 'ä¸€æ™‚ãƒ•ã‚¡ã‚¤ãƒ«ã®ä½œæˆã«å¤±æ•—ã—ã¾ã—ãŸ';
 var
   ModuleServices: IOTAModuleServices;
   Module: IOTAModule;
@@ -146,11 +146,11 @@ var
   end;
 
 begin
-  // Message æ“¾
+  // Message å–å¾—
   if not Supports(BorlandIDEServices, IOTAMessageServices, MessageServices) then
     Exit;
 
-  // Source Editor æ“¾
+  // Source Editor å–å¾—
   if
     Supports(BorlandIDEServices, IOTAModuleServices, ModuleServices) and
     Supports(ModuleServices.CurrentModule, IOTAModule, Module)
@@ -182,7 +182,7 @@ begin
     Exit;
   end;
 
-  // Formatter ƒpƒXæ“¾
+  // Formatter ãƒ‘ã‚¹å–å¾—
   Formatter := TPath.Combine(TPath.GetDirectoryName(ParamStr(0)),
     'Formatter.exe');
 
@@ -192,14 +192,14 @@ begin
     Exit;
   end;
 
-  // ƒ\[ƒXƒtƒ@ƒCƒ‹
+  // ã‚½ãƒ¼ã‚¹ãƒ•ã‚¡ã‚¤ãƒ«
   if not TFile.Exists(Editor.FileName) then
   begin
     ShowMsg(Format(ERR_MSG_FILE_NOT_FOUND, [Target]));
     Exit;
   end;
 
-  // •ÏXŠi”[æƒeƒ“ƒ|ƒ‰ƒŠƒtƒ@ƒCƒ‹ì¬
+  // å¤‰æ›´æ ¼ç´å…ˆãƒ†ãƒ³ãƒãƒ©ãƒªãƒ•ã‚¡ã‚¤ãƒ«ä½œæˆ
   Target := TPath.GetTempFileName;
   try
     TFile.Copy(Editor.FileName, Target, True);
@@ -216,10 +216,10 @@ begin
     Exit;
   end;
 
-  // Às
+  // å®Ÿè¡Œ
   Res := DOSExe(AddQuote(Formatter) + ' -delphi ' + AddQuote(Target));
 
-  // •ÏX“à—e“Ç‚İ‚İ
+  // å¤‰æ›´å†…å®¹èª­ã¿è¾¼ã¿
   with TStringList.Create do
     try
       LoadFromFile(Target);
@@ -228,7 +228,7 @@ begin
       DisposeOf;
     end;
 
-  // ƒeƒ“ƒ|ƒ‰ƒŠíœ
+  // ãƒ†ãƒ³ãƒãƒ©ãƒªå‰Šé™¤
   try
     TFile.Delete(Target);
   except on E: Exception do
@@ -246,7 +246,7 @@ begin
 
   MessageServices.AddTitleMessage('[Formatter] ' + Res);
 
-  // ƒŠƒvƒŒ[ƒX
+  // ãƒªãƒ—ãƒ¬ãƒ¼ã‚¹
   CurrentLine := EditPosition.Row;
   EditPosition.GotoLine(1);
   EditWriter.DeleteTo(MaxInt);
@@ -262,7 +262,7 @@ begin
 
     MenuFormatter :=
       NewItem(
-        'ƒ\[ƒX‚Ì®Œ`',
+        'ã‚½ãƒ¼ã‚¹ã®æ•´å½¢',
         TextToShortCut('Ctrl+D'),
         False,
         True,
