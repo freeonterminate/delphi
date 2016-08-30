@@ -20,14 +20,19 @@ type
 const
   EXT_PAS = '.PAS';
 
-  ERR_MSG_INTERFACE = 'Interface の取得に失敗しました';
-  ERR_MSG_FORMATTER_PATH = 'Formatter.exe が見つかりません (%S)';
-  ERR_MSG_EXECUTE = '実行に失敗しました';
-  ERR_MSG_FILE_NOT_FOUND = 'ソースファイルがありません (%S)';
-  ERR_MSG_CREATE_TEMPFILE = '一時ファイルの作成に失敗しました';
+  ERR_MSG_INTERFACE =
+    'Failed: get interface / Interface の取得に失敗しました';
+  ERR_MSG_FORMATTER_PATH =
+    'Fomatter.exe not found. / Formatter.exe が見つかりません (%S)';
+  ERR_MSG_EXECUTE = 'Failed: Execution. / 実行に失敗しました';
+  ERR_MSG_FILE_NOT_FOUND =
+    'Source file not found. / ソースファイルがありません (%S)';
+  ERR_MSG_CREATE_TEMPFILE =
+    'Failed: create temp file. / 一時ファイルの作成に失敗しました';
 
   MENU_NAME = 'menuCodeFormatter';
-  MENU_CAPTION = 'ソースの整形';
+  MENU_CAPTION_JP = 'ソースの整形';
+  MENU_CAPTION_EN = 'Code Formatter';
   MENU_SHORTCUT = 'Ctrl+D';
 
   IDE_MENU_DEST = 'ToolsMenu';
@@ -275,14 +280,20 @@ var
 procedure Initialize;
 var
   NTAServices: INTAServices;
+  Caption: String;
 begin
   if Supports(BorlandIDEServices, INTAServices, NTAServices) then
   begin
     Formatter := TFormatter.Create;
 
+    if GetSystemDefaultLCID = 1041 then
+      Caption := MENU_CAPTION_JP
+    else
+      Caption := MENU_CAPTION_EN;
+
     MenuFormatter :=
       NewItem(
-        MENU_CAPTION,
+        Caption,
         TextToShortCut(MENU_SHORTCUT),
         False,
         True,
