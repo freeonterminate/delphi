@@ -22,6 +22,10 @@ Delphi / C++Builder Starter Edition には「ソースの整形」が存在し�
 2. IDE のメニュー「コンポーネント」→「パッケージのインストール」で Formatter.bpl を追加します。
 3. IDE の「ツール」メニューの最下段に「ソースの整形」が追加されます。
 
+##謝辞
+@KinuiKei さんが Starter Edition にはコードフォーまたが存在しない事に気づきました！
+@ht_deko さんが Starter Edtion でも、Formatter.exe のコマンドライン版は存在していることを教えてくれました！
+
 ##著作権
 Copyright (C) 2016 HOSOKAWA Jun(@pik).
   
@@ -57,6 +61,9 @@ The Extension uses Fomatter.exe from IDE.
 1. Download "Formatter.bpl"
 2. IDE MainMenu [Component] -> [Install Packages], Add "Formatter.bpl"
 3. Formatter Menu is added to IDE MainMenu's [Tools].
+
+##Special Thanks
+@ht_deko, @KinuiKei !
 
 ##Copyright
 Copyright (C) 2016 HOSOKAWA Jun (as @pik).  
