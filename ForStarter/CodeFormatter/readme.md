@@ -47,7 +47,7 @@ Delphi / C++Builder Starter Edition doesn't have "Code Formatter".
 But, Command-Line Tool "Fomatter.exe" exists.
 The Extension uses Fomatter.exe from IDE.
 
-##Uses
+##Usage
 ###By Compile
 1. Open "Formatter.dproj"
 2. Build & Install package (at ProjectManager Window's Contextg Menu)
