@@ -141,13 +141,13 @@ var
   Editor: IOTASourceEditor;
   EditView: IOTAEditView;
   EditPosition: IOTAEditPosition;
-  EditBlock: IOTAEditBlock;
   EditWriter: IOTAEditWriter;
   Target: String;
   Formatter: String;
   Res: String;
   Contents: String;
   CurrentLine: Integer;
+  i: Integer;
 
   procedure ShowMsg(const iMsg: String);
   begin
@@ -160,6 +160,8 @@ begin
     Exit;
 
   // Source Editor 取得
+  Editor := nil;
+
   if
     Supports(BorlandIDEServices, IOTAModuleServices, ModuleServices) and
     Supports(ModuleServices.CurrentModule, IOTAModule, Module)
@@ -168,7 +170,8 @@ begin
     CurrentEditor := Module.CurrentEditor;
 
     if
-      (CurrentEditor <> nil) and (TFile.Exists(CurrentEditor.FileName)) and
+      (CurrentEditor <> nil) and
+      (TFile.Exists(CurrentEditor.FileName)) and
       (ExtractFileExt(CurrentEditor.FileName).ToUpper = EXT_PAS)
     then
       CurrentEditor.QueryInterface(IOTASourceEditor, Editor);
@@ -180,12 +183,8 @@ begin
     Exit;
   end;
 
-  EditView := Editor.EditViews[0];
-  EditPosition := EditView.Position;
-  EditBlock := EditView.Block;
   EditWriter := Editor.CreateUndoableWriter;
-
-  if (EditPosition = nil) or (EditBlock = nil) or (EditWriter = nil) then
+  if (EditWriter = nil) then
   begin
     ShowMsg(ERR_MSG_INTERFACE);
     Exit;
@@ -256,11 +255,23 @@ begin
   ShowMsg(Res);
 
   // リプレース
-  CurrentLine := EditPosition.Row;
-  EditPosition.GotoLine(1);
-  EditWriter.DeleteTo(MaxInt);
-  EditWriter.Insert(PAnsiChar(AnsiToUtf8(Contents)));
-  EditPosition.GotoLine(CurrentLine);
+  for i := 0 to Editor.EditViewCount - 1 do
+  begin
+    EditView := Editor.EditViews[i];
+    if EditView = nil then
+      Continue;
+
+    EditPosition := EditView.Position;
+
+    if EditPosition = nil then
+      Continue;
+
+    CurrentLine := EditPosition.Row;
+    EditPosition.GotoLine(1);
+    EditWriter.DeleteTo(MaxInt);
+    EditWriter.Insert(PAnsiChar(AnsiToUtf8(Contents)));
+    EditPosition.GotoLine(CurrentLine);
+  end;
 end;
 
 procedure Initialize;
