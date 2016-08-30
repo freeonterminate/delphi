@@ -8,7 +8,7 @@ uses
   ToolsAPI,
   Winapi.Windows,
   System.Classes, System.SysUtils, System.IOUtils,
-  Vcl.Menus, Vcl.Dialogs;
+  Vcl.Menus;
 
 type
   TFormatter = class
@@ -22,6 +22,27 @@ var
   NTAServices: INTAServices = nil;
   MenuFormatter: TMenuItem = nil;
   Formatter: TFormatter = nil;
+
+const
+  EXT_PAS = '.PAS';
+
+  ERR_MSG_INTERFACE = 'Interface の取得に失敗しました';
+  ERR_MSG_FORMATTER_PATH = 'Formatter.exe が見つかりません (%S)';
+  ERR_MSG_EXECUTE = '実行に失敗しました';
+  ERR_MSG_FILE_NOT_FOUND = 'ソースファイルがありません (%S)';
+  ERR_MSG_CREATE_TEMPFILE = '一時ファイルの作成に失敗しました';
+
+  MENU_NAME = 'menuCodeFormatter';
+  MENU_CAPTION = 'ソースの整形';
+  MENU_SHORTCUT = 'Ctrl+D';
+
+  IDE_MENU_DEST = 'ToolsMenu';
+
+  MESSAGE_HEADER = '[Formatter] ';
+
+  FORMATTER_EXE = 'Formatter.exe';
+
+  COMMAND_LINE = '"%s" -delphi "%s"';
 
 { TFormatter }
 
@@ -112,13 +133,6 @@ begin
 end;
 
 procedure TFormatter.FormatterClick(Sender: TObject);
-const
-  EXT_PAS = '.PAS';
-  ERR_MSG_INTERFACE = 'Interface の取得に失敗しました';
-  ERR_MSG_FORMATTER_PATH = 'Formatter.exe が見つかりません (%S)';
-  ERR_MSG_EXECUTE = '実行に失敗しました';
-  ERR_MSG_FILE_NOT_FOUND = 'ソースファイルがありません (%S)';
-  ERR_MSG_CREATE_TEMPFILE = '一時ファイルの作成に失敗しました';
 var
   ModuleServices: IOTAModuleServices;
   Module: IOTAModule;
@@ -135,14 +149,9 @@ var
   Contents: String;
   CurrentLine: Integer;
 
-  function AddQuote(const iName: String): String;
-  begin
-    Result := AnsiQuotedStr(iName, '"');
-  end;
-
   procedure ShowMsg(const iMsg: String);
   begin
-    MessageServices.AddTitleMessage('[Formatter] ' + iMsg);
+    MessageServices.AddTitleMessage(MESSAGE_HEADER + iMsg);
   end;
 
 begin
@@ -183,8 +192,8 @@ begin
   end;
 
   // Formatter パス取得
-  Formatter := TPath.Combine(TPath.GetDirectoryName(ParamStr(0)),
-    'Formatter.exe');
+  Formatter :=
+    TPath.Combine(TPath.GetDirectoryName(ParamStr(0)), FORMATTER_EXE);
 
   if not TFile.Exists(Formatter) then
   begin
@@ -217,7 +226,7 @@ begin
   end;
 
   // 実行
-  Res := DOSExe(AddQuote(Formatter) + ' -delphi ' + AddQuote(Target));
+  Res := DOSExe(Format(COMMAND_LINE, [Formatter, Target]));
 
   // 変更内容読み込み
   with TStringList.Create do
@@ -244,7 +253,7 @@ begin
     Exit;
   end;
 
-  MessageServices.AddTitleMessage('[Formatter] ' + Res);
+  ShowMsg(Res);
 
   // リプレース
   CurrentLine := EditPosition.Row;
@@ -262,15 +271,15 @@ begin
 
     MenuFormatter :=
       NewItem(
-        'ソースの整形',
-        TextToShortCut('Ctrl+D'),
+        MENU_CAPTION,
+        TextToShortCut(MENU_SHORTCUT),
         False,
         True,
         Formatter.FormatterClick,
         0,
-        'menuCodeFormatter');
+        MENU_NAME);
 
-    NTAServices.AddActionMenu('ToolsMenu', nil, MenuFormatter, True, True);
+    NTAServices.AddActionMenu(IDE_MENU_DEST, nil, MenuFormatter, True, True);
 
     Initialized := True;
   end;
