@@ -57,7 +57,7 @@ The Extension uses Fomatter.exe from IDE.
 2. Build & Install package (at ProjectManager Window's Contextg Menu)
 3. Formatter Menu is added to IDE MainMenu's [Tools].
 
-###By Installe
+###By Install
 1. Download "Formatter.bpl"
 2. IDE MainMenu [Component] -> [Install Packages], Add "Formatter.bpl"
 3. Formatter Menu is added to IDE MainMenu's [Tools].
