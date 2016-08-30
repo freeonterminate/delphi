@@ -13,7 +13,7 @@ uses
 type
   TFormatter = class
   private
-    function DOSExe(const iCommand: String): String;
+    function ExecCommand(const iCommand: String): String;
     procedure FormatterClick(Sender: TObject);
   end;
 
@@ -46,7 +46,7 @@ const
 
 { TFormatter }
 
-function TFormatter.DOSExe(const iCommand: String): String;
+function TFormatter.ExecCommand(const iCommand: String): String;
 var
   ReadHandle, WriteHandle: THandle;
   SA: TSecurityAttributes;
@@ -225,7 +225,7 @@ begin
   end;
 
   // 実行
-  Res := DOSExe(Format(COMMAND_LINE, [Formatter, Target]));
+  Res := ExecCommand(Format(COMMAND_LINE, [Formatter, Target]));
 
   // 変更内容読み込み
   with TStringList.Create do
@@ -262,7 +262,6 @@ begin
       Continue;
 
     EditPosition := EditView.Position;
-
     if EditPosition = nil then
       Continue;
 
