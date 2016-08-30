@@ -268,9 +268,9 @@ begin
         True,
         Formatter.FormatterClick,
         0,
-        'mnuHelpCodeFormatter');
+        'menuCodeFormatter');
 
-    NTAServices.AddActionMenu('mnuRefactoring', nil, MenuFormatter, True, True);
+    NTAServices.AddActionMenu('EditMenu', nil, MenuFormatter, True, True);
 
     Initialized := True;
   end;
