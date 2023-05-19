@@ -18,17 +18,18 @@ uses
 
 procedure GetEnvironmentVariables(const iProc: TGetEnvironmentVariablesProc);
 var
-  P: PChar;
+  PIndex, PStart: PChar;
   Key, Value: String;
   Index: Integer;
 begin
   if (not Assigned(iProc)) then
     Exit;
 
-  P := GetEnvironmentStrings;
+  PStart := GetEnvironmentStrings;
+  PIndex := PStart;
   try
     repeat
-      Key := P;
+      Key := PIndex;
 
       Index := Key.IndexOf('=');
       if (Index > -1) then
@@ -38,11 +39,11 @@ begin
         iProc(Key, Value);
       end;
 
-      P := StrEnd(P);
-      Inc(P);
-    until P^ = #0;
+      PIndex := StrEnd(PIndex);
+      Inc(PIndex);
+    until PIndex^ = #0;
   finally
-    FreeEnvironmentStrings(P);
+    FreeEnvironmentStrings(PStart);
   end;
 end;
 
