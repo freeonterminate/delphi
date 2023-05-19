@@ -2,15 +2,25 @@
 # Delphi 用の git ignore
 #
 
+# Delphi history and backups
 __history/
 __recovery/
+*.~*
+
+# Delphi compiler directories
 Android/
+Android64/
 iOSDevice32/
 iOSDevice64/
 iOSSimulator/
+iOSSimARM64/
 Win32/
 Win64/
 OSX32/
+OSX64/
+OSXARM64/
+Linux64/
+TMSWeb/
 
 *.dcu
 *.deployproj
@@ -52,3 +62,8 @@ OSX32/
 *.projdata
 *.tvsconfig
 *.dsk
+
+# Mac Finder and Windows Explorer files
+.DS_Store
+Thumbs.db
+*.bak

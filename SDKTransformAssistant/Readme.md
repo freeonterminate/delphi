@@ -1,6 +1,6 @@
 ﻿#SDK Transform Assitant
 
-This Program execute SDKTransoform.exe with GUI.
+This Program execute SDKTransform.exe with GUI.
 
 Auto setting: Clang Path, SDKRoot Path (from RAD Studio's Environment Variable or Registory).
 
