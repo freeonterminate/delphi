@@ -7,7 +7,11 @@ uses
   System.Variants, System.Generics.Collections,
   FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs, FMX.StdCtrls,
   FMX.Controls.Presentation, FMX.Layouts, FMX.Objects, FMX.Edit, FMX.ScrollBox,
-  FMX.Memo, FMX.ListBox;
+  FMX.Memo, 
+{$IF Defined(VER350)}
+  FMX.Memo.Types,
+{$ENDIF}
+  FMX.ListBox;
 
 type
   TfrmMain = class(TForm)
@@ -64,8 +68,10 @@ type
       FName, FPath: String;
       constructor Create(const iName, iPath: String);
     end;
+
     TSDKList = TList<TSDKData>;
-  private var
+  private
+  var
     FBDSPath: String;
     FBinPath: String;
     FPlatformSdkPath: String;
@@ -79,9 +85,7 @@ type
     procedure AddLog(const iMsg: String);
     procedure AddError(const iMsg: String);
 
-    procedure FindSDKs(
-      const iPrefix: String;
-      const iList: TSDKList;
+    procedure FindSDKs(const iPrefix: String; const iList: TSDKList;
       const iComboBox: TComboBox);
 
     procedure SelectDir(const iTitle: String; const iEdit: TEdit);
@@ -102,44 +106,28 @@ uses
   uGetEnvironmentVariables,
   uExecCMD,
   uRegistoryUtils,
-  uCautionForm
-  ;
+  uCautionForm;
 
 const
-  CCOPTS_IOS =
-    '-D TARGET_OS_IPHONE ' +
-    '-isysroot "%s" ' + // SDKRoot
-    '-isystem "%s" ' +  // Include
-    '-isystem "%s" ' +  // Clang
-    '-F "%s" ' +        // Framework
+  CCOPTS_IOS = '-D TARGET_OS_IPHONE ' + '-isysroot "%s" ' + // SDKRoot
+    '-isystem "%s" ' + // Include
+    '-isystem "%s" ' + // Clang
+    '-F "%s" ' + // Framework
     '-triple thumbv7-apple-ios';
 
-  CCOPTS_OSX =
-    '--macsdk ' +
-    '-D TARGET_OS_MAC ' +
-    '-isysroot "%s" ' + // SDKRoot
-    '-isystem "%s" ' +  // Include
-    '-isystem "%s" ' +  // Clang
-    '-F "%s" ' +        // Framework
+  CCOPTS_OSX = '--macsdk ' + '-D TARGET_OS_MAC ' + '-isysroot "%s" ' +
+  // SDKRoot
+    '-isystem "%s" ' + // Include
+    '-isystem "%s" ' + // Clang
+    '-F "%s" ' + // Framework
     '-triple x86_64-apple-macosx-clang++';
 
-  OPTS =
-    '-cc1 ' +
-    '-g ' +
-    '-w ' +
-    '%s ' +
-    '-fdiagnostics-show-option ' +
-    '-fexceptions ' +
-    '-fobjc-exceptions ' +
-    '-x objective-c ' +
-    '-std=gnu99 ' +
-    '-nobuiltininc ' +
-    '-nostdinc++ ' +
-    '-nostdsysteminc ' +
-    '-fblocks';
+  OPTS = '-cc1 ' + '-g ' + '-w ' + '%s ' + '-fdiagnostics-show-option ' +
+    '-fexceptions ' + '-fobjc-exceptions ' + '-x objective-c ' + '-std=gnu99 ' +
+    '-nobuiltininc ' + '-nostdinc++ ' + '-nostdsysteminc ' + '-fblocks';
 
   INCLUDE_PATH = '%s\usr\include';
-  FRAMEWORK_PATH =  '%s\System\Library\Frameworks';
+  FRAMEWORK_PATH = '%s\System\Library\Frameworks';
 
   CMD = 'SdkTransform.exe %s --fmt %s';
 
@@ -154,19 +142,42 @@ const
   SDK_PREFIX_OSX = 'MacOSX';
 
   SDKS_PATH = 'PlatformSDKs';
+
+  // check compiler versions from this repository :
+  // https://github.com/omonien/Delphi-Version-Information
+
+{$IF Defined(VER350)}
+  // Delphi 11.3 Alexandria
+  // C:\Users\Public\Documents\Embarcadero\Studio\22.0\CatalogRepository\AndroidNDK-21-22.0.47991.2819\android-ndk-r21\toolchains\llvm\prebuilt\windows-x86_64\lib64\clang\9.0.8\include
+  NDK_PATH = 'android-ndk-r21';
+  CLANG_PATH =
+    'toolchains\llvm\prebuilt\windows-x86_64\lib64\clang\9.0.8\include';
+{$ELSEIF Defined(VER250)}
+  // Delphi XE4
   NDK_PATH = 'android-ndk-r9c';
-
   CLANG_PATH = 'toolchains\llvm-3.3\prebuilt\windows\lib\clang\3.3\include';
-
+{$ELSE}
+  NDK_PATH = '';
+  CLANG_PATH = '';
+{$ENDIF}
   // for GetIt
   NDK_PATTERN = 'AndroidNDK*';
   NDK_PATTERN2 = 'android-ndk*';
-  CLANG_PATH2 =
-    'Embarcadero\Studio\18.0\CatalogRepository\' +
-    'AndroidNDK-9c_x86_GIB.Build.22858.6822\' +
-    CLANG_PATH;
-
+{$IF Defined(VER350)}
+  // Delphi 11.3 Alexandria
+  // C:\Users\Public\Documents\Embarcadero\Studio\22.0\CatalogRepository\AndroidNDK-21-22.0.47991.2819\android-ndk-r21
+  CLANG_PATH2 = 'Embarcadero\Studio\22.0\CatalogRepository\' +
+    'AndroidNDK-21-22.0.47991.2819\android-ndk-r21\' + CLANG_PATH;
+  BDS_REG_PATH = 'Software\Embarcadero\BDS\22.0\';
+{$ELSEIF Defined(VER250)}
+  // Delphi XE4
+  CLANG_PATH2 = 'Embarcadero\Studio\18.0\CatalogRepository\' +
+    'AndroidNDK-9c_x86_GIB.Build.22858.6822\' + CLANG_PATH;
   BDS_REG_PATH = 'Software\Embarcadero\BDS\18.0\';
+{$ELSE}
+  CLANG_PATH2 = '';
+  BDS_REG_PATH = '';
+{$ENDIF}
   BDS_REG_KEY_ROOT_DIR = 'RootDir';
   BDS_REG_KEY_APP = 'App';
   BDS_REF_KEY_ANDROID_PATH = 'AndroidPath';
@@ -174,8 +185,7 @@ const
   IMPORTED_SDKS_PATH = 'Embarcadero\Studio\SDKs';
 
 {$R *.fmx}
-
-{ TfrmMain.TSDKData }
+  { TfrmMain.TSDKData }
 
 constructor TfrmMain.TSDKData.Create(const iName, iPath: String);
 begin
@@ -210,11 +220,8 @@ procedure TfrmMain.btnCopyLogClick(Sender: TObject);
 var
   Clipboard: IFMXClipboardService;
 begin
-  if
-    TPlatformServices.Current.SupportsPlatformService(
-      IFMXClipboardService,
-      IInterface(Clipboard))
-  then
+  if TPlatformServices.Current.SupportsPlatformService(IFMXClipboardService,
+    IInterface(Clipboard)) then
     Clipboard.SetClipboard(memoLog.Lines.Text);
 end;
 
@@ -282,12 +289,8 @@ begin
     if (not CheckFile(SDK_TRANSFORM_EXE, FSDKTransformExe)) then
       Exit;
 
-    if
-      not CheckFile(
-        SDK_TRANSFORM_TYPES,
-        TPath.Combine(FBinPath, SDK_TRANSFORM_TYPES)
-      )
-    then
+    if not CheckFile(SDK_TRANSFORM_TYPES, TPath.Combine(FBinPath,
+      SDK_TRANSFORM_TYPES)) then
       Exit;
 
     Opt := Format(Opt, [Root, Include, FClang, Framework]);
@@ -295,14 +298,12 @@ begin
 
     TDirectory.SetCurrentDirectory(FBinPath);
 
-    ExecCMD(
-      FSDKTransformExe + ' ' + Opt + ' --fmt --out:' + edtOutputPath.Text,
+    ExecCMD(FSDKTransformExe + ' ' + Opt + ' --fmt --out:' + edtOutputPath.Text,
       procedure(const iLine: String)
       begin
         AddLog(iLine);
         Application.ProcessMessages;
-      end
-    );
+      end);
 
     AddLog('----- Finish');
   finally
@@ -335,10 +336,8 @@ begin
   FSDKTransformExe := edtSDKTransPath.Text;
 end;
 
-procedure TfrmMain.FindSDKs(
-  const iPrefix: String;
-  const iList: TSDKList;
-  const iComboBox: TComboBox);
+procedure TfrmMain.FindSDKs(const iPrefix: String; const iList: TSDKList;
+const iComboBox: TComboBox);
 var
   Paths: TStringDynArray;
   Path: String;
@@ -349,22 +348,18 @@ begin
 
   Paths := TDirectory.GetDirectories(FPlatformSdkPath, iPrefix + '*');
   for Path in Paths do
-    iList.Add(TSDKData.Create( TPath.GetFileName(Path), Path));
+    iList.Add(TSDKData.Create(TPath.GetFileName(Path), Path));
 
-  iList.Sort(
-    TComparer<TSDKData>.Construct(
-      function(const iL, iR: TSDKData): Integer
-      var
-        Res: Double;
-      begin
-        Res :=
-          TDirectory.GetCreationTime(iR.FPath)
-          - TDirectory.GetCreationTime(iL.FPath);
+  iList.Sort(TComparer<TSDKData>.Construct(
+    function(const iL, iR: TSDKData): Integer
+    var
+      Res: Double;
+    begin
+      Res := TDirectory.GetCreationTime(iR.FPath) - TDirectory.GetCreationTime
+        (iL.FPath);
 
-        Result := Ord(Res > 0) - Ord(Res < 0);
-      end
-    )
-  );
+      Result := Ord(Res > 0) - Ord(Res < 0);
+    end));
 
   for i := 0 to iList.Count - 1 do
     iComboBox.Items.Add(iList[i].FName);
@@ -449,8 +444,7 @@ begin
 
       if (ENV_BDSPLATFORMSDKSDIR = iKey) then
         FPlatformSdkPath := iValue;
-    end
-  );
+    end);
 
   if (FBDSPath.IsEmpty) then
   begin
